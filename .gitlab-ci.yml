@@ -11,10 +11,9 @@ docker-build:
   before_script:
     - echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
   script:
-    - docker buildx create --use --name mybuilder
-    - docker buildx inspect --bootstrap
-    - docker buildx ls
-    - docker buildx build --pull --platform linux/amd64,linux/arm64 -t $CI_REGISTRY_IMAGE --push .
+    - docker buildx create --name mybuilder
+    - docker buildx use mybuilder
+    - docker buildx build --pull --platform linux/arm64 -t $CI_REGISTRY_IMAGE --push .
     - docker buildx prune -a -f
     - echo "Registry image:" $CI_REGISTRY_IMAGE
   only:
