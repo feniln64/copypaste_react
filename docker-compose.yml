@@ -1,0 +1,21 @@
+version: '3'
+services:
+  react:
+    image: registry.gitlab.com/do-copypaste/docopypaste_react
+    container_name: react
+    restart: unless-stopped
+    networks:
+      - traefik-net
+    ports:
+      - 80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.react.rule=HostRegexp(`{sub:[a-zA-Z0-9-]+}.docopypaste.live`)"
+      - "traefik.http.services.react.loadbalancer.server.port=80"
+      - "traefik.http.routers.react.tls.certresolver=cloudflare"
+      - "traefik.http.routers.react.tls=true"
+  
+
+networks:
+  traefik-net:
+    external: true
