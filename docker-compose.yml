@@ -1,7 +1,7 @@
 version: '3'
 services:
   react:
-    image: registry.gitlab.com/do-copypaste/docopypaste_react
+    image: registry.gitlab.com/do-copypaste/copypaste_react:latest
     container_name: react
     restart: unless-stopped
     networks:
