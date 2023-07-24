@@ -23,9 +23,9 @@ stages:
 
 deploy:
   stage: deploy
-  image: dannranny/ssh-agent:latest
+  image: kroniak/ssh-client
   before_script:
-    - chmod 600 $SSH_KEY
+    - chmod 400 $SSH_KEY
   script:
     
     - ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@$SERVER_IP "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin;  cd docopypaste_react;docker pull  ; docker-compose up -d"
