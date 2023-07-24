@@ -29,7 +29,6 @@ before_script:
   
 deploy:
   stage: deploy
-  image: kroniak/ssh-client
   script:
     - ssh-add <(echo "$SSH_KEY")
     - ssh -o StrictHostKeyChecking=no ubuntu@$SERVER_IP "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin;  cd docopypaste_react;docker pull  ; docker-compose up -d"
