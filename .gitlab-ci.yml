@@ -34,8 +34,6 @@ before_script:
 deploy:
   stage: deploy
   image: kroniak/ssh-client
-  before_script:
-    - chmod 400 $SSH_KEY
   script:
     
     - ssh ubuntu@$SERVER_IP "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin;  cd docopypaste_react;docker pull  ; docker-compose up -d"
