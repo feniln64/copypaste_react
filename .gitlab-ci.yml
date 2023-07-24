@@ -21,6 +21,16 @@ stages:
 
 #deploy with ssh key
 
+before_script:
+  - apt-get update -qq
+  - apt-get install -qq git
+  # Setup SSH deploy keys
+  - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  
 deploy:
   stage: deploy
   image: kroniak/ssh-client
@@ -28,7 +38,7 @@ deploy:
     - chmod 400 $SSH_KEY
   script:
     
-    - ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@$SERVER_IP "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin;  cd docopypaste_react;docker pull  ; docker-compose up -d"
+    - ssh ubuntu@$SERVER_IP "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin;  cd docopypaste_react;docker pull  ; docker-compose up -d"
   only:
     - main                                                                                                                                                                            
 
