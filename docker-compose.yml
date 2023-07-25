@@ -1,8 +1,8 @@
 version: '3'
 services:
   react:
-    image: registry.gitlab.com/do-copypaste/copypaste_react:latest
-    container_name: react
+    build: .
+    container_name: react_copypaste
     restart: unless-stopped
     networks:
       - traefik-net

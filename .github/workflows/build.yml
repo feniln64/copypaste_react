@@ -58,8 +58,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: 22
         script: |
-          docker login ghcr.io -u ${{ secrets.GITHUB_USERNAME }} -p ${{ secrets.GITHUB_TOKEN }}
-          docker pull ghcr.io/${{ github.repository_owner }}/copypaste_react:latest
-          docker stop copypaste_react
-          docker rm copypaste_react
-          docker run -d --name copypaste_react -p 80:80 ghcr.io/${{ github.repository_owner }}/copypaste_react:latest
+          cd copypaste_react
+          docker-compose pull
+          docker-compose up -d
+          docker image prune -f
