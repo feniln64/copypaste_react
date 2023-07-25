@@ -47,7 +47,7 @@ jobs:
       #     tags: registry.gitlab.com/do-copypaste/copypaste_node:latest
   
   deploy:
-    needs: docker-build-push
+    # needs: docker-build-push
     runs-on: ubuntu-latest
     steps:
     - name: multiple command
