@@ -3,8 +3,11 @@ import { useSelector, useDispatch } from 'react-redux'
 import { removeUser } from '../store/slices/authSlice'
 import axiosInstance from '../api/api'
 import 'bootstrap/dist/css/bootstrap.min.css'
-
 import React from 'react'
+import "../assets/button.css"
+import "../assets/navbar.css"
+
+
 const Header = () => {
     const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
     const userInfo = useSelector((state) => state.auth.userInfo)
@@ -27,9 +30,9 @@ const Header = () => {
     return (
         <>
 
-            <nav className="navbar navbar-expand-lg navbar-dark bg-dark p-3">
+            <nav className="navbar navbar-expand-lg  text-dark p-3 underline" style={{borderBottomWidth:"1px solid ",backgroundColor:"#D6D7E3"}}>
                 <div className="container-fluid">
-                    <Link className="navbar-brand" to="/">Home put logo</Link>
+                    <Link className="navbar-brand" to="/"><img src="assets/img/old.png" style={{height: "50px"}}></img></Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -41,10 +44,10 @@ const Header = () => {
                             {!isLoggedIn && (
                                 <>
                                     <li className="nav-item">
-                                        <Link className="nav-link mx-2 active" aria-current="page" to="/login">Login</Link>
+                                        <Link className="nav-link mx-2 active button-54" aria-current="page" to="/login">Login</Link>
                                     </li>
                                     <li className="nav-item">
-                                        <Link className="nav-link mx-2 active" to="/register">Sign Up</Link>
+                                        <Link className="nav-link mx-2 active button-54" to="/register">Sign Up</Link>
                                     </li>
                                 </>)}
 

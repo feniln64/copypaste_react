@@ -8,6 +8,10 @@ import Register from './components/Register';
 import { useEffect, useState } from 'react';
 import Profile from './components/Profile';
 import Error from './templates/Error';
+import Domain from './components/Domain';
+import ViewContent from './components/ViewContent';
+import Content from './components/Content';
+
 function App() {
   return (
     <Routes>
@@ -17,6 +21,9 @@ function App() {
         <Route path={"/login"} element={<Login/>} />
         <Route path={"/register"} element={<Register/>} />
         <Route path={"/profile"} element={<Profile/>} />
+        <Route path={"/add-domain"} element={<Domain/>} />
+        <Route path={"/content"} element={<ViewContent/>} />
+        <Route path={"/create-content"} element={<Content/>} />
 
         <Route path={"*"} element={<Error/>} />
 

@@ -6,8 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { addNewUser } from '../store/slices/authSlice'
 import 'bootstrap/dist/css/bootstrap.min.css'
-
-
+import '../assets/button.css'
 export default function Login() {
     const auth = useSelector((state) => state.auth.value)
     const dispatch = useDispatch()
@@ -109,7 +108,7 @@ export default function Login() {
                                                 </div>
                                             </div>
                                             <div className="col-12">
-                                                <button className="btn btn-primary w-100" type="submit">Login</button>
+                                                <button className=" w-100 button-54" type="submit">Login</button>
                                             </div>
                                             <div className="col-12">
                                                 <p className="small mb-0">Don't have account? <a href="pages-register.html">Create an account</a></p>
