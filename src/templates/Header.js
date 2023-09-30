@@ -30,7 +30,7 @@ const Header = () => {
     return (
         <>
 
-            <nav className="navbar navbar-expand-lg  text-dark p-3 underline" style={{borderBottomWidth:"1px solid ",backgroundColor:"#D6D7E3"}}>
+            <nav className="navbar navbar-expand-lg  text-dark p-2" >
                 <div className="container-fluid">
                     <Link className="navbar-brand" to="/"><img src="assets/img/old.png" style={{height: "50px"}}></img></Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse"

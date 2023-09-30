@@ -3,6 +3,10 @@ import { useState } from 'react'
 import React from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
+import axiosInstance from '../api/api'
+import { toast } from 'react-hot-toast';
+import { useSelector, useDispatch } from 'react-redux'
+
 // import '../assets/content.css'
 function Content() {
     const modules = {
@@ -34,13 +38,47 @@ function Content() {
         console.log(value, isChecked)
         
     }
+    const userInfo = useSelector((state) => state.auth.userInfo)
+    const userId = userInfo.id
+
+     const handleSubmit = async (e) => {
+        e.preventDefault()
+        const contentData = {
+            content: content,
+            is_protected: isChecked
+        };
+        console.log(contentData)
+        // setContent("");
+        // isChecked("");
+        try {
+            const res = await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true });
+            // remove this console.log after testing
+            console.log(res);
+            if (res.status === 201) {
+
+                toast.success('data added Successfully')
+                // navigate("/login");
+            }
+        } catch (error) {
+            if (error.response) {
+                console.log(error.response);
+                toast.error(error.response.data.message)
+            } else if (error.request) {
+                toast.error('network error')
+            } else {
+                toast.error(error)
+            }
+        }
+
+    };
     return (
         <>
-            <div id='main' className="container card"  style={{ marginLeft: "auto" ,marginBottom:"100px"}}>
+            <div id='main' className="services"  style={{ marginLeft: "auto",height:"vh"}}>
+            <div className="container" data-aos="fade-up">
             <section className=" card-body ">
-                <form  >
+                <form onSubmit={handleSubmit} >
                     
-                    <button type="submit" className="btn btn-primary btn-block mb-4">Create Contact</button>
+                    <button  type="submit" className="btn btn-primary btn-block mb-4">Create Contact</button>
                     <div className="form-check">
                         <label className="form-check-label" htmlFor="protected_content">
                             Protected Content
@@ -54,6 +92,7 @@ function Content() {
                
                 </form>
                 </section>
+                </div>
             </div>
         </>
     )

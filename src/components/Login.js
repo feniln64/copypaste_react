@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
 // import "../assets/login.css"
 import axiosInstance from '../api/api'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 // import toast, { Toaster } from 'react-hot-toast';
 import { useSelector, useDispatch } from 'react-redux'
 import { addNewUser } from '../store/slices/authSlice'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../assets/button.css'
+import '../assets/container.css'
+
 export default function Login() {
     const auth = useSelector((state) => state.auth.value)
     const dispatch = useDispatch()
@@ -69,7 +71,7 @@ export default function Login() {
             </form>
         </div>
     </div> */}
-            <div className="container" style={{ marginTop: "100px" }}>
+            <section className="container" style={{height:"85vh"}} >
 
                 <section className="section register  d-flex flex-column align-items-center justify-content-center py-4">
                     <div className="container">
@@ -111,7 +113,7 @@ export default function Login() {
                                                 <button className=" w-100 button-54" type="submit">Login</button>
                                             </div>
                                             <div className="col-12">
-                                                <p className="small mb-0">Don't have account? <a href="pages-register.html">Create an account</a></p>
+                                                <p className="small mb-0">Don't have account? <Link to="/register">Create an account</Link></p>
                                             </div>
                                         </form>
                                     </div>
@@ -121,7 +123,7 @@ export default function Login() {
                     </div>
                 </section>
 
-            </div>
+            </section>
         </>
 
     )

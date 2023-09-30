@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
 import React from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
-
+// import '../assets/container.css'
 const Footer = () => {
     return (
         <>
-            <footer id="footer"  className="footer justify-content-between py-4 px-4 px-xl-5 bg-primary" style={{marginLeft:"auto",bottom:"0"}}>
+            <footer id="footer"  className="footer py-4 px-xl-5 bg-primary" style={{marginLeft:"auto",height:"80px"}}>
                 <div className="text-white mb-3 mb-md-0">
                     Copyright © 2020. All rights reserved.
                 </div>

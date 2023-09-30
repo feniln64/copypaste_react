@@ -6,7 +6,7 @@ import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { useEffect } from 'react';
 import axiosInstance from '../api/api'
 import { useSelector, useDispatch } from 'react-redux'
-
+import bootstrap from 'bootstrap/dist/css/bootstrap.min.css'
 
 function ViewContent() {
     const userInfo = useSelector((state) => state.auth.userInfo)
@@ -24,7 +24,7 @@ function ViewContent() {
                 axiosInstance.get(`/content/${userId}`, { withCredentials: true })
                     .then((response) => {
                         console.log("init.response =", response);
-                        setContent(response.data.constent);
+                        setContent(response.data);
                         sethasContent(true)
                         console.log("hasContent =", hasContent)
                     })
@@ -51,7 +51,7 @@ function ViewContent() {
                 axiosInstance.post(`/init`, { subdomain: subdomain })
                     .then((response) => {
                         console.log("init.response =", response);
-                        setContent(response.data.constent);
+                        setContent(response.data);
                     })
                     .catch((error) => {
                         console.log(error);
@@ -72,9 +72,29 @@ function ViewContent() {
         console.log("subdomain is " + parsed.subdomain)
 
     }, []);
-
+    function iframe() {
+        return {
+            __html: `
+            <div className="container text-justify fontt" style={{ marginTop: "40px", marginBottom: "40px" }}>
+                <div className="row">
+                    <div className="col-md-10 offset-md-1 text-justify">
+                        ${content}
+                    </div>
+                </div>
+            </div>`
+        }
+    }
     return (
         <>
+           {/* <div className="container text-justify fontt" style={{ marginTop: "40px", marginBottom: "40px" }}>
+                <div className="row">
+                    <div className="col-md-10 offset-md-1 text-justify">
+            <div dangerouslySetInnerHTML={iframe()} />
+                        
+                    </div>
+                </div>
+            </div> */}
+
             {hasContent ? (
                 <>
                 <div className="container card rounded bg-white mt-5 mb-5" style={{marginBottom:"100px"}}>
@@ -86,9 +106,10 @@ function ViewContent() {
                         </div>
                         <div className="row mt-3">
                             <div className="col-md-24 card-body">
-                                <label className="labels">content</label>
-                                <SyntaxHighlighter language="1c" style={docco} wrapLongLines="true" >
-                                    {content}
+                                <label className="labels" >content</label>
+                                 {content} 
+                                <SyntaxHighlighter language="html" style={docco} wrapLongLines="true" >
+                                    
                                 </SyntaxHighlighter>
                                 <Link className="btn btn-primary btn-block mb-4" to="/create-content">Edit content</Link>
 

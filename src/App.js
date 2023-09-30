@@ -11,7 +11,7 @@ import Error from './templates/Error';
 import Domain from './components/Domain';
 import ViewContent from './components/ViewContent';
 import Content from './components/Content';
-
+import Test from './components/Test';
 function App() {
   return (
     <Routes>
@@ -24,7 +24,7 @@ function App() {
         <Route path={"/add-domain"} element={<Domain/>} />
         <Route path={"/content"} element={<ViewContent/>} />
         <Route path={"/create-content"} element={<Content/>} />
-
+        <Route path={"/test"} element={<Test/>} />
         <Route path={"*"} element={<Error/>} />
 
         </Route>

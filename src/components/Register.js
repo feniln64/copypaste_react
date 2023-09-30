@@ -9,21 +9,24 @@ const Register = () => {
     const navigate = useNavigate();
 
     const [userName, setuserName] = useState("");
+    const [name, setName] = useState("");
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         const userData = {
-            name: userName,
+            username: userName,
             email: email,
-            password: password
+            password: password,
+            name: name
         };
         setEmail("");
         setPassword("");
         setuserName("");
         try {
-            const res = await axiosInstance.post("/auth/signup", userData, { withCredentials: true });
+            const res = await axiosInstance.post("/user/createuser", userData, { withCredentials: true });
             // remove this console.log after testing
             console.log(res);
             if (res.status === 201) {
@@ -68,7 +71,7 @@ const Register = () => {
                 </div>
             </div>
         </div> */}
-            <div className="container" style={{ marginTop: "60px" }}>
+            <div className="container" style={{ marginTop: "60px", height:"77vh"}}>
 
                 <section className="section register  d-flex flex-column align-items-center justify-content-center py-4">
                     <div className="container">
@@ -94,7 +97,7 @@ const Register = () => {
                                         <form className="row g-3 needs-validation" onSubmit={handleSubmit}>
                                             <div className="col-12">
                                                 <label htmlFor="yourName" className="form-label">Your Name</label>
-                                                <input type="text" name="name" className="form-control" id="yourName" required />
+                                                <input type="text" name="name" className="form-control" value={name} onChange={e => setName(e.target.value)} id="yourName" required />
                                                 <div className="invalid-feedback">Please, enter your name!</div>
                                             </div>
 
@@ -115,7 +118,7 @@ const Register = () => {
 
                                             <div className="col-12">
                                                 <label htmlFor="yourPassword" className="form-label">Password</label>
-                                                <input type="password" name="password" className="form-control" id="yourPassword" required />
+                                                <input type="password" name="password" className="form-control" id="yourPassword" value={password} onChange={e => setPassword(e.target.value)} required />
                                                 <div className="invalid-feedback">Please enter your password!</div>
                                             </div>
 

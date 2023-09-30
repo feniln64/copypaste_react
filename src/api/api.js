@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { updateUser } from '../store/slices/authSlice'
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:9000",
+  baseURL: "http://localhost:3000",
   headers: {
     "Content-Type": "application/json",
   },

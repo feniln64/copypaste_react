@@ -24,7 +24,7 @@ function Domain() {
         setDomain("")
 
         try {
-            const res = await axiosInstance.post("/subdomain/create", userData, { withCredentials: true });
+            const res = await axiosInstance.post(`/subdomain/create/${userInfo.id}`, userData, { withCredentials: true });
             // remove this console.log after testing
             if (res.status === 200) {
                 const response = res.data.subdomainObject
@@ -43,9 +43,13 @@ function Domain() {
         }
     };
 
+    const handleQR = async (e) => {
+        e.preventDefault()
+        console.log("handleQR")
+    }
     useEffect(() => {
         try {
-            axiosInstance.get(`/subdomain/${userData.userId}`, {}, { withCredentials: true })
+            axiosInstance.get(`/subdomain/getsubdomain/${userData.userId}`, {}, { withCredentials: true })
                 .then((response) => {
                     // console.log("init.response =", response);
                     if (response.status === 200) {
@@ -53,6 +57,10 @@ function Domain() {
                         console.log("subdomain", subdomain);
                         setHasSubdomain(true)
                         setSubdomainObject(subdomain)
+                    }
+                    if (response.status === 204) {
+                        setHasSubdomain(false)
+                        
                     }
                 })
                 .catch((error) => {
@@ -97,7 +105,7 @@ function Domain() {
                 (
                     <>
                         <div  className="container card card rounded bg-white mt-5 mb-5" >
-                            <h1 class="card-title">
+                            <h1 className="card-title">
                                 Found subdomain
                             </h1>
                             <table className='table' border={1}>
@@ -106,7 +114,7 @@ function Domain() {
                                     <th scope="col">Subdoamin</th>
                                     <th scope="col">UserId</th>
                                     <th scope="col">Domain</th>
-
+                                    <th scope="col">Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -116,9 +124,11 @@ function Domain() {
                                         <td>{subdomain.subdomain}</td>
                                         {/* <td>{subdomain.userId}</td> */}
                                         <td><a href={"https://"+subdomain.subdomain+".readyle.live"}>{subdomain.subdomain}.readyle.live</a></td>
-
+                                        <td><button onClick={handleQR} className="btn btn-primary">Generate QR</button></td>
                                     </tr>
+                                   
                                 ))}
+                                 
                                 </tbody>
                             </table>
                         </div>
