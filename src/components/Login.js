@@ -26,7 +26,7 @@ export default function Login() {
         setPassword("")
 
         try {
-            const res = await axiosInstance.post("/auth/login", userData, { withCredentials: true });
+            const res = await axiosInstance.post("/auth/sign-in", userData, { withCredentials: true });
             // remove this console.log after testing
 
             if (res.status === 200) {

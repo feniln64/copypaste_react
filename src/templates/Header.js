@@ -6,6 +6,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import React from 'react'
 import "../assets/button.css"
 import "../assets/navbar.css"
+import "../assets/bizland.css"
+
 
 
 const Header = () => {
@@ -27,12 +29,52 @@ const Header = () => {
         navigate("/login");
         dispatch(removeUser())
     }
+
     return (
         <>
+            <header id="header" className="d-flex align-items-center">
 
-            <nav className="navbar navbar-expand-lg  text-dark p-2" >
+                <div className="container d-flex align-items-center justify-content-between">
+                    <Link to="/" className="logo"><img src="assets/img/old.png" alt="" /></Link>
+                    <nav id="navbar" className="navbar">
+                        <ul>
+                            {!isLoggedIn && (
+                                <>
+                                    <li className="nav-item">
+                                        <Link className="nav-link active" to="/login">Login</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link " to="/register">Sign Up</Link>
+                                    </li>
+                                </>)}
+
+                            {isLoggedIn && (<>
+                                <li><Link className="nav-link mx-2  " to="/content">Content</Link></li>
+                                <li><Link className="nav-link mx-2  " to="/add-domain">Add Domain</Link></li>
+                                <li className="dropdown"> <span><img
+                                    style={{ width: 30, height: 30 }}
+                                    src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
+                                    className="rounded-circle"
+                                    alt="Black and White Portrait of a Man"
+                                /></span> <i className="bi bi-chevron-down"></i>
+                                    <ul style={{ width: "150px" }}>
+                                        <li><Link to="/profile">Profile</Link></li>
+                                        <li><a className="" onClick={logout}>Log Out</a></li>
+                                        <li><a href="#">Contact us</a></li>
+                                    </ul>
+                                </li>
+                            </>
+                            )}
+                        </ul>
+                        <i className="bi bi-list mobile-nav-toggle"></i>
+                    </nav>
+
+                </div>
+            </header>
+
+            {/* <nav className="navbar navbar-expand-lg  text-dark p-2" >
                 <div className="container-fluid">
-                    <Link className="navbar-brand" to="/"><img src="assets/img/old.png" style={{height: "50px"}}></img></Link>
+                    <Link className="navbar-brand" to="/"><img src="assets/img/old.png" style={{ height: "50px" }}></img></Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +82,7 @@ const Header = () => {
                     </button>
 
                     <div className=" collapse navbar-collapse" id="navbarNavDropdown">
-                        <ul className="navbar-nav ms-auto ">
+                        <ul className=" nav navbar-nav ms-auto ">
                             {!isLoggedIn && (
                                 <>
                                     <li className="nav-item">
@@ -53,24 +95,23 @@ const Header = () => {
 
                             {isLoggedIn && (<>
                                 <li className="nav-item">
-                                    <Link className="nav-link mx-2 active" to="/content">Content</Link>
+                                    <Link className="nav-link mx-2 active " to="/content">Content</Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className="nav-link mx-2 active" to="/add-domain">Add Domain</Link>
+                                    <Link className="nav-link mx-2 active " to="/add-domain">Add Domain</Link>
                                 </li>
                                 <li className="nav-item dropdown">
-                                    <a className="nav-link mx-2 dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a className="nav-link mx-2 dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <img
                                             style={{ width: 30, height: 30 }}
                                             src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
                                             className="rounded-circle"
                                             alt="Black and White Portrait of a Man"
-                                            loading="lazy"
                                         />
                                     </a>
 
-                                    <ul className="dropdown-menu dropdown-menu-end dropdown-menu-lg-start" aria-labelledby="navbarDropdownMenuLink" >
-                                        <li><Link className="dropdown-item" to="/profile">Profile</Link></li>
+                                    <ul className="dropdown-menu mx-2"  >
+                                        <li><Link className="dropdown-item mx-2" to="/profile">Profile</Link></li>
                                         <li><a className="dropdown-item" onClick={logout}>Log Out</a></li>
                                         <li><a className="dropdown-item" href="#">Contact us</a></li>
                                     </ul>
@@ -80,7 +121,7 @@ const Header = () => {
                         </ul>
                     </div>
                 </div>
-            </nav>
+            </nav> */}
         </>
     )
 }

@@ -1,22 +1,39 @@
-# version: '3'
-# services:
-#   react:
-#     build: .
-#     container_name: react_copypaste
-#     restart: unless-stopped
-#     networks:
-#       - traefik-net
-#     ports:
-#       - 80
-#     labels:
-#       - "traefik.enable=true"
-#       - "traefik.http.routers.react.rule=HostRegexp(`{sub:[a-zA-Z0-9-]+}.docopypaste.live`)"
-#       - "traefik.http.services.react.loadbalancer.server.port=80"
-#       - "traefik.http.routers.react.tls.certresolver=cloudflare"
-#       - "traefik.http.routers.react.tls=true"
-  
+version: "3"
 
-# networks:
-#   traefik-net:
-#     external: true
-
+services:
+  db:
+    image: mariadb:10.11
+    command: --max-allowed-packet=64MB
+    restart: always
+    volumes:
+      - ./db:/var/lib/mysql:Z
+    environment:
+      - MYSQL_ROOT_PASSWORD=Fenil1234
+      - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_DISABLE_UPGRADE_BACKUP=1
+    env_file:
+      - ./db.env
+    networks:
+      - traefik-net
+  app:
+    image: matomo
+    restart: always
+    volumes:
+      - ./matomo:/var/www/html:z
+    environment:
+      - MATOMO_DATABASE_HOST=db
+    env_file:
+      - ./db.env
+    ports:
+      - 80
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.react.rule=Host(`grafana.readyle.live`)"
+      - "traefik.http.services.react.loadbalancer.server.port=80"
+      - "traefik.http.routers.react.tls.certresolver=cloudflare"
+      - "traefik.http.routers.react.tls=true"
+networks:
+  traefik-net:
+    external: true
