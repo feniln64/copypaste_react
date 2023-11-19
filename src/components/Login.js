@@ -39,38 +39,11 @@ export default function Login() {
                 navigate("/");
             }
         } catch (error) {
-            if (error.response) {
-                console.log(error.response);
-                // toast.error(error.response.data.message)
-            } else if (error.request) {
-                // toast.error('network error')
-                console.log("network error");
-            } else {
-                // toast.error(error)
-                console.log("error", error);
-            }
+                console.log("error", error.message);
         }
     };
     return (
         <>
-            {/* <div><Toaster position="bottom-left"
-    reverseOrder={false}/></div>
-
-    <div className='container'>
-        <div className='window'>
-            <div className='overlay'></div>
-            <form className='content' onSubmit={handleSubmit}>
-                <div className='welcome'>Hello There!</div>
-                <div className='subtitle'>Before using our services you need to Log In.</div>
-                <div className='input-fields'>
-                    <input id="email" type='email' placeholder='Email' value={email} onChange={e=>setEmail(e.target.value)} className='input-line full-width'></input>
-                    <input id="password" type='password' placeholder='Password' value={password} onChange={e=>setPassword(e.target.value)} className='input-line full-width'></input>
-                </div>
-                <div className='spacing'>or continue with <span className='highlight'>Facebook</span></div>
-                <div><button className='ghost-round full-width'>Login</button></div>
-            </form>
-        </div>
-    </div> */}
             <section className="container" style={{height:"85vh"}} >
 
                 <section className="section register  d-flex flex-column align-items-center justify-content-center py-4">
@@ -125,7 +98,6 @@ export default function Login() {
 
             </section>
         </>
-
     )
 }
 

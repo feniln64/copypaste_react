@@ -63,11 +63,7 @@ function Content() {
         // setContent("");
         // isChecked("");
         try {
-            const res = await axiosInstance.post(
-                `/content/create/${userId}`,
-                contentData,
-                { withCredentials: true }
-            );
+            const res = await axiosInstance.post(`/content/create/${userId}`,contentData,{ withCredentials: true });
             // remove this console.log after testing
             console.log(res);
             if (res.status === 201) {
@@ -127,7 +123,8 @@ function Content() {
                                     }}
                                     onChange={(event, editor) => {
                                         const data = editor.getData();
-                                        console.log({ event, editor, data });
+                                        setContent(data)
+                                        console.log({ data });
                                     }}
                                     onBlur={(event, editor) => {
                                         console.log("Blur.", editor);
