@@ -14,17 +14,19 @@ function Domain() {
     const [hasSubdomain, setHasSubdomain] = useState(false)
     const [subdomainObject, setSubdomainObject] = useState([])
     const dispatch = useDispatch()
-    const userData = {
-        userId: userInfo.id,
-        subdomain: domain,
-        active: true
-    };
+    const userId = userInfo.id
+   
     const handleSubmit = async (e) => {
         e.preventDefault()
+        const userData = {
+            userId: userId,
+            subdomain: domain,
+            active: true
+        };
         setDomain("")
 
         try {
-            const res = await axiosInstance.post(`/subdomain/create/${userInfo.id}`, userData, { withCredentials: true });
+            const res = await axiosInstance.post(`/subdomain/create/${userId}`, userData, { withCredentials: true });
             // remove this console.log after testing
             if (res.status === 200) {
                 const response = res.data.subdomainObject
@@ -43,15 +45,17 @@ function Domain() {
     }
     useEffect(() => {
         try {
-            axiosInstance.get(`/subdomain/getsubdomain/${userData.userId}`, {}, { withCredentials: true })
+             axiosInstance.get(`/subdomain/getsubdomain/${userId}`, {}, { withCredentials: true })
+             
                 .then((response) => {
                     // console.log("init.response =", response);
                     if (response.status === 200) {
-                        const subdomain = response.data
-                        console.log(typeof(subdomain))
+                        var subdomain = response
+                       
+                        
                         console.log("subdomain", subdomain);
                         setHasSubdomain(true)
-                        setSubdomainObject(subdomain)
+                        setSubdomainObject([subdomain.data])
                     }
                     if (response.status === 204) {
                         setHasSubdomain(false)
@@ -67,6 +71,8 @@ function Domain() {
             console.log(error);
         }
     }, []);
+
+
     return (
         <>
             {!hasSubdomain &&
@@ -80,7 +86,7 @@ function Domain() {
                                     <input type="text" id="subdomaain" value={domain} onChange={e => setDomain(e.target.value)} className="form-control" />
                                 </div>
                                 <h5>Your personal domain will be  </h5>
-                                <h6><a className='disabled' href={domain}>https://{domain}.docopypaste.live</a></h6>
+                                <h6><a className='disabled' href={domain}>https://{domain}.cpypst.online</a></h6>
 
 
 
@@ -100,18 +106,18 @@ function Domain() {
                                 <thead>
                                     <tr>
                                         <th scope="col">Subdoamin</th>
-                                        <th scope="col">UserId</th>
+                                        <th scope="col">User Name</th>
                                         <th scope="col">Domain</th>
                                         <th scope="col">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {subdomainObject.map(subdomain => (
-                                        <tr key={subdomain.id}>
+                                        <tr key={subdomain._id}>
                                             <th scope="row">1</th>
                                             <td>{subdomain.subdomain}</td>
                                             {/* <td>{subdomain.userId}</td> */}
-                                            <td><a href={"https://" + subdomain.subdomain + ".readyle.live"}>{subdomain.subdomain}.readyle.live</a></td>
+                                            <td><a href={"https://" + subdomain.subdomain + ".cpypst.online"}>{subdomain.subdomain}.cpypst.online</a></td>
                                             <td><button onClick={handleQR} className="btn btn-primary">Generate QR</button></td>
                                         </tr>
 

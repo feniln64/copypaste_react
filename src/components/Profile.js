@@ -5,25 +5,29 @@ import { updateUser } from '../store/slices/authSlice'
 import axiosInstance from '../api/api'
 import { toast } from 'react-hot-toast'
 import 'bootstrap/dist/css/bootstrap.min.css'
-
+var AWS = require('aws-sdk');
 
 function Profile() {
-
+    const [file, setFile] = useState(null);
     const [email, setEmail] = useState()
     const [namee, setName] = useState()
+    const [username, setUsername] = useState()
+    const [profileImage, setProfileImage] = useState()
+
     const [view, setView] = useState('hs')
     const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
     const userInfo = useSelector((state) => state.auth.userInfo)
     const dispatch = useDispatch()
-
+    const userData = {
+        id: userInfo.id,
+        email: email,
+        name: namee,
+        username: username,
+        premium_user: userInfo.premium_user
+    };
     const handleSubmit = async (e) => {
         e.preventDefault()
-        const userData = {
-            id: userInfo.id,
-            email: email,
-            name: namee,
-            premium_user: userInfo.premium_user
-        };
+      
 
         try {
             const res = await axiosInstance.patch(`/users/${userData.id}/update`, userData, { withCredentials: true });
@@ -48,60 +52,73 @@ function Profile() {
             }
         }
     }
+
+    const handleFileChange = (e) => {
+        // Uploaded file
+        e.preventDefault();
+        const file = e.target.files[0];
+        console.log(file);
+        // Changing file state
+        setFile(file);
+      };
+
+    const uploadImage = async (e) => {
+        e.preventDefault()
+          var config = {
+            accessKeyId: "pPAzlk6rv4x34C6GoJEd",
+            secretAccessKey: "aYuVmUYJonn7ESKAcDOop1O2dEca0v3RipG3FUUx",
+            endpoint: "readyle.live:9000",
+            sslEnabled: false,
+            forcePathStyle: true
+          };
+        
+          AWS.config.update(config);
+        const s3Client = new AWS.S3();
+        const response = await s3Client.putObject({ Bucket: 'minio', Key: `docopypaste/profile/${file.name}`, Body: `${file}` })
+        if (!response) {
+           console.log("error uploading file");
+        }
+        console.log("Successfully uploaded data to myBucket/myKey");
+    }
     useEffect(() => {
+        
+        
+    // var minioClient = new minio.Client({
+    //     endPoint: 'minio.readyle.live',
+    //     port: 9000,
+    //     useSSL: false,
+    //     accessKey: 'pPAzlk6rv4x34C6GoJEd',
+    //     secretKey: 'aYuVmUYJonn7ESKAcDOop1O2dEca0v3RipG3FUUx',
+    //   })
+
         console.log("auth from profile", isLoggedIn);
         console.log("userInfo from profile", JSON.stringify(userInfo));
         setView("profile-overview")
         setEmail(userInfo.email)
         setName(userInfo.username)
+        try {
+            const res =  axiosInstance.get(`user/getProfile/${userData.id}`, { withCredentials: true })
+            .then((response) => {
+
+                response.data.signedUrl ? setProfileImage(response.data.signedUrl) : setProfileImage("assets/img/profile-img.jpg")
+               
+                // if (response.data.content !== null) sethasContent(true); else sethasContent(false);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+            // remove this console.log after testing
+
+            
+        } catch (error) {
+                console.error(error);
+        }
+    
     }, [])
 
     return (
         <>
-            {/* <div className="container rounded bg-white mt-5 mb-5">
-                <div className="row">
-                    <div className="col-md-3 border-right">
-                        <div className="d-flex flex-column align-items-center text-center p-3 py-5"><img className="rounded-circle mt-5" width="150px" alt="" src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg" />
-                            <span className="font-weight-bold">{namee}</span><span className="text-black-50">{email}</span><span> </span></div>
-                    </div>
-                    <form className="col-md-5 border-right" onSubmit={handleSubmit}>
-                        <div className="p-3 py-5">
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h4 className="text-right">Profile Settings</h4>
-                            </div>
-                            <div className="row mt-6">
-                                <div className="col-md-12">
-                                    <label className="labels">Name</label>
-                                    <input type="text" className="form-control" placeholder="name" value={namee} onChange={e => setName(e.target.value)} />
-                                </div>
-                            </div>
 
-                            <div className="row mt-6">
-
-                                <div className="col-md-12">
-                                    <label className="labels">Email ID</label>
-                                    <input type="text" className="form-control" placeholder="enter email id" value={email} onChange={e => setEmail(e.target.value)} />
-                                </div>
-                            </div>
-
-                            <div className="row mt-3">
-                                <div className="col-md-6">
-                                    <label className="labels">Country</label>
-                                    <input type="text" className="form-control" placeholder="country" />
-                                </div>
-                                <div className="col-md-6">
-                                    <label className="labels">State/Region</label>
-                                    <input type="text" className="form-control" placeholder="state" />
-                                </div>
-                            </div>
-                            <div className="mt-5 text-center"><button className="btn btn-primary profile-button" type="submit">Update Profile</button></div>
-                        </div>
-                    </form>
-
-                </div>
-            </div> */}
-            {/* </div >
-    </div > */}
             <div id='main' className="container" style={{ marginLeft: "auto" }}>
                 <section className="section profile">
                     <div className="row">
@@ -110,7 +127,7 @@ function Profile() {
                             <div className="card">
                                 <div className="card-body profile-card pt-4 d-flex flex-column align-items-center">
 
-                                    <img src="assets/img/profile-img.jpg" alt="Profile" className="rounded-circle" />
+                                    <img src={profileImage} alt="Profile" className="rounded-circle" />
                                     <h2>Kevin Anderson</h2>
                                     <h3>Web Designer</h3>
                                     <div className="social-links mt-2">
@@ -156,21 +173,16 @@ function Profile() {
 
                                             <div className="row">
                                                 <div className="col-lg-3 col-md-4 label ">Full Name</div>
-                                                <div className="col-lg-9 col-md-8">Kevin Anderson</div>
+                                                <div className="col-lg-9 col-md-8">{namee}</div>
                                             </div>
 
                                             <div className="row">
                                                 <div className="col-lg-3 col-md-4 label">Username</div>
-                                                <div className="col-lg-9 col-md-8">Lueilwit</div>
+                                                <div className="col-lg-9 col-md-8">{username}</div>
                                             </div>
-
-                                        
-
-                                           
-
-                                            <div className="row">
+                                                <div className="row">
                                                 <div className="col-lg-3 col-md-4 label">Email</div>
-                                                <div className="col-lg-9 col-md-8">k.anderson@example.com</div>
+                                                <div className="col-lg-9 col-md-8">{email}</div>
                                             </div>
 
                                         </div>
@@ -183,31 +195,29 @@ function Profile() {
                                                 <div className="row mb-3">
                                                     <label for="profileImage" className="col-md-4 col-lg-3 col-form-label">Profile Image</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <img src="assets/img/profile-img.jpg" alt="Profile" />
-                                                        <div className="pt-2">
-                                                            <a href="#" className="btn btn-primary btn-sm" title="Upload new profile image">upload</a>
-                                                            <a href="#" className="btn btn-danger btn-sm" title="Remove my profile image">Delete</a>
-                                                        </div>
+                                                        <img src={profileImage} alt="Profile" ></img>
+                                                        <input name="profileImage" onChange={handleFileChange}  type="file" className="form-control" id="profileImage" />
+                                                        <button as='label'onClick={uploadImage} htmlFor='profileImage' className="btn btn-primary">Upload</button>
                                                     </div>
                                                 </div>
 
                                                 <div className="row mb-3">
                                                     <label for="fullName" className="col-md-4 col-lg-3 col-form-label">Full Name</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <input name="fullName" type="text" className="form-control" id="fullName" value="Kevin Anderson" />
+                                                        <input name="fullName" type="text" className="form-control" id="fullName" value={namee} />
                                                     </div>
                                                 </div>
 
                                                 <div className="row mb-3">
                                                     <label for="Email" className="col-md-4 col-lg-3 col-form-label">Email</label>
                                                     <div className="col-md-8 col-lg-9">
-                                                        <input name="email" type="email" className="form-control" id="Email" value="k.anderson@example.com" />
+                                                        <input name="email" type="email" className="form-control" id="Email" value={email} />
                                                     </div>
                                                 </div>
 
 
                                                 <div className="text-center">
-                                                    <button type="submit" className="btn btn-primary">Save Changes</button>
+                                                    <button type="submit" onSubmit={handleSubmit} className="btn btn-primary">Save Changes</button>
                                                 </div>
                                             </form>
                                         </div>

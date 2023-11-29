@@ -123,9 +123,9 @@ function ViewContent() {
                             <div className="row mt-3">
                                 <div className="col-md-24 card-body">
                                     <label className="labels" >content</label>
-                                    {content}
                                     <SyntaxHighlighter language="html" style={docco} wrapLongLines="true" >
-
+                                    {content}   
+                                    dengerouslySetInnerHTML={{ __html: content }}
                                     </SyntaxHighlighter>
                                     <Link className="btn btn-primary btn-block mb-4" to="/create-content">Edit content</Link>
 
