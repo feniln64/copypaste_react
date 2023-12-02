@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import axiosInstance from '../api/api';
 import 'bootstrap/dist/css/bootstrap.min.css'
+const notify = (message) => toast('Here is your toast.'+message);
 
 const Register = () => {
     const message = "";
@@ -37,7 +38,7 @@ const Register = () => {
         } catch (error) {
             if (error.response) {
                 console.log(error.response);
-                toast.error(error.response.data.message)
+                toast.error(error.response.data.message,{icon:'👎'})
             } else if (error.request) {
                 toast.error('network error')
             } else {
@@ -49,7 +50,8 @@ const Register = () => {
 
     return (
         <>
-
+        <div><Toaster/></div>
+            
             <div className="container" style={{ marginTop: "60px", height: "77vh" }}>
                 <section className="section register  d-flex flex-column align-items-center justify-content-center py-4">
                     <div className="container">

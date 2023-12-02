@@ -6,13 +6,13 @@ import axiosInstance from '../api/api'
 import { toast } from 'react-hot-toast'
 import 'bootstrap/dist/css/bootstrap.min.css'
 var AWS = require('aws-sdk');
-
+var Jimp = require('jimp');
 function Profile() {
     const [file, setFile] = useState(null);
     const [email, setEmail] = useState()
     const [namee, setName] = useState()
     const [username, setUsername] = useState()
-    const [profileImage, setProfileImage] = useState()
+    const [profileImage, setProfileImage] = useState('')
 
     const [view, setView] = useState('hs')
     const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
@@ -27,7 +27,7 @@ function Profile() {
     };
     const handleSubmit = async (e) => {
         e.preventDefault()
-      
+
 
         try {
             const res = await axiosInstance.patch(`/users/${userData.id}/update`, userData, { withCredentials: true });
@@ -53,67 +53,72 @@ function Profile() {
         }
     }
 
-    const handleFileChange = (e) => {
-        // Uploaded file
-        e.preventDefault();
-        const file = e.target.files[0];
-        console.log(file);
-        // Changing file state
-        setFile(file);
-      };
+    var config = {
+        accessKeyId: "pPAzlk6rv4x34C6GoJEd",
+        secretAccessKey: "aYuVmUYJonn7ESKAcDOop1O2dEca0v3RipG3FUUx",
+        endpoint: "readyle.live:9000",
+        sslEnabled: false,
+        forcePathStyle: true
+    };
+    AWS.config.update(config);
+    const s3Client = new AWS.S3();
 
     const uploadImage = async (e) => {
         e.preventDefault()
-          var config = {
-            accessKeyId: "pPAzlk6rv4x34C6GoJEd",
-            secretAccessKey: "aYuVmUYJonn7ESKAcDOop1O2dEca0v3RipG3FUUx",
-            endpoint: "readyle.live:9000",
-            sslEnabled: false,
-            forcePathStyle: true
-          };
-        
-          AWS.config.update(config);
-        const s3Client = new AWS.S3();
-        const response = await s3Client.putObject({ Bucket: 'minio', Key: `docopypaste/profile/${file.name}`, Body: `${file}` })
-        if (!response) {
-           console.log("error uploading file");
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // const response = await s3Client.putObject({ Bucket: 'minio', Key: `docopypaste/profile/${file.name}`, Body: `${file}` })
+        // if (!response) {
+        //    console.log("error uploading file");
+        // }
+        try {
+            const res = axiosInstance.patch(`user/updateProfileImage/${userData.id}`, formData, { withCredentials: true })
+                .then((response) => { console.log(response); })
+
+                .catch((error) => { console.log(error); });
+        } catch (error) {
+            console.error(error);
         }
+
         console.log("Successfully uploaded data to myBucket/myKey");
     }
+
     useEffect(() => {
-        
-        
-    // var minioClient = new minio.Client({
-    //     endPoint: 'minio.readyle.live',
-    //     port: 9000,
-    //     useSSL: false,
-    //     accessKey: 'pPAzlk6rv4x34C6GoJEd',
-    //     secretKey: 'aYuVmUYJonn7ESKAcDOop1O2dEca0v3RipG3FUUx',
-    //   })
 
         console.log("auth from profile", isLoggedIn);
         console.log("userInfo from profile", JSON.stringify(userInfo));
         setView("profile-overview")
         setEmail(userInfo.email)
-        setName(userInfo.username)
-        try {
-            const res =  axiosInstance.get(`user/getProfile/${userData.id}`, { withCredentials: true })
-            .then((response) => {
+        setName(userInfo.name)
+        setUsername(userInfo.username)
 
-                response.data.signedUrl ? setProfileImage(response.data.signedUrl) : setProfileImage("assets/img/profile-img.jpg")
-               
-                // if (response.data.content !== null) sethasContent(true); else sethasContent(false);
-              })
-              .catch((error) => {
-                console.log(error);
-              });
-            // remove this console.log after testing
+        const fetchProfile = async () => {
 
-            
-        } catch (error) {
-                console.error(error);
+            const ne = await s3Client.getSignedUrl('getObject', { Bucket: 'minio', Key: `docopypaste/profile/${userInfo.username}/profile.png`, Expires: 60 })
+            console.log(ne);
+            setProfileImage(ne)
         }
-    
+
+        fetchProfile().catch((error) => { console.log(error); })
+        // try {
+        //     const res =  axiosInstance.get(`user/getProfile/${userData.id}`, { withCredentials: true })
+        //     .then((response) => {
+
+        //         response.data.signedUrl ? setProfileImage(response.data.signedUrl) : setProfileImage("assets/img/profile-img.jpg")
+
+        //         // if (response.data.content !== null) sethasContent(true); else sethasContent(false);
+        //       })
+        //       .catch((error) => {
+        //         console.log(error);
+        //       });
+        //     // remove this console.log after testing
+
+
+        // } catch (error) {
+        //         console.error(error);
+        // }
+
     }, [])
 
     return (
@@ -148,155 +153,155 @@ function Profile() {
                                     <ul className="nav nav-tabs nav-tabs-bordered">
 
                                         <li className="nav-item">
-                                            <button className="nav-link active" onClick={e=>setView("profile-overview")} data-bs-toggle="tab" data-bs-target="#profile-overview">Overview</button>
+                                            <button className="nav-link active" onClick={e => setView("profile-overview")} data-bs-toggle="tab" data-bs-target="#profile-overview">Overview</button>
                                         </li>
 
                                         <li className="nav-item">
-                                            <button className="nav-link" data-bs-toggle="tab" onClick={e=>setView("profile-edit")} data-bs-target="#profile-edit">Edit Profile</button>
+                                            <button className="nav-link" data-bs-toggle="tab" onClick={e => setView("profile-edit")} data-bs-target="#profile-edit">Edit Profile</button>
                                         </li>
 
                                         <li className="nav-item">
-                                            <button className="nav-link" data-bs-toggle="tab" onClick={e=>setView("profile-settings")} data-bs-target="#profile-settings">Settings</button>
+                                            <button className="nav-link" data-bs-toggle="tab" onClick={e => setView("profile-settings")} data-bs-target="#profile-settings">Settings</button>
                                         </li>
 
                                         <li className="nav-item">
-                                            <button className="nav-link" data-bs-toggle="tab" onClick={e=>setView("profile-change-password")}  data-bs-target="#profile-change-password">Change Password</button>
+                                            <button className="nav-link" data-bs-toggle="tab" onClick={e => setView("profile-change-password")} data-bs-target="#profile-change-password">Change Password</button>
                                         </li>
 
                                     </ul>
-                                    
+
                                     <div className="tab-content pt-2">
-                                    {view ==="profile-overview" &&(
+                                        {view === "profile-overview" && (
                                             <div className="tab-pane fade show active profile-overview" id="profile-overview">
 
-                                            <h5 className="card-title">Profile Details</h5>
+                                                <h5 className="card-title">Profile Details</h5>
 
-                                            <div className="row">
-                                                <div className="col-lg-3 col-md-4 label ">Full Name</div>
-                                                <div className="col-lg-9 col-md-8">{namee}</div>
-                                            </div>
-
-                                            <div className="row">
-                                                <div className="col-lg-3 col-md-4 label">Username</div>
-                                                <div className="col-lg-9 col-md-8">{username}</div>
-                                            </div>
                                                 <div className="row">
-                                                <div className="col-lg-3 col-md-4 label">Email</div>
-                                                <div className="col-lg-9 col-md-8">{email}</div>
+                                                    <div className="col-lg-3 col-md-4 label ">Full Name</div>
+                                                    <div className="col-lg-9 col-md-8">{namee}</div>
+                                                </div>
+
+                                                <div className="row">
+                                                    <div className="col-lg-3 col-md-4 label">Username</div>
+                                                    <div className="col-lg-9 col-md-8">{username}</div>
+                                                </div>
+                                                <div className="row">
+                                                    <div className="col-lg-3 col-md-4 label">Email</div>
+                                                    <div className="col-lg-9 col-md-8">{email}</div>
+                                                </div>
+
                                             </div>
 
-                                        </div>
+                                        )}
+                                        {view === "profile-edit" && (
+                                            <div className="tab-pane show active fade profile-edit pt-3" id="profile-edit">
 
-                                    )}
-                                    {view ==="profile-edit" &&(
-                                        <div className="tab-pane show active fade profile-edit pt-3" id="profile-edit">
-
-                                            <form>
-                                                <div className="row mb-3">
-                                                    <label for="profileImage" className="col-md-4 col-lg-3 col-form-label">Profile Image</label>
-                                                    <div className="col-md-8 col-lg-9">
-                                                        <img src={profileImage} alt="Profile" ></img>
-                                                        <input name="profileImage" onChange={handleFileChange}  type="file" className="form-control" id="profileImage" />
-                                                        <button as='label'onClick={uploadImage} htmlFor='profileImage' className="btn btn-primary">Upload</button>
-                                                    </div>
-                                                </div>
-
-                                                <div className="row mb-3">
-                                                    <label for="fullName" className="col-md-4 col-lg-3 col-form-label">Full Name</label>
-                                                    <div className="col-md-8 col-lg-9">
-                                                        <input name="fullName" type="text" className="form-control" id="fullName" value={namee} />
-                                                    </div>
-                                                </div>
-
-                                                <div className="row mb-3">
-                                                    <label for="Email" className="col-md-4 col-lg-3 col-form-label">Email</label>
-                                                    <div className="col-md-8 col-lg-9">
-                                                        <input name="email" type="email" className="form-control" id="Email" value={email} />
-                                                    </div>
-                                                </div>
-
-
-                                                <div className="text-center">
-                                                    <button type="submit" onSubmit={handleSubmit} className="btn btn-primary">Save Changes</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    )}
-                                    {view ==="profile-settings" &&(
-                                        <>
-                                        <div className="tab-pane show active fade pt-3" id="profile-settings">
-
-                                            <form>
-
-                                                <div className="row mb-3">
-                                                    <label for="fullName" className="col-md-4 col-lg-3 col-form-label">Email Notifications</label>
-                                                    <div className="col-md-8 col-lg-9">
-                                                        <div className="form-check">
-                                                            <input className="form-check-input" type="checkbox" id="changesMade" checked />
-                                                            <label className="form-check-label" for="changesMade">
-                                                                Changes made to your account
-                                                            </label>
-                                                        </div>
-                                                        <div className="form-check">
-                                                            <input className="form-check-input" type="checkbox" id="newProducts" checked />
-                                                            <label className="form-check-label" for="newProducts">
-                                                                Information on new products and services
-                                                            </label>
-                                                        </div>
-                                                        <div className="form-check">
-                                                            <input className="form-check-input" type="checkbox" id="proOffers" />
-                                                            <label className="form-check-label" for="proOffers">
-                                                                Marketing and promo offers
-                                                            </label>
-                                                        </div>
-                                                        <div className="form-check">
-                                                            <input className="form-check-input" type="checkbox" id="securityNotify" checked disabled />
-                                                            <label className="form-check-label" for="securityNotify">
-                                                                Security alerts
-                                                            </label>
+                                                <form>
+                                                    <div className="row mb-3">
+                                                        <label for="profileImage" className="col-md-4 col-lg-3 col-form-label">Profile Image</label>
+                                                        <div className="col-md-8 col-lg-9">
+                                                            <img src={profileImage} alt="Profile" ></img>
+                                                            <input name="profileImage" onChange={(e) => setFile(e.target.files[0])} type="file" className="form-control" id="profileImage" />
+                                                            <button as='label' onClick={uploadImage} htmlFor='profileImage' className="btn btn-primary">Upload</button>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="text-center">
-                                                    <button type="submit" className="btn btn-primary">Save Changes</button>
-                                                </div>
-                                            </form>
-
-                                        </div>
-                                        </>
-                                    )}
-                                    {view ==="profile-change-password" &&(
-                                        <div className="tab-pane fade show active pt-3" id="profile-change-password">
-                                            <form>
-
-                                                <div className="row mb-3">
-                                                    <label for="currentPassword" className="col-md-4 col-lg-3 col-form-label">Current Password</label>
-                                                    <div className="col-md-8 col-lg-9">
-                                                        <input name="password" type="password" className="form-control" id="currentPassword" />
+                                                    <div className="row mb-3">
+                                                        <label for="fullName" className="col-md-4 col-lg-3 col-form-label">Full Name</label>
+                                                        <div className="col-md-8 col-lg-9">
+                                                            <input name="fullName" type="text" className="form-control" id="fullName" value={namee} />
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="row mb-3">
-                                                    <label for="newPassword" className="col-md-4 col-lg-3 col-form-label">New Password</label>
-                                                    <div className="col-md-8 col-lg-9">
-                                                        <input name="newpassword" type="password" className="form-control" id="newPassword" />
+                                                    <div className="row mb-3">
+                                                        <label for="Email" className="col-md-4 col-lg-3 col-form-label">Email</label>
+                                                        <div className="col-md-8 col-lg-9">
+                                                            <input name="email" type="email" className="form-control" id="Email" value={email} />
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="row mb-3">
-                                                    <label for="renewPassword" className="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
-                                                    <div className="col-md-8 col-lg-9">
-                                                        <input name="renewpassword" type="password" className="form-control" id="renewPassword" />
+
+                                                    <div className="text-center">
+                                                        <button type="submit" onSubmit={handleSubmit} className="btn btn-primary">Save Changes</button>
                                                     </div>
-                                                </div>
+                                                </form>
+                                            </div>
+                                        )}
+                                        {view === "profile-settings" && (
+                                            <>
+                                                <div className="tab-pane show active fade pt-3" id="profile-settings">
 
-                                                <div className="text-center">
-                                                    <button type="submit" className="btn btn-primary">Change Password</button>
+                                                    <form>
+
+                                                        <div className="row mb-3">
+                                                            <label for="fullName" className="col-md-4 col-lg-3 col-form-label">Email Notifications</label>
+                                                            <div className="col-md-8 col-lg-9">
+                                                                <div className="form-check">
+                                                                    <input className="form-check-input" type="checkbox" id="changesMade" checked />
+                                                                    <label className="form-check-label" for="changesMade">
+                                                                        Changes made to your account
+                                                                    </label>
+                                                                </div>
+                                                                <div className="form-check">
+                                                                    <input className="form-check-input" type="checkbox" id="newProducts" checked />
+                                                                    <label className="form-check-label" for="newProducts">
+                                                                        Information on new products and services
+                                                                    </label>
+                                                                </div>
+                                                                <div className="form-check">
+                                                                    <input className="form-check-input" type="checkbox" id="proOffers" />
+                                                                    <label className="form-check-label" for="proOffers">
+                                                                        Marketing and promo offers
+                                                                    </label>
+                                                                </div>
+                                                                <div className="form-check">
+                                                                    <input className="form-check-input" type="checkbox" id="securityNotify" checked disabled />
+                                                                    <label className="form-check-label" for="securityNotify">
+                                                                        Security alerts
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="text-center">
+                                                            <button type="submit" className="btn btn-primary">Save Changes</button>
+                                                        </div>
+                                                    </form>
+
                                                 </div>
-                                            </form>
-                                        </div>
-                                    )}
+                                            </>
+                                        )}
+                                        {view === "profile-change-password" && (
+                                            <div className="tab-pane fade show active pt-3" id="profile-change-password">
+                                                <form>
+
+                                                    <div className="row mb-3">
+                                                        <label for="currentPassword" className="col-md-4 col-lg-3 col-form-label">Current Password</label>
+                                                        <div className="col-md-8 col-lg-9">
+                                                            <input name="password" type="password" className="form-control" id="currentPassword" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="row mb-3">
+                                                        <label for="newPassword" className="col-md-4 col-lg-3 col-form-label">New Password</label>
+                                                        <div className="col-md-8 col-lg-9">
+                                                            <input name="newpassword" type="password" className="form-control" id="newPassword" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="row mb-3">
+                                                        <label for="renewPassword" className="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
+                                                        <div className="col-md-8 col-lg-9">
+                                                            <input name="renewpassword" type="password" className="form-control" id="renewPassword" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="text-center">
+                                                        <button type="submit" className="btn btn-primary">Change Password</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        )}
                                     </div>
 
                                 </div>

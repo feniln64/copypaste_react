@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 // import "../assets/login.css"
+import toast, { Toaster } from 'react-hot-toast';
+
 import axiosInstance from '../api/api'
 import { Link, useNavigate } from 'react-router-dom'
 // import toast, { Toaster } from 'react-hot-toast';
@@ -31,7 +33,7 @@ export default function Login() {
 
             if (res.status === 200) {
                 // alert.success("Login Successful");
-                // toast.success('Successfully Login!')
+                toast.success('Successfully Login!')
                 axiosInstance.defaults.headers.common['Authorization'] = "Bearer " + res.data.accessToken;
                 const userInfo = res.data.userInfo
                 console.log("from data", userInfo);
@@ -44,6 +46,7 @@ export default function Login() {
     };
     return (
         <>
+           <div><Toaster/></div>
             <section className="container" style={{height:"85vh"}} >
 
                 <section className="section register  d-flex flex-column align-items-center justify-content-center py-4">
