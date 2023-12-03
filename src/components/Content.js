@@ -1,6 +1,8 @@
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import { useState } from "react";
 import React from "react";
+import psl from 'psl';
+import { useEffect } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import axiosInstance from "../api/api";
@@ -9,7 +11,16 @@ import { useSelector, useDispatch } from "react-redux";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import "../assets/content.css";
+
+
 function Content() {
+    var parsed = psl.parse(window.location.hostname);
+    const subdomain = parsed.subdomain
+    const [hasContent, sethasContent] = React.useState(false)
+    const [isChecked, setIsChecked] = useState(false);
+    const [content, setContent] = useState("");
+    const userInfo = useSelector((state) => state.auth.userInfo);
+    const userId = userInfo.id;
     const modules = {
         toolbar: [
             [{ header: [1, 2, false] }],
@@ -41,8 +52,6 @@ function Content() {
     const [code, setCode] = React.useState(
         `function add(a, b) {\n  return a + b;\n}`
     );
-    const [content, setContent] = useState("");
-    const [isChecked, setIsChecked] = useState(false);
 
     const handlechange = (value) => {
         setContent(value);
@@ -50,8 +59,7 @@ function Content() {
         //remove this console.log after testing
         console.log(value, isChecked);
     };
-    const userInfo = useSelector((state) => state.auth.userInfo);
-    const userId = userInfo.id;
+   
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -81,6 +89,59 @@ function Content() {
             }
         }
     };
+
+    useEffect(() => {
+      
+        if (subdomain === null) {
+            // remove this
+            // alert("subdomain is null")
+            try {
+                axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
+                    .then((response) => {
+                        console.log("init.response =", response);
+                        setContent(response.data);
+                        console.log("hasContent =", hasContent)
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        console.log("hasContent =", hasContent)
+                    });
+            }
+            catch (error) {
+                if (error.response) {
+                    console.log(error.response);
+                    
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            }
+
+        }
+        else {
+            try {
+                axiosInstance.post(`/init`, { subdomain: subdomain })
+                    .then((response) => {
+                        console.log("init.response =", response);
+                        setContent(response.data);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+            }
+            catch (error) {
+                if (error.response) {
+                    console.log(error.response);
+                    alert(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            }
+        }
+    }, []);
     return (
         <>
             <div id="main" className="services" style={{ marginLeft: "auto", height: "vh", width: "auto" }}>

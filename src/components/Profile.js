@@ -10,9 +10,10 @@ var Jimp = require('jimp');
 function Profile() {
     const [file, setFile] = useState(null);
     const [email, setEmail] = useState()
-    const [namee, setName] = useState()
+    const [namee, setName] = useState('')
     const [username, setUsername] = useState()
     const [profileImage, setProfileImage] = useState('')
+    const [fileName, setFileName] = useState('')
 
     const [view, setView] = useState('hs')
     const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
@@ -27,8 +28,6 @@ function Profile() {
     };
     const handleSubmit = async (e) => {
         e.preventDefault()
-
-
         try {
             const res = await axiosInstance.patch(`/users/${userData.id}/update`, userData, { withCredentials: true });
             // remove this console.log after testing
@@ -63,17 +62,29 @@ function Profile() {
     AWS.config.update(config);
     const s3Client = new AWS.S3();
 
+
+    const saveFile = (e) => {
+        setFile(e.target.files[0]);
+        setFileName(e.target.files[0].name);
+        const data = new FileReader();
+        data.readAsDataURL(e.target.files[0]);
+        data.addEventListener("load", function () {
+            setFile(data.result);
+        }); 
+        console.log(typeof(file));
+
+      };
     const uploadImage = async (e) => {
         e.preventDefault()
         const formData = new FormData();
         formData.append('file', file);
-
+        formData.append("fileName", fileName);
         // const response = await s3Client.putObject({ Bucket: 'minio', Key: `docopypaste/profile/${file.name}`, Body: `${file}` })
         // if (!response) {
         //    console.log("error uploading file");
         // }
         try {
-            const res = axiosInstance.patch(`user/updateProfileImage/${userData.id}`, formData, { withCredentials: true })
+            await axiosInstance.post(`user/updateProfileImage/${userData.id}`, {file:file,username:username}, { withCredentials: true })
                 .then((response) => { console.log(response); })
 
                 .catch((error) => { console.log(error); });
@@ -95,29 +106,29 @@ function Profile() {
 
         const fetchProfile = async () => {
 
-            const ne = await s3Client.getSignedUrl('getObject', { Bucket: 'minio', Key: `docopypaste/profile/${userInfo.username}/profile.png`, Expires: 60 })
+            const ne = await s3Client.getSignedUrl('getObject', { Bucket: 'minio', Key: `docopypaste/profile/${userInfo.username}/profile.png`, Expires: 60*60 })
             console.log(ne);
             setProfileImage(ne)
         }
 
         fetchProfile().catch((error) => { console.log(error); })
-        // try {
-        //     const res =  axiosInstance.get(`user/getProfile/${userData.id}`, { withCredentials: true })
-        //     .then((response) => {
+        try {
+            const res =  axiosInstance.get(`user/getProfile/${userData.id}`, { withCredentials: true })
+            .then((response) => {
 
-        //         response.data.signedUrl ? setProfileImage(response.data.signedUrl) : setProfileImage("assets/img/profile-img.jpg")
+                response.data.signedUrl ? setProfileImage(response.data.signedUrl) : setProfileImage("assets/img/profile-img.jpg")
 
-        //         // if (response.data.content !== null) sethasContent(true); else sethasContent(false);
-        //       })
-        //       .catch((error) => {
-        //         console.log(error);
-        //       });
-        //     // remove this console.log after testing
+                // if (response.data.content !== null) sethasContent(true); else sethasContent(false);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+            // remove this console.log after testing
 
 
-        // } catch (error) {
-        //         console.error(error);
-        // }
+        } catch (error) {
+                console.error(error);
+        }
 
     }, [])
 
@@ -133,7 +144,7 @@ function Profile() {
                                 <div className="card-body profile-card pt-4 d-flex flex-column align-items-center">
 
                                     <img src={profileImage} alt="Profile" className="rounded-circle" />
-                                    <h2>Kevin Anderson</h2>
+                                    <h2>{namee}</h2>
                                     <h3>Web Designer</h3>
                                     <div className="social-links mt-2">
                                         <a href="#" className="twitter"><i className="bi bi-twitter"></i></a>
@@ -198,23 +209,23 @@ function Profile() {
 
                                                 <form>
                                                     <div className="row mb-3">
-                                                        <label for="profileImage" className="col-md-4 col-lg-3 col-form-label">Profile Image</label>
+                                                        <label htmlFor="profileImage" className="col-md-4 col-lg-3 col-form-label">Profile Image</label>
                                                         <div className="col-md-8 col-lg-9">
-                                                            <img src={profileImage} alt="Profile" ></img>
-                                                            <input name="profileImage" onChange={(e) => setFile(e.target.files[0])} type="file" className="form-control" id="profileImage" />
+                                                            <img src={file} alt="Profile" ></img>
+                                                            <input name="profileImage" onChange={saveFile} type="file" className="form-control" id="profileImage" />
                                                             <button as='label' onClick={uploadImage} htmlFor='profileImage' className="btn btn-primary">Upload</button>
                                                         </div>
                                                     </div>
 
                                                     <div className="row mb-3">
-                                                        <label for="fullName" className="col-md-4 col-lg-3 col-form-label">Full Name</label>
+                                                        <label htmlFor="fullName" className="col-md-4 col-lg-3 col-form-label">Full Name</label>
                                                         <div className="col-md-8 col-lg-9">
                                                             <input name="fullName" type="text" className="form-control" id="fullName" value={namee} />
                                                         </div>
                                                     </div>
 
                                                     <div className="row mb-3">
-                                                        <label for="Email" className="col-md-4 col-lg-3 col-form-label">Email</label>
+                                                        <label htmlFor="Email" className="col-md-4 col-lg-3 col-form-label">Email</label>
                                                         <div className="col-md-8 col-lg-9">
                                                             <input name="email" type="email" className="form-control" id="Email" value={email} />
                                                         </div>
@@ -234,29 +245,29 @@ function Profile() {
                                                     <form>
 
                                                         <div className="row mb-3">
-                                                            <label for="fullName" className="col-md-4 col-lg-3 col-form-label">Email Notifications</label>
+                                                            <label htmlFor="fullName" className="col-md-4 col-lg-3 col-form-label">Email Notifications</label>
                                                             <div className="col-md-8 col-lg-9">
                                                                 <div className="form-check">
                                                                     <input className="form-check-input" type="checkbox" id="changesMade" checked />
-                                                                    <label className="form-check-label" for="changesMade">
+                                                                    <label className="form-check-label" htmlFor="changesMade">
                                                                         Changes made to your account
                                                                     </label>
                                                                 </div>
                                                                 <div className="form-check">
                                                                     <input className="form-check-input" type="checkbox" id="newProducts" checked />
-                                                                    <label className="form-check-label" for="newProducts">
+                                                                    <label className="form-check-label" htmlFor="newProducts">
                                                                         Information on new products and services
                                                                     </label>
                                                                 </div>
                                                                 <div className="form-check">
                                                                     <input className="form-check-input" type="checkbox" id="proOffers" />
-                                                                    <label className="form-check-label" for="proOffers">
+                                                                    <label className="form-check-label" htmlFor="proOffers">
                                                                         Marketing and promo offers
                                                                     </label>
                                                                 </div>
                                                                 <div className="form-check">
                                                                     <input className="form-check-input" type="checkbox" id="securityNotify" checked disabled />
-                                                                    <label className="form-check-label" for="securityNotify">
+                                                                    <label className="form-check-label" htmlFor="securityNotify">
                                                                         Security alerts
                                                                     </label>
                                                                 </div>
@@ -276,21 +287,21 @@ function Profile() {
                                                 <form>
 
                                                     <div className="row mb-3">
-                                                        <label for="currentPassword" className="col-md-4 col-lg-3 col-form-label">Current Password</label>
+                                                        <label htmlFor="currentPassword" className="col-md-4 col-lg-3 col-form-label">Current Password</label>
                                                         <div className="col-md-8 col-lg-9">
                                                             <input name="password" type="password" className="form-control" id="currentPassword" />
                                                         </div>
                                                     </div>
 
                                                     <div className="row mb-3">
-                                                        <label for="newPassword" className="col-md-4 col-lg-3 col-form-label">New Password</label>
+                                                        <label htmlFor="newPassword" className="col-md-4 col-lg-3 col-form-label">New Password</label>
                                                         <div className="col-md-8 col-lg-9">
                                                             <input name="newpassword" type="password" className="form-control" id="newPassword" />
                                                         </div>
                                                     </div>
 
                                                     <div className="row mb-3">
-                                                        <label for="renewPassword" className="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
+                                                        <label htmlFor="renewPassword" className="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
                                                         <div className="col-md-8 col-lg-9">
                                                             <input name="renewpassword" type="password" className="form-control" id="renewPassword" />
                                                         </div>

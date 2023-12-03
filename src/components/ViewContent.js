@@ -10,9 +10,12 @@ import bootstrap from 'bootstrap/dist/css/bootstrap.min.css'
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useState } from 'react';
-
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ReactQuill, { Quill } from 'react-quill';
 
 function ViewContent() {
+    const [editor, setEditor] = useState(null);
     const userInfo = useSelector((state) => state.auth.userInfo)
     const dispatch = useDispatch()
     const userId = userInfo.id
@@ -31,14 +34,12 @@ function ViewContent() {
         console.log("permission =", permission);
         e.preventDefault();
         try {
-            axiosInstance.post(`/permission/create/${userId}`, { userList: username,permission_type:permission, permission_current_period_end: date }, { withCredentials: true })
+            axiosInstance.post(`/permission/create/${userId}`, { userList: username, permission_type: permission, permission_current_period_end: date }, { withCredentials: true })
                 .then((response) => {
                     console.log("init.response =", response);
-
                 })
                 .catch((error) => {
                     console.log(error);
-
                 });
         }
         catch (error) {
@@ -52,8 +53,13 @@ function ViewContent() {
             }
         }
     }
-
+    const modules = {
+        toolbar: [
+        ],
+    };
+    const formats = [    ];
     useEffect(() => {
+       
         if (subdomain === null) {
             // remove this
             // alert("subdomain is null")
@@ -123,22 +129,26 @@ function ViewContent() {
                             <div className="row mt-3">
                                 <div className="col-md-24 card-body">
                                     <label className="labels" >content</label>
-                                    <SyntaxHighlighter language="html" style={docco} wrapLongLines="true" >
-                                    {content}   
-                                    dengerouslySetInnerHTML={{ __html: content }}
-                                    </SyntaxHighlighter>
-                                    <Link className="btn btn-primary btn-block mb-4" to="/create-content">Edit content</Link>
+                                   
+                                    <ReactQuill
+                                        modules={modules}
+                                        formats={formats}
+                                        style={{ height: "auto", marginBottom: "50px",border:"none" }}
 
+                                        readOnly={true}
+                                        value={content}
+                                    />
+                                    <Link className="btn btn-primary btn-block mb-4" to="/create-content">Edit content</Link>
                                 </div>
                                 <form className="row g-3 needs-validation" onSubmit={handleSubmit} >
-                                    
+
 
                                     <div className="col-12">
                                         <label htmlFor="userlist" className="form-label">Username or Email of users</label>
                                         <div className="input-group has-validation">
                                             <div class="dropdown">
-                                                
-                                                <select  value={permission} onChange={handlePermission}  class=" btn btn-secondary dropdown-toggledropdown-menu" aria-labelledby="dropdownMenuButton1">
+
+                                                <select value={permission} onChange={handlePermission} class=" btn btn-secondary dropdown-toggledropdown-menu" aria-labelledby="dropdownMenuButton1">
                                                     <option class="dropdown-item" value="0" href="#">None</option>
                                                     <option class="dropdown-item" value="1" href="#">Read Only</option>
                                                     <option class="dropdown-item" value="2" href="#">Read and Write</option>
@@ -148,7 +158,7 @@ function ViewContent() {
                                             <div className="invalid-feedback">Please enter your username.</div>
                                         </div>
                                     </div>
-                                            <Calendar onChange={onChange} value={date} />
+                                    <Calendar onChange={onChange} value={date} />
 
                                     <div className="col-12">
                                         <button className=" w-100 button-54" type="submit">give permission</button>
