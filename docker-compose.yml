@@ -5,7 +5,5 @@ services:
     container_name: react_copypaste
     restart: unless-stopped
     ports:
-      - 80:3000
-    volumes:
-      -  ./:/app
-    command: ["npm", "run", "start"]
+      - 80:80
+    
