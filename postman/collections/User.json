@@ -1,0 +1,225 @@
+{
+	"info": {
+		"_postman_id": "e7047fb7-c24e-4a32-9506-a4adc8822782",
+		"name": "User",
+		"description": "User create using API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "27612305-e7047fb7-c24e-4a32-9506-a4adc8822782"
+	},
+	"item": [
+		{
+			"name": "Sign Up user",
+			"id": "c7f58647-18a5-4676-8dc3-695b1497f8bc",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"fenilnakrani39@gmail.com\",\r\n    \"username\":\"feniln36\",\r\n    \"name\":\"fenil nakrani\",\r\n    \"password\":\"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/sign-up",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"sign-up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login User",
+			"id": "a0acc79f-4200-46bb-ad75-9f4a17647bba",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"fenilnakrani39@gmail.com\",\r\n    \"username\":\"feniln36\",\r\n    \"name\":\"fenil nakrani\",\r\n    \"password\":\"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/sign-in",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"sign-in"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Password",
+			"id": "13a189df-2cd0-46e8-93b7-62012b644133",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"password\":\"new password\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/user/:userId/updatePassword",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						":userId",
+						"updatePassword"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "",
+							"description": "userid "
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update User",
+			"id": "698d0ef6-caa5-40bb-9086-760a00456dc1",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"update name\",\r\n    \"email\": \"fenil1@gmail.com\",\r\n    \"username\": \"feniln3\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/user/:userId/updateUser",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						":userId",
+						"updateUser"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "64dd7aff4d85ca1e10a2104a"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Profile",
+			"id": "f9e38ffa-63f0-4567-a7d4-fb45805870e5",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/user/profile/:userId",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"profile",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": " 64e01b03f059726416ea6f0c"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vrify Email",
+			"id": "cd811160-2b01-424b-8c38-1f01449d5f2e",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/auth/varify/email/:token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"auth",
+						"varify",
+						"email",
+						":token"
+					],
+					"variable": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJpZCI6IjY0ZTAxYWJkZjA1OTcyNjQxNmVhNmYwOCIsInVzZXJuYW1lIjoiZmVuaWwgbmFrcmFuaSIsImVtYWlsIjoiZmVuaWxAZ21haWwuY29tIiwicHJlbWl1bV91c2VyIjp0cnVlfSwiaWF0IjoxNjk2MTc3MTY1LCJleHAiOjE2OTYxODA3NjV9.8VhJPR1Rc74n1pRr25W0jA952FZRwjAqJpZzt8CYENc"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
