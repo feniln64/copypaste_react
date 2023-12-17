@@ -15,7 +15,7 @@ import Test from './components/Test';
 import sendPageView from './api/googleGA';
 function App() {
   useEffect(() => {
-    sendPageView(window.location.pathname + window.location.search, "homepage");
+    sendPageView(window.location.pathname + window.location.search, "App page");
   }, []);
   return (
     <Routes>
