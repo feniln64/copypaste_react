@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import ReactQuill, { Quill } from 'react-quill';
+import newEvent from '../api/postHog';
 
 function ViewContent() {
     const [editor, setEditor] = useState(null);
@@ -59,7 +60,7 @@ function ViewContent() {
     };
     const formats = [    ];
     useEffect(() => {
-       
+       newEvent("view content", "view content", "/view-content");
         if (subdomain === null) {
             // remove this
             // alert("subdomain is null")

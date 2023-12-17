@@ -10,7 +10,7 @@ import { addNewUser } from '../store/slices/authSlice'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../assets/button.css'
 import '../assets/container.css'
-
+import newEvent from '../api/postHog';
 export default function Login() {
     const auth = useSelector((state) => state.auth.value)
     const dispatch = useDispatch()
@@ -33,6 +33,7 @@ export default function Login() {
 
             if (res.status === 200) {
                 // alert.success("Login Successful");
+                newEvent("login", "logged in", "/login");
                 toast.success('Successfully Login!')
                 axiosInstance.defaults.headers.common['Authorization'] = "Bearer " + res.data.accessToken;
                 const userInfo = res.data.userInfo

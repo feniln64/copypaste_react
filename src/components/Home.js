@@ -5,7 +5,7 @@ import axiosInstance from '../api/api'
 import psl from 'psl';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import sendPageView from '../api/googleGA';
-
+import newEvent from '../api/postHog';
 function Home() {
 
   var parsed = psl.parse(window.location.hostname);
@@ -17,6 +17,7 @@ function Home() {
   useEffect(() => {
     console.log("subdomain is " + parsed.sld)
     sendPageView(window.location.pathname + window.location.search, "homepage");
+    newEvent("homepage", "homepage", "/homepage");
     subdomain = parsed.sld;
     if (parsed.sld === null) {
       subdomain = "";

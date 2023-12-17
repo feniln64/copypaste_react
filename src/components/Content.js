@@ -1,4 +1,3 @@
-import CodeEditor from "@uiw/react-textarea-code-editor";
 import { useState } from "react";
 import React from "react";
 import psl from 'psl';

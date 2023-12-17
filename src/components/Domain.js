@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { updateDomain } from '../store/slices/domainSlice'
 import { toast } from 'react-hot-toast'
 import { useEffect } from 'react'
+import newEvent from '../api/postHog'
 function Domain() {
 
     const [domain, setDomain] = useState("")
@@ -44,6 +45,7 @@ function Domain() {
         console.log("handleQR")
     }
     useEffect(() => {
+        newEvent("domain", "view domain", "/domain");
         try {
              axiosInstance.get(`/subdomain/getsubdomain/${userId}`, {}, { withCredentials: true })
              

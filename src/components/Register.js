@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import axiosInstance from '../api/api';
 import 'bootstrap/dist/css/bootstrap.min.css'
+import newEvent from '../api/postHog';
 const notify = (message) => toast('Here is your toast.'+message);
 
 const Register = () => {
@@ -33,6 +34,7 @@ const Register = () => {
             if (res.status === 201) {
 
                 toast.success('Registered Successfully')
+                newEvent("register", "registered", "/register");
                 navigate("/login");
             }
         } catch (error) {
