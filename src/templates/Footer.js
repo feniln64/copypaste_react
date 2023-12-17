@@ -8,6 +8,7 @@ const Footer = () => {
             <footer id="footer"  className="footer py-4 px-xl-5 bg-primary" style={{marginLeft:"auto",height:"80px"}}>
                 <div className="text-white mb-3 mb-md-0">
                     Copyright © 2020. All rights reserved.
+                    v2.0.0
                 </div>
 
                 <div>
