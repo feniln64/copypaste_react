@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import axiosInstance from '../api/api'
 import psl from 'psl';
 import 'bootstrap/dist/css/bootstrap.min.css'
+import sendPageView from '../api/googleGA';
 
 function Home() {
 
@@ -15,6 +16,7 @@ function Home() {
 
   useEffect(() => {
     console.log("subdomain is " + parsed.sld)
+    sendPageView(window.location.pathname + window.location.search, "homepage");
     subdomain = parsed.sld;
     if (parsed.sld === null) {
       subdomain = "";

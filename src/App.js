@@ -12,11 +12,11 @@ import Domain from './components/Domain';
 import ViewContent from './components/ViewContent';
 import Content from './components/Content';
 import Test from './components/Test';
-import ReactGA from 'react-ga';
-ReactGA.initialize('G-7PR5M4K0RF');
-ReactGA.initialize('UA-000000-01');
-ReactGA.pageview(window.location.pathname + window.location.search);
+import sendPageView from './api/googleGA';
 function App() {
+  useEffect(() => {
+    sendPageView(window.location.pathname + window.location.search, "homepage");
+  }, []);
   return (
     <Routes>
         <Route path="/" element={<Layout />} >
