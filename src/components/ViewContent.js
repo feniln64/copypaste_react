@@ -14,23 +14,26 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import ReactQuill, { Quill } from 'react-quill';
 import newEvent from '../api/postHog';
+import { socket } from "../api/socket";
 
 function ViewContent() {
     const [editor, setEditor] = useState(null);
     const userInfo = useSelector((state) => state.auth.userInfo)
     const dispatch = useDispatch()
     const userId = userInfo.id
-    const [hasContent, sethasContent] = React.useState(false)
-    const [permission, setPermission] = React.useState(0)
-    const [content, setContent] = React.useState(`Edit me!`)
+    
+    const [hasContent, sethasContent] =useState(false)
+    const [permission, setPermission] =useState(0)
+    const [content, setContent] =useState(`Edit me!`)
     var parsed = psl.parse(window.location.hostname);
     const subdomain = parsed.subdomain
-    const [date, onChange] = useState(new Date());
+    const [date, setDate] = useState(new Date());
 
     const [username, setUserName] = useState("");
     const handlePermission = (e) => {
         setPermission(e.target.value);
     }
+    
     const handleSubmit = (e) => {
         console.log("permission =", permission);
         e.preventDefault();
@@ -60,22 +63,30 @@ function ViewContent() {
     };
     const formats = [    ];
     useEffect(() => {
+        
        newEvent("view content", "view content", "/view-content");
+
+         socket.emit('join_room', userInfo.username);
+         socket.on('message', (data) => {
+            console.log("data from server",data);
+            setContent(data.content);
+        });
+        
         if (subdomain === null) {
             // remove this
             // alert("subdomain is null")
             try {
                 axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
                     .then((response) => {
-                        console.log("init.response =", response);
+                        // console.log("init.response =", response);
                         setContent(response.data);
                         sethasContent(true)
-                        console.log("hasContent =", hasContent)
+                        // console.log("hasContent =", hasContent)
                     })
                     .catch((error) => {
                         console.log(error);
                         sethasContent(false)
-                        console.log("hasContent =", hasContent)
+                        // console.log("hasContent =", hasContent)
                     });
             }
             catch (error) {
@@ -94,7 +105,7 @@ function ViewContent() {
             try {
                 axiosInstance.post(`/init`, { subdomain: subdomain })
                     .then((response) => {
-                        console.log("init.response =", response);
+                        // console.log("init.response =", response);
                         setContent(response.data);
                     })
                     .catch((error) => {
@@ -112,8 +123,8 @@ function ViewContent() {
                 }
             }
         }
-        console.log(parsed.sld);
-        console.log("subdomain is " + parsed.sld)
+        // console.log(parsed.sld);
+        // console.log("subdomain is " + parsed.sld)
 
     }, []);
     return (
@@ -147,19 +158,19 @@ function ViewContent() {
                                     <div className="col-12">
                                         <label htmlFor="userlist" className="form-label">Username or Email of users</label>
                                         <div className="input-group has-validation">
-                                            <div class="dropdown">
+                                            <div className="dropdown">
 
-                                                <select value={permission} onChange={handlePermission} class=" btn btn-secondary dropdown-toggledropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                                    <option class="dropdown-item" value="0" href="#">None</option>
-                                                    <option class="dropdown-item" value="1" href="#">Read Only</option>
-                                                    <option class="dropdown-item" value="2" href="#">Read and Write</option>
+                                                <select value={permission} onChange={handlePermission} className=" btn btn-secondary dropdown-toggledropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                                    <option className="dropdown-item" value="0" href="#">None</option>
+                                                    <option className="dropdown-item" value="1" href="#">Read Only</option>
+                                                    <option className="dropdown-item" value="2" href="#">Read and Write</option>
                                                 </select>
                                             </div>
                                             <input type="text" name="username" className="form-control" value={username} id="userlist" onChange={e => setUserName(e.target.value)} required />
                                             <div className="invalid-feedback">Please enter your username.</div>
                                         </div>
                                     </div>
-                                    <Calendar onChange={onChange} value={date} />
+                                    <Calendar onChange={setDate} value={date} />
 
                                     <div className="col-12">
                                         <button className=" w-100 button-54" type="submit">give permission</button>

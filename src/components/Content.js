@@ -5,12 +5,14 @@ import { useEffect } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import axiosInstance from "../api/api";
-import { toast } from "react-hot-toast";
+import toast, { Toaster } from 'react-hot-toast';
 import { useSelector, useDispatch } from "react-redux";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import "../assets/content.css";
-
+import { Redis } from "@upstash/redis"
+import { socket } from "../api/socket";
+import { Link, useNavigate } from "react-router-dom";
 
 function Content() {
     var parsed = psl.parse(window.location.hostname);
@@ -19,7 +21,10 @@ function Content() {
     const [isChecked, setIsChecked] = useState(false);
     const [content, setContent] = useState("");
     const userInfo = useSelector((state) => state.auth.userInfo);
+    const navigate = useNavigate()
+
     const userId = userInfo.id;
+    const username = userInfo.username;
     const modules = {
         toolbar: [
             [{ header: [1, 2, false] }],
@@ -54,11 +59,11 @@ function Content() {
 
     const handlechange = (value) => {
         setContent(value);
-        // setIsChecked(!isChecked)
+        setIsChecked(!isChecked)
         //remove this console.log after testing
-        console.log(value, isChecked);
+        // console.log(value, isChecked);
     };
-   
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -66,16 +71,14 @@ function Content() {
             content: content,
             is_protected: isChecked,
         };
-        console.log(contentData);
-        // setContent("");
-        // isChecked("");
+        socket.emit("message",({room:username, message:contentData}));
         try {
-            const res = await axiosInstance.post(`/content/create/${userId}`,contentData,{ withCredentials: true });
+            const res = await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true });
             // remove this console.log after testing
-            console.log(res);
+            // console.log(res);
             if (res.status === 201) {
                 toast.success("data added Successfully");
-                // navigate("/login");
+                navigate("/content");
             }
         } catch (error) {
             if (error.response) {
@@ -90,26 +93,26 @@ function Content() {
     };
 
     useEffect(() => {
-      
+        // socket.emit('join_room', username);
         if (subdomain === null) {
             // remove this
             // alert("subdomain is null")
             try {
                 axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
                     .then((response) => {
-                        console.log("init.response =", response);
+                        // console.log("init.response =", response);
                         setContent(response.data);
-                        console.log("hasContent =", hasContent)
+                        // console.log("hasContent =", hasContent)
                     })
                     .catch((error) => {
                         console.log(error);
-                        console.log("hasContent =", hasContent)
+                        // console.log("hasContent =", hasContent)
                     });
             }
             catch (error) {
                 if (error.response) {
                     console.log(error.response);
-                    
+
                 } else if (error.request) {
                     console.log("network error");
                 } else {
@@ -122,7 +125,7 @@ function Content() {
             try {
                 axiosInstance.post(`/init`, { subdomain: subdomain })
                     .then((response) => {
-                        console.log("init.response =", response);
+                        // console.log("init.response =", response);
                         setContent(response.data);
                     })
                     .catch((error) => {
@@ -143,6 +146,10 @@ function Content() {
     }, []);
     return (
         <>
+            <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
             <div id="main" className="services" style={{ marginLeft: "auto", height: "vh", width: "auto" }}>
                 <div className="container" data-aos="fade-up" style={{ width: "auto" }}>
                     <section className=" card-body ">
@@ -184,13 +191,13 @@ function Content() {
                                     onChange={(event, editor) => {
                                         const data = editor.getData();
                                         setContent(data)
-                                        console.log({ data });
+                                        // console.log({ data });
                                     }}
                                     onBlur={(event, editor) => {
-                                        console.log("Blur.", editor);
+                                        // console.log("Blur.", editor);
                                     }}
                                     onFocus={(event, editor) => {
-                                        console.log("Focus.", editor);
+                                        // console.log("Focus.", editor);
                                     }}
                                 />
                             </div>
