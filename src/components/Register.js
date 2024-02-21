@@ -24,18 +24,18 @@ const Register = () => {
             password: password,
             name: name
         };
-        setEmail("");
         setPassword("");
-        setuserName("");
         try {
             const res = await axiosInstance.post("/auth/sign-up", userData, { withCredentials: true });
             // remove this console.log after testing
             console.log(res);
-            if (res.status === 201) {
+            if (res.status === 200) {
 
-                toast.success('Registered Successfully')
                 newEvent("register", "registered", "/register");
-                navigate("/login");
+                navigate("/login",{
+                    state:{message: 'Registered Successfully'}
+                  });
+                // toast.success('Registered Successfully')
             }
         } catch (error) {
             if (error.response) {

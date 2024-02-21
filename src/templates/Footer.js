@@ -1,14 +1,20 @@
 import { Outlet } from "react-router-dom";
 import React from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import json from '../../package.json'
 // import '../assets/container.css'
 const Footer = () => {
+    const version = json.version;
+    const description = json.description;
     return (
         <>
             <footer id="footer"  className="footer py-4 px-xl-5 bg-primary" style={{marginLeft:"auto",height:"80px"}}>
                 <div className="text-white mb-3 mb-md-0">
                     Copyright © 2020. All rights reserved.
-                    v2.0.1
+                    {version}
+                </div>
+                <div className="text-white mb-3 mb-md-0">
+                    {description}
                 </div>
 
                 <div>
