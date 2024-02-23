@@ -24,7 +24,7 @@ function Home() {
     }
     else {
       try {
-        axiosInstance.get(`/init/${subdomain}`)
+        axiosInstance.get(`/init/getdata/${subdomain}`)
           .then((response) => {
             console.log("init.response =", response);
             setContent(response.data.content);

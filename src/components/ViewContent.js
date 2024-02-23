@@ -15,16 +15,20 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import ReactQuill, { Quill } from 'react-quill';
 import newEvent from '../api/postHog';
 import { socket } from "../api/socket";
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Card from 'react-bootstrap/Card';
 
 function ViewContent() {
     const [editor, setEditor] = useState(null);
     const userInfo = useSelector((state) => state.auth.userInfo)
     const dispatch = useDispatch()
     const userId = userInfo.id
-    
-    const [hasContent, sethasContent] =useState(false)
-    const [permission, setPermission] =useState(0)
-    const [content, setContent] =useState(`Edit me!`)
+
+    const [hasContent, sethasContent] = useState(false)
+    const [permission, setPermission] = useState(0)
+    const [content, setContent] = useState(`Edit me!`)
     var parsed = psl.parse(window.location.hostname);
     const subdomain = parsed.subdomain
     const [date, setDate] = useState(new Date());
@@ -33,7 +37,7 @@ function ViewContent() {
     const handlePermission = (e) => {
         setPermission(e.target.value);
     }
-    
+
     const handleSubmit = (e) => {
         console.log("permission =", permission);
         e.preventDefault();
@@ -61,17 +65,17 @@ function ViewContent() {
         toolbar: [
         ],
     };
-    const formats = [    ];
+    const formats = [];
     useEffect(() => {
-        
-       newEvent("view content", "view content", "/view-content");
 
-         socket.emit('join_room', userInfo.username);
-         socket.on('message', (data) => {
-            console.log("data from server",data);
+        newEvent("view content", "view content", "/view-content");
+
+        socket.emit('join_room', userInfo.username);
+        socket.on('message', (data) => {
+            console.log("data from server", data);
             setContent(data.content);
         });
-        
+
         if (subdomain === null) {
             // remove this
             // alert("subdomain is null")
@@ -141,11 +145,11 @@ function ViewContent() {
                             <div className="row mt-3">
                                 <div className="col-md-24 card-body">
                                     <label className="labels" >content</label>
-                                   
+
                                     <ReactQuill
                                         modules={modules}
                                         formats={formats}
-                                        style={{ height: "auto", marginBottom: "50px",border:"none" }}
+                                        style={{ height: "auto", marginBottom: "50px", border: "none" }}
 
                                         readOnly={true}
                                         value={content}
@@ -184,8 +188,27 @@ function ViewContent() {
                 </>
             ) : (
                 <>
-                    <h1>has no content</h1>
-                    <Link className="btn btn-primary btn-block mb-4" to="/create-content">Content</Link>
+                    <Container style={{ minHeight: "715px", marginTop: "50px" }}>
+                        <Row >
+                           
+                                <Col>
+                                    <Card style={{ width: '18rem' }}>
+                                        <Card.Body>
+                                            <Card.Title>No Content</Card.Title>
+                                            <Card.Text>
+                                                Add new content clieck on the button below
+                                            </Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                           
+                           
+                        </Row>
+                        <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
+                         
+                            
+                    </Container>
+
                 </>
             )
             }

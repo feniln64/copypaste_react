@@ -171,10 +171,7 @@ function Content() {
                                     onChange={(e) => setIsChecked(e.target.checked)}
                                 />
                             </div>
-                            {/* <div className="form-outline quill-editor-full mb-4">
-                                <label className="form-label" htmlFor="form4Example3">Message</label>
-                                <ReactQuill theme="snow" value={content} onChange={value => handlechange(value)} modules={modules} formats={formats} />
-                            </div> */}
+                        
                             <div
                                 id="editor-container"
                                 value={content}
