@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
-// import "../assets/login.css"
 import toast, { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react'
 import axiosInstance from '../api/api'
 import { Link, useNavigate,useLocation } from 'react-router-dom'
 // import toast, { Toaster } from 'react-hot-toast';
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { addNewUser } from '../store/slices/authSlice'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../assets/button.css'
@@ -14,7 +13,6 @@ import newEvent from '../api/postHog';
 export default function Login() {
     const location = useLocation();
     const message = location.state?.message;
-    const auth = useSelector((state) => state.auth.value)
     const dispatch = useDispatch()
     const navigate = useNavigate();
     const [email, setEmail] = useState("");

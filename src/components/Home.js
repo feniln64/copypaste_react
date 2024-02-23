@@ -1,24 +1,36 @@
-import React, { useState } from 'react'
-// import "../assets/home.css"
+import React,{useState} from 'react'
 import { useEffect } from 'react';
 import axiosInstance from '../api/api'
 import psl from 'psl';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import sendPageView from '../api/googleGA';
 import newEvent from '../api/postHog';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import { Card } from 'react-bootstrap';
+import toast, { Toaster } from 'react-hot-toast';
+import { socket } from "../api/socket";
+
 function Home() {
 
   var parsed = psl.parse(window.location.hostname);
   var subdomain = "";
 
-  const [content, setContent] = React.useState("");
-  const [hascontent, sethasContent] = React.useState(false);
+  const [content, setContent] = useState("");
+  const [title, setTitle] = useState("");
+  const [hascontent, sethasContent] = useState(false);
 
   useEffect(() => {
     console.log("subdomain is " + parsed.sld)
     sendPageView(window.location.pathname + window.location.search, "homepage");
     newEvent("homepage", "homepage", "/homepage");
     subdomain = parsed.sld;
+    socket.emit('join_room', subdomain);
+        socket.on('message', (data) => {
+            console.log("data from server", data);
+            setContent(data.content);
+        });
     if (parsed.sld === null) {
       subdomain = "";
     }
@@ -28,10 +40,12 @@ function Home() {
           .then((response) => {
             console.log("init.response =", response);
             setContent(response.data.content);
+            setTitle(response.data.title);
             if (response.data.content !== null) sethasContent(true); else sethasContent(false);
           })
           .catch((error) => {
-            console.log(error);
+            toast.error(error.response.data.message);
+            console.log(error);                //here
           });
       }
       catch (error) {
@@ -50,7 +64,7 @@ function Home() {
 
   return (
     <>
-
+    <div><Toaster/></div>
 
 
       {!hascontent && (
@@ -109,9 +123,38 @@ function Home() {
         </>
       )}
       {hascontent && (
-        <>
+
+
+        <Container >
+          <Row>
+            <Col >
+
+              <Card>
+                <Card.Body>
+                  <Card.Title>{title}</Card.Title>
+                  <Card.Text>
+                    {content}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+              
+            </Col>
+            <Col >
+
+              <Card>
+                <Card.Body>
+                  <Card.Title>{title}</Card.Title>
+                  <Card.Text>
+                    {content}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+              
+            </Col>
+          </Row>
           <p>{content}</p>
-        </>
+        </Container>
+
       )}
     </>
   )

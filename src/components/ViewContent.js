@@ -1,18 +1,12 @@
 import React from 'react'
-import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { Link } from "react-router-dom";
-import psl from 'psl';
-import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { useEffect } from 'react';
 import axiosInstance from '../api/api'
-import { useSelector, useDispatch } from 'react-redux'
-import bootstrap from 'bootstrap/dist/css/bootstrap.min.css'
+import { useSelector } from 'react-redux'
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useState } from 'react';
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import ReactQuill, { Quill } from 'react-quill';
+import ReactQuill from 'react-quill';
 import newEvent from '../api/postHog';
 import { socket } from "../api/socket";
 import Container from 'react-bootstrap/Container';
@@ -21,16 +15,14 @@ import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 
 function ViewContent() {
-    const [editor, setEditor] = useState(null);
+
     const userInfo = useSelector((state) => state.auth.userInfo)
-    const dispatch = useDispatch()
     const userId = userInfo.id
 
     const [hasContent, sethasContent] = useState(false)
+    const [title, setTitle] = useState("")
     const [permission, setPermission] = useState(0)
     const [content, setContent] = useState(`Edit me!`)
-    var parsed = psl.parse(window.location.hostname);
-    const subdomain = parsed.subdomain
     const [date, setDate] = useState(new Date());
 
     const [username, setUserName] = useState("");
@@ -76,14 +68,12 @@ function ViewContent() {
             setContent(data.content);
         });
 
-        if (subdomain === null) {
-            // remove this
-            // alert("subdomain is null")
             try {
                 axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
                     .then((response) => {
                         // console.log("init.response =", response);
-                        setContent(response.data);
+                        setContent(response.data.content);
+                        setTitle(response.data.title);
                         sethasContent(true)
                         // console.log("hasContent =", hasContent)
                     })
@@ -104,32 +94,6 @@ function ViewContent() {
                 }
             }
 
-        }
-        else {
-            try {
-                axiosInstance.post(`/init`, { subdomain: subdomain })
-                    .then((response) => {
-                        // console.log("init.response =", response);
-                        setContent(response.data);
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-            }
-            catch (error) {
-                if (error.response) {
-                    console.log(error.response);
-                    alert(error.response.data.message);
-                } else if (error.request) {
-                    console.log("network error");
-                } else {
-                    console.log(error);
-                }
-            }
-        }
-        // console.log(parsed.sld);
-        // console.log("subdomain is " + parsed.sld)
-
     }, []);
     return (
         <>
@@ -144,7 +108,7 @@ function ViewContent() {
                             </div>
                             <div className="row mt-3">
                                 <div className="col-md-24 card-body">
-                                    <label className="labels" >content</label>
+                                    <label className="labels" >{title}</label>
 
                                     <ReactQuill
                                         modules={modules}

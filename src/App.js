@@ -9,8 +9,7 @@ import Profile from './components/Profile';
 import Error from './templates/Error';
 import Domain from './components/Domain';
 import ViewContent from './components/ViewContent';
-import Content from './components/Content';
-import Test from './components/Test';
+import Content from './components/EditContent';
 import sendPageView from './api/googleGA';
 import { ref, set,onValue } from "firebase/database";
 
@@ -39,7 +38,6 @@ function App() {
         <Route path={"/add-domain"} element={<Domain/>} />
         <Route path={"/content"} element={<ViewContent/>} />
         <Route path={"/create-content"} element={<Content/>} />
-        <Route path={"/test"} element={<Test/>} />
         <Route path={"*"} element={<Error/>} />
 
         </Route>

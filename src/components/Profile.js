@@ -6,7 +6,6 @@ import axiosInstance from '../api/api'
 import { toast } from 'react-hot-toast'
 import 'bootstrap/dist/css/bootstrap.min.css'
 var AWS = require('aws-sdk');
-var Jimp = require('jimp');
 function Profile() {
     const [file, setFile] = useState(null);
     const [email, setEmail] = useState()
