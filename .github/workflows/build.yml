@@ -1,7 +1,7 @@
 name: build-and-deploy
 on:
   push:
-    branches: ['main']
+    branches: ['main', 'testing']
 jobs:
   # docker-build-push:
   #   runs-on: ubuntu-latest
@@ -60,5 +60,7 @@ jobs:
         script: |
           ls -al
           cd copypaste_react
-          docker-compose up -d --build
+          ls
+          git pull
+          docker compose up -d --build
           docker image prune -f

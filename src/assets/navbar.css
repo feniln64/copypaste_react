@@ -1,3 +1,7 @@
 .underline {
  border-bottom-width: 2px;
 }
+.nav-link {
+ color: #fff;
+ font-size: large;
+}

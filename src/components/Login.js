@@ -1,16 +1,18 @@
 import React, { useState } from 'react'
-// import "../assets/login.css"
+import toast, { Toaster } from 'react-hot-toast';
+import { useEffect } from 'react'
 import axiosInstance from '../api/api'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate,useLocation } from 'react-router-dom'
 // import toast, { Toaster } from 'react-hot-toast';
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { addNewUser } from '../store/slices/authSlice'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../assets/button.css'
 import '../assets/container.css'
-
+import newEvent from '../api/postHog';
 export default function Login() {
-    const auth = useSelector((state) => state.auth.value)
+    const location = useLocation();
+    const message = location.state?.message;
     const dispatch = useDispatch()
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
@@ -26,12 +28,13 @@ export default function Login() {
         setPassword("")
 
         try {
-            const res = await axiosInstance.post("/auth/login", userData, { withCredentials: true });
+            const res = await axiosInstance.post("/auth/sign-in", userData, { withCredentials: true });
             // remove this console.log after testing
 
             if (res.status === 200) {
                 // alert.success("Login Successful");
-                // toast.success('Successfully Login!')
+                newEvent("login", "logged in", "/login");
+                toast.success('Successfully Login!')
                 axiosInstance.defaults.headers.common['Authorization'] = "Bearer " + res.data.accessToken;
                 const userInfo = res.data.userInfo
                 console.log("from data", userInfo);
@@ -39,38 +42,19 @@ export default function Login() {
                 navigate("/");
             }
         } catch (error) {
-            if (error.response) {
-                console.log(error.response);
-                // toast.error(error.response.data.message)
-            } else if (error.request) {
-                // toast.error('network error')
-                console.log("network error");
-            } else {
-                // toast.error(error)
-                console.log("error", error);
-            }
+            toast.error(error.response.data.message,{icon:'👎'})
         }
     };
+
+    useEffect(() => {
+        if (message) {
+            toast.success(message)
+        }
+    }, [message])
+
     return (
         <>
-            {/* <div><Toaster position="bottom-left"
-    reverseOrder={false}/></div>
-
-    <div className='container'>
-        <div className='window'>
-            <div className='overlay'></div>
-            <form className='content' onSubmit={handleSubmit}>
-                <div className='welcome'>Hello There!</div>
-                <div className='subtitle'>Before using our services you need to Log In.</div>
-                <div className='input-fields'>
-                    <input id="email" type='email' placeholder='Email' value={email} onChange={e=>setEmail(e.target.value)} className='input-line full-width'></input>
-                    <input id="password" type='password' placeholder='Password' value={password} onChange={e=>setPassword(e.target.value)} className='input-line full-width'></input>
-                </div>
-                <div className='spacing'>or continue with <span className='highlight'>Facebook</span></div>
-                <div><button className='ghost-round full-width'>Login</button></div>
-            </form>
-        </div>
-    </div> */}
+           <div><Toaster/></div>
             <section className="container" style={{height:"85vh"}} >
 
                 <section className="section register  d-flex flex-column align-items-center justify-content-center py-4">
@@ -125,7 +109,6 @@ export default function Login() {
 
             </section>
         </>
-
     )
 }
 
