@@ -164,7 +164,7 @@ function ViewContent() {
                 <Container  >
                     <Row  >
                         <Col className=' d-flex justify-content-cente'>
-                        <button className="btn btn-primary" onClick={() => setOpen(o => !o)}> <FaPlus /> Create New Content </button>
+                            <button className="btn btn-primary" onClick={() => setOpen(o => !o)}> <FaPlus /> Create New Content </button>
                             <Popup open={open} closeOnDocumentClick onClose={closeModal}>
                                 <Form onSubmit={handleCreateNewContent}>
                                     <InputGroup className="mb-3">
@@ -219,31 +219,32 @@ function ViewContent() {
                                         <label className="labels" >{title}</label>
                                         <Container style={{ minHeight: "715px", marginTop: "50px" }}>
                                             <Row >
-                                            {content.map((e) => (
-                                                <Col>
-                                                    <Card key={content._id} style={{ width: '18rem' }}>
-                                                        <Card.Body>
-                                                            <Card.Title>{e.title}</Card.Title>
-                                                            <Card.Text>
-                                                                {e.content}
-                                                            </Card.Text>
-                                                        </Card.Body>
-                                                    </Card>
-                                                </Col>
-                                            ))}
+                                                {content.map((e) => (
+                                                    <Col>
+                                                        <Card key={content._id} style={{ width: '18rem' }}>
+                                                            <Card.Body>
+                                                                <Card.Title>{e.title}</Card.Title>
+                                                                <Card.Text>
+                                                                    <ReactQuill
+                                                                        modules={modules}
+                                                                        formats={formats}
+                                                                        style={{ height: "auto", marginBottom: "50px", border: "none" }}
+
+                                                                        readOnly={true}
+                                                                        value={e.content}
+                                                                    />
+
+                                                                </Card.Text>
+                                                            </Card.Body>
+                                                        </Card>
+                                                    </Col>
+                                                ))}
                                             </Row>
                                             <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
 
 
                                         </Container>
-                                        {/* <ReactQuill
-                                            modules={modules}
-                                            formats={formats}
-                                            style={{ height: "auto", marginBottom: "50px", border: "none" }}
 
-                                            readOnly={true}
-                                            value={content}
-                                        /> */}
                                     </div>
                                     <Link className="btn btn-primary btn-block mb-4" to="/create-content">Edit content</Link>
                                 </div>

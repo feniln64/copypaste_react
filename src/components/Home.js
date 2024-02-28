@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import axiosInstance from '../api/api'
 import psl from 'psl';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import sendPageView from '../api/googleGA';
 import newEvent from '../api/postHog';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -23,16 +22,15 @@ function Home() {
   const [hascontent, sethasContent] = useState(false);
 
   useEffect(() => {
-    console.log("subdomain is " + parsed.sld)
-    sendPageView(window.location.pathname + window.location.search, "homepage");
+    console.log("subdomain is " + parsed.subdomain)
     newEvent("homepage", "homepage", "/homepage");
-    subdomain = parsed.sld;
+    subdomain = parsed.subdomain;
     socket.emit('join_room', subdomain);
         socket.on('message', (data) => {
             console.log("data from server", data);
             setContent(data.content);
         });
-    if (parsed.sld === null) {
+    if (subdomain === null) {
       subdomain = "";
     }
     else {
