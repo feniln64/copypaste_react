@@ -11,12 +11,13 @@ import Col from 'react-bootstrap/Col';
 import { Card } from 'react-bootstrap';
 import toast, { Toaster } from 'react-hot-toast';
 import { socket } from "../api/socket";
-
+import { TailSpin } from 'react-loader-spinner'
+import { Link } from 'react-router-dom';
 function Home() {
 
   var parsed = psl.parse(window.location.hostname);
   var subdomain = "";
-
+  const [isLoading, setLoading] = useState(true)
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [hascontent, sethasContent] = useState(false);
@@ -59,14 +60,13 @@ function Home() {
         }
       }
     }
+    setLoading(false);
   }, []);
 
 
   return (
     <>
     <div><Toaster/></div>
-
-
       {!hascontent && (
         <>
           <section id="hero" className="d-flex align-items-center" >
@@ -125,37 +125,27 @@ function Home() {
       {hascontent && (
 
 
-        <Container >
-          <Row>
-            <Col >
+<Container style={{ minHeight: "715px", marginTop: "50px" }}>
+<Row >
+{content.map((e) => (
+    <Col>
+        <Card key={content._id} style={{ width: '18rem' }}>
+            <Card.Body>
+                <Card.Title>{e.title}</Card.Title>
+                <Card.Text>
+                    {e.content}
+                </Card.Text>
+            </Card.Body>
+        </Card>
+    </Col>
+))}
+</Row>
+<Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
 
-              <Card>
-                <Card.Body>
-                  <Card.Title>{title}</Card.Title>
-                  <Card.Text>
-                    {content}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-              
-            </Col>
-            <Col >
 
-              <Card>
-                <Card.Body>
-                  <Card.Title>{title}</Card.Title>
-                  <Card.Text>
-                    {content}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-              
-            </Col>
-          </Row>
-          <p>{content}</p>
-        </Container>
-
+</Container>
       )}
+      
     </>
   )
 }

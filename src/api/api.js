@@ -2,8 +2,14 @@ import axios from "axios";
 import { useSelector, useDispatch } from 'react-redux'
 import { updateUser } from '../store/slices/authSlice'
 
+let baseURL  = ""
+if (process.env.NODE_ENV === 'dev') {
+  baseURL = "http://localhost:9000"
+} else {
+  baseURL = "https://node.cpypst.online"
+}
 const axiosInstance = axios.create({
-  baseURL: "https://node.cpypst.online",
+  baseURL: baseURL,
   headers: {
     "Content-Type": "application/json",
   },
