@@ -13,7 +13,17 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
-
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { FaPlus } from "react-icons/fa6";
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
+import '../assets/popup.css';
+import toast, { Toaster } from 'react-hot-toast';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { Button } from 'react-bootstrap';
+import Form from 'react-bootstrap/Form';
+import CardView from '../views/CardView';
 function ViewContent() {
 
     const userInfo = useSelector((state) => state.auth.userInfo)
@@ -24,12 +34,51 @@ function ViewContent() {
     const [permission, setPermission] = useState(0)
     const [content, setContent] = useState(`Edit me!`)
     const [date, setDate] = useState(new Date());
-
+    const [newContent, setNewContent] = useState("");
+    const [newTitle, setNewTitle] = useState("");
+    const [newIsChecked, setNewIsChecked] = useState(false);
     const [username, setUserName] = useState("");
+    const [open, setOpen] = useState(false);
+    const [currentId, setCurrentId] = useState("");
+    const closeModal = () => setOpen(false);
     const handlePermission = (e) => {
         setPermission(e.target.value);
     }
+    const modules = {
+        toolbar: [
+        ],
+    };
+    const formats = [];
+    const openModal = (event) => {
+        console.log("event.target.id =", event);
+        console.log("text", event.target.innerHTML);
+        setOpen(o => !o)
+        setCurrentId(event.target.id)
 
+    };
+    const handleCreateNewContent = async (e) => {
+        e.preventDefault();
+        const contentData = {
+            content: newContent,
+            is_protected: newIsChecked,
+            title: newTitle
+        };
+        setNewContent("")
+        setNewTitle("")
+        setNewIsChecked(false)
+        console.log(contentData);
+        socket.emit("message", ({ room: username, message: contentData }));
+        try {
+            const res = await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true });
+            if (res.status === 201) {
+                toast.success("data added Successfully");
+                closeModal();
+            }
+        } catch (error) {
+            toast.error(error.response.data.message);
+        }
+        getinitialData();
+    };
     const handleSubmit = (e) => {
         console.log("permission =", permission);
         e.preventDefault();
@@ -53,11 +102,33 @@ function ViewContent() {
             }
         }
     }
-    const modules = {
-        toolbar: [
-        ],
-    };
-    const formats = [];
+    const getinitialData = async () => {
+        try {
+            axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
+                .then((response) => {
+                    console.log("init.response =", response);
+                    setContent(response.data.content);
+                    setTitle(response.data.title);
+                    sethasContent(true)
+                    // console.log("hasContent =", hasContent)
+                })
+                .catch((error) => {
+                    console.log(error);
+                    sethasContent(false)
+                    // console.log("hasContent =", hasContent)
+                });
+        }
+        catch (error) {
+            if (error.response) {
+                console.log(error.response);
+                alert(error.response.data.message);
+            } else if (error.request) {
+                console.log("network error");
+            } else {
+                console.log(error);
+            }
+        }
+    }
     useEffect(() => {
 
         newEvent("view content", "view content", "/view-content");
@@ -68,62 +139,108 @@ function ViewContent() {
             setContent(data.content);
         });
 
-            try {
-                axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
-                    .then((response) => {
-                        // console.log("init.response =", response);
-                        setContent(response.data.content);
-                        setTitle(response.data.title);
-                        sethasContent(true)
-                        // console.log("hasContent =", hasContent)
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                        sethasContent(false)
-                        // console.log("hasContent =", hasContent)
-                    });
-            }
-            catch (error) {
-                if (error.response) {
-                    console.log(error.response);
-                    alert(error.response.data.message);
-                } else if (error.request) {
-                    console.log("network error");
-                } else {
+        try {
+            axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
+                .then((response) => {
+                    console.log("init.response =", response);
+                    setContent(response.data.content);
+                    setTitle(response.data.title);
+                    sethasContent(true)
+                    // console.log("hasContent =", hasContent)
+                })
+                .catch((error) => {
                     console.log(error);
-                }
+                    sethasContent(false)
+                    // console.log("hasContent =", hasContent)
+                });
+        }
+        catch (error) {
+            if (error.response) {
+                console.log(error.response);
+                alert(error.response.data.message);
+            } else if (error.request) {
+                console.log("network error");
+            } else {
+                console.log(error);
             }
+        }
 
     }, []);
     return (
         <>
-            {hasContent ? (
-                <>
-                    <div className="container card rounded bg-white mt-5 mb-5" style={{ marginBottom: "100px" }}>
-                        <div className="row">
-                            <div className="col-md-6 border-right">
-                            </div>
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h4 className="text-right">User Content</h4>
-                            </div>
-                            <div className="row mt-3">
-                                <div className="col-md-24 card-body">
-                                    <label className="labels" >{title}</label>
+            <Container className="mt-4">
+                <Container  >
+                    <Row  >
+                        <Col className='d-flex justify-content-center align-items-center mt-3'>
+                            <Popup open={open} closeOnDocumentClick onClose={closeModal}>
+                                <Form onSubmit={handleCreateNewContent}>
+                                    <InputGroup className="mb-3">
+                                        <Button type="submit" className="btn btn-primary mb-3">
+                                            Create Contact
+                                        </Button>
+                                    </InputGroup>
 
-                                    <ReactQuill
-                                        modules={modules}
-                                        formats={formats}
-                                        style={{ height: "auto", marginBottom: "50px", border: "none" }}
-
-                                        readOnly={true}
-                                        value={content}
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label  >Title</Form.Label>
+                                        <Form.Control type="text" value={newTitle} placeholder="Title" onChange={e => setNewTitle(e.target.value)} />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Check
+                                            type="checkbox"
+                                            label="Protected Content"
+                                            checked={newIsChecked}
+                                            name="protected_content"
+                                            id="protected_content"
+                                            onChange={e => setNewIsChecked(e.target.checked)}
+                                        />
+                                    </Form.Group>
+                                    <CKEditor
+                                        editor={ClassicEditor}
+                                        data="<p>Hello from CKEditor&nbsp;5!</p>"
+                                        onReady={editor => {
+                                            // console.log("Editor is ready to use!", editor);
+                                        }
+                                        }
+                                        onChange={(event, editor) => {
+                                            const data = editor.getData();
+                                            setNewContent(data)
+                                            // console.log({ data });
+                                        }}
                                     />
-                                    <Link className="btn btn-primary btn-block mb-4" to="/create-content">Edit content</Link>
+                                </Form>
+                            </Popup>
+                        </Col>
+                    </Row>
+                </Container>
+                {hasContent ? (
+                    <>
+                        <div className="container  card rounded bg-white" style={{ marginBottom: "100px" }}>
+                            <div className="row">
+                                <div className="d-flex justify-content-center align-items-center mt-3">
+                                    <h4 className="text-right">User Content</h4>
                                 </div>
-                                <form className="row g-3 needs-validation" onSubmit={handleSubmit} >
+                                <div className="row">
+                                    <div className="col-md-24  card-body">
+                                        <label className="labels" >{title}</label>
+                                        <Container style={{ minHeight: "715px", marginTop: "50px" }}>
+                                            <Row >
+                                                {content.map((e) => (
+                                                    <Col id={e._id} onClick={openModal}>
+                                                    <CardView title={e.title} content={e.content} _id={e._id} />
+                                                    </Col>
+                                                ))}
+                                            </Row>
+                                        </Container>
+                                    </div>
+                                    <div className="d-flex justify-content-center align-items-center">
+                                    <button className="btn btn-primary mb-3" onClick={openModal}> <FaPlus /> Create New Content </button>
 
-
+                                </div>
+                                </div>
+                                {/* <form className="row g-3 needs-validation" onSubmit={handleSubmit} >
                                     <div className="col-12">
+
+
                                         <label htmlFor="userlist" className="form-label">Username or Email of users</label>
                                         <div className="input-group has-validation">
                                             <div className="dropdown">
@@ -144,17 +261,15 @@ function ViewContent() {
                                         <button className=" w-100 button-54" type="submit">give permission</button>
                                     </div>
 
-                                </form>
+                                </form> */}
 
                             </div>
                         </div>
-                    </div>
-                </>
-            ) : (
-                <>
-                    <Container style={{ minHeight: "715px", marginTop: "50px" }}>
-                        <Row >
-                           
+                    </>
+                ) : (
+                    <>
+                        <Container style={{ minHeight: "715px", marginTop: "50px" }}>
+                            <Row >
                                 <Col>
                                     <Card style={{ width: '18rem' }}>
                                         <Card.Body>
@@ -165,19 +280,16 @@ function ViewContent() {
                                         </Card.Body>
                                     </Card>
                                 </Col>
-                           
-                           
-                        </Row>
-                        <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
-                         
-                            
-                    </Container>
-
-                </>
-            )
-            }
+                            </Row>
+                            <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
+                        </Container>
+                    </>
+                )
+                }
+            </Container >
         </>
     )
 }
+
 
 export default ViewContent
