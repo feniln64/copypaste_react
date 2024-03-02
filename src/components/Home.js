@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React, { useState } from 'react'
 import { useEffect } from 'react';
 import axiosInstance from '../api/api'
 import psl from 'psl';
@@ -26,10 +26,10 @@ function Home() {
     newEvent("homepage", "homepage", "/homepage");
     subdomain = parsed.subdomain;
     socket.emit('join_room', subdomain);
-        socket.on('message', (data) => {
-            console.log("data from server", data);
-            setContent(data.content);
-        });
+    socket.on('message', (data) => {
+      console.log("data from server", data);
+      setContent(data.content);
+    });
     if (subdomain === null) {
       subdomain = "";
     }
@@ -38,9 +38,11 @@ function Home() {
         axiosInstance.get(`/init/getdata/${subdomain}`)
           .then((response) => {
             console.log("init.response =", response);
-            setContent(response.data.content);
-            setTitle(response.data.title);
-            if (response.data.content !== null) sethasContent(true); else sethasContent(false);
+            if (response.data.content !== null && response.data.content.length > 0) {
+              sethasContent(true);
+              setContent(response.data.content);
+              setTitle(response.data.title);
+            } else sethasContent(false);
           })
           .catch((error) => {
             toast.error(error.response.data.message);
@@ -64,7 +66,7 @@ function Home() {
 
   return (
     <>
-    <div><Toaster/></div>
+      <div><Toaster /></div>
       {!hascontent && (
         <>
           <section id="hero" className="d-flex align-items-center" >
@@ -121,29 +123,24 @@ function Home() {
         </>
       )}
       {hascontent && (
-
-
-<Container style={{ minHeight: "715px", marginTop: "50px" }}>
-<Row >
-{content.map((e) => (
-    <Col>
-        <Card key={content._id} style={{ width: '18rem' }}>
-            <Card.Body>
-                <Card.Title>{e.title}</Card.Title>
-                <Card.Text>
-                    {e.content}
-                </Card.Text>
-            </Card.Body>
-        </Card>
-    </Col>
-))}
-</Row>
-<Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
-
-
-</Container>
-      )}
-      
+        <Container style={{ minHeight: "715px", marginTop: "50px" }}>
+          <Row >
+            {content.map((e) => (
+              <Col>
+                <Card key={content._id} style={{ width: '18rem' }}>
+                  <Card.Body>
+                    <Card.Title>{e.title}</Card.Title>
+                    <Card.Text>
+                      {e.content}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
+        </Container>
+      )}1
     </>
   )
 }

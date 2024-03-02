@@ -22,6 +22,7 @@ function Content() {
     const [title, setTitle] = useState("")
     const [isChecked, setIsChecked] = useState(false);
     const [content, setContent] = useState("");
+    const [subdomain, setSubdomain] = useState("");
     const userInfo = useSelector((state) => state.auth.userInfo);
     const navigate = useNavigate()
 
@@ -98,17 +99,12 @@ function Content() {
             catch (error) {
                 if (error.response) {
                     console.log(error.response);
-
                 } else if (error.request) {
                     console.log("network error");
                 } else {
                     console.log(error);
                 }
             }
-           
-        
-          
-        
     }, []);
     return (
         <>

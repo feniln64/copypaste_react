@@ -24,6 +24,7 @@ export default function Login() {
             email: email,
             password: password
         };
+        console.log(userData)
         setEmail("")
         setPassword("")
 

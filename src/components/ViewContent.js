@@ -23,7 +23,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
-
+import CardView from '../views/CardView';
 function ViewContent() {
 
     const userInfo = useSelector((state) => state.auth.userInfo)
@@ -39,6 +39,7 @@ function ViewContent() {
     const [newIsChecked, setNewIsChecked] = useState(false);
     const [username, setUserName] = useState("");
     const [open, setOpen] = useState(false);
+    const [currentId, setCurrentId] = useState("");
     const closeModal = () => setOpen(false);
     const handlePermission = (e) => {
         setPermission(e.target.value);
@@ -48,6 +49,13 @@ function ViewContent() {
         ],
     };
     const formats = [];
+    const openModal = (event) => {
+        console.log("event.target.id =", event);
+        console.log("text", event.target.innerHTML);
+        setOpen(o => !o)
+        setCurrentId(event.target.id)
+
+    };
     const handleCreateNewContent = async (e) => {
         e.preventDefault();
         const contentData = {
@@ -163,12 +171,11 @@ function ViewContent() {
             <Container className="mt-4">
                 <Container  >
                     <Row  >
-                        <Col className=' d-flex justify-content-cente'>
-                            <button className="btn btn-primary" onClick={() => setOpen(o => !o)}> <FaPlus /> Create New Content </button>
+                        <Col className='d-flex justify-content-center align-items-center mt-3'>
                             <Popup open={open} closeOnDocumentClick onClose={closeModal}>
                                 <Form onSubmit={handleCreateNewContent}>
                                     <InputGroup className="mb-3">
-                                        <Button type="submit" className="btn btn-primary btn-block">
+                                        <Button type="submit" className="btn btn-primary mb-3">
                                             Create Contact
                                         </Button>
                                     </InputGroup>
@@ -191,7 +198,7 @@ function ViewContent() {
                                         editor={ClassicEditor}
                                         data="<p>Hello from CKEditor&nbsp;5!</p>"
                                         onReady={editor => {
-                                            console.log("Editor is ready to use!", editor);
+                                            // console.log("Editor is ready to use!", editor);
                                         }
                                         }
                                         onChange={(event, editor) => {
@@ -207,48 +214,30 @@ function ViewContent() {
                 </Container>
                 {hasContent ? (
                     <>
-                        <div className="container card rounded bg-white mb-5" style={{ marginBottom: "100px" }}>
+                        <div className="container  card rounded bg-white" style={{ marginBottom: "100px" }}>
                             <div className="row">
-                                <div className="col-md-6 border-right">
-                                </div>
-                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                <div className="d-flex justify-content-center align-items-center mt-3">
                                     <h4 className="text-right">User Content</h4>
                                 </div>
-                                <div className="row mt-3">
-                                    <div className="col-md-24 card-body mb-4">
+                                <div className="row">
+                                    <div className="col-md-24  card-body">
                                         <label className="labels" >{title}</label>
                                         <Container style={{ minHeight: "715px", marginTop: "50px" }}>
                                             <Row >
                                                 {content.map((e) => (
-                                                    <Col>
-                                                        <Card key={content._id} style={{ width: '18rem' }}>
-                                                            <Card.Body>
-                                                                <Card.Title>{e.title}</Card.Title>
-                                                                <Card.Text>
-                                                                    <ReactQuill
-                                                                        modules={modules}
-                                                                        formats={formats}
-                                                                        style={{ height: "auto", marginBottom: "50px", border: "none" }}
-
-                                                                        readOnly={true}
-                                                                        value={e.content}
-                                                                    />
-
-                                                                </Card.Text>
-                                                            </Card.Body>
-                                                        </Card>
+                                                    <Col id={e._id} onClick={openModal}>
+                                                    <CardView title={e.title} content={e.content} _id={e._id} />
                                                     </Col>
                                                 ))}
                                             </Row>
-                                            <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
-
-
                                         </Container>
-
                                     </div>
-                                    <Link className="btn btn-primary btn-block mb-4" to="/create-content">Edit content</Link>
+                                    <div className="d-flex justify-content-center align-items-center">
+                                    <button className="btn btn-primary mb-3" onClick={openModal}> <FaPlus /> Create New Content </button>
+
                                 </div>
-                                <form className="row g-3 needs-validation" onSubmit={handleSubmit} >
+                                </div>
+                                {/* <form className="row g-3 needs-validation" onSubmit={handleSubmit} >
                                     <div className="col-12">
 
 
@@ -272,7 +261,7 @@ function ViewContent() {
                                         <button className=" w-100 button-54" type="submit">give permission</button>
                                     </div>
 
-                                </form>
+                                </form> */}
 
                             </div>
                         </div>
@@ -281,7 +270,6 @@ function ViewContent() {
                     <>
                         <Container style={{ minHeight: "715px", marginTop: "50px" }}>
                             <Row >
-
                                 <Col>
                                     <Card style={{ width: '18rem' }}>
                                         <Card.Body>
@@ -292,14 +280,9 @@ function ViewContent() {
                                         </Card.Body>
                                     </Card>
                                 </Col>
-
-
                             </Row>
                             <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
-
-
                         </Container>
-
                     </>
                 )
                 }
