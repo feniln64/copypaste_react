@@ -10,7 +10,7 @@
 # General
 --------------------------------------------------------------*/
 body {
-  font-family: "Open Sans", sans-serif;
+  font-family: "IBM Plex Sans","Open Sans", sans-serif;
   color: #444444;
 }
 
@@ -30,7 +30,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Roboto", sans-serif;
+  font-family: "IBM Plex Sans","Roboto", sans-serif;
 }
 
 /*--------------------------------------------------------------
@@ -179,7 +179,7 @@ h6 {
   line-height: 1;
   font-weight: 600;
   letter-spacing: 0.8px;
-  font-family: "Poppins", sans-serif;
+  font-family: "IBM Plex Sans","Poppins", sans-serif;
 }
 
 #header .logo a {
@@ -486,7 +486,7 @@ h6 {
   font-weight: 700;
   line-height: 56px;
   color: #222222;
-  font-family: "Poppins", sans-serif;
+  font-family: "IBM Plex Sans","Poppins", sans-serif;
 }
 
 #hero h1 span {
@@ -501,7 +501,7 @@ h6 {
 }
 
 #hero .btn-get-started {
-  font-family: "Roboto", sans-serif;
+  font-family: "IBM Plex Sans","Roboto", sans-serif;
   text-transform: uppercase;
   font-weight: 500;
   font-size: 14px;
@@ -814,7 +814,7 @@ section {
   text-transform: uppercase;
   display: block;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  font-family: "IBM Plex Sans", "Poppins", sans-serif;
   color: #222222;
 }
 
@@ -878,7 +878,7 @@ section {
 .counts .count-box p {
   padding: 0;
   margin: 0;
-  font-family: "Roboto", sans-serif;
+  font-family: "IBM Plex Sans", "Roboto", sans-serif;
   font-size: 14px;
 }
 
@@ -1353,7 +1353,7 @@ section {
   font-size: 36px;
   color: #106eea;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  font-family: "IBM Plex Sans", "Poppins", sans-serif;
   margin-bottom: 20px;
 }
 
@@ -1409,7 +1409,7 @@ section {
   transition: none;
   font-size: 14px;
   font-weight: 400;
-  font-family: "Roboto", sans-serif;
+  font-family: "IBM Plex Sans", "Roboto", sans-serif;
   font-weight: 600;
   transition: 0.3s;
 }
@@ -1713,7 +1713,7 @@ section {
   font-size: 14px;
   line-height: 24px;
   margin-bottom: 0;
-  font-family: "Roboto", sans-serif;
+  font-family: "IBM Plex Sans", "Roboto", sans-serif;
   color: #777777;
 }
 
