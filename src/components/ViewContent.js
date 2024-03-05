@@ -1,9 +1,11 @@
+/* eslint-disable*/
 import React from 'react'
 import { Link } from "react-router-dom";
 import { useEffect } from 'react';
 import axiosInstance from '../api/api'
-import { useSelector } from 'react-redux'
 import Calendar from 'react-calendar';
+import { useSelector, useDispatch } from 'react-redux'
+import { addContent, updateContent, updateOneContent,removeOneContent } from '../store/slices/contentSlice';
 import 'react-calendar/dist/Calendar.css';
 import { useState } from 'react';
 import ReactQuill from 'react-quill';
@@ -24,113 +26,139 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import CardView from '../views/CardView';
+import Modal from 'react-bootstrap/Modal';
+import ToggleButton from 'react-bootstrap/ToggleButton';
+
 function ViewContent() {
 
+    const dispatch = useDispatch()
     const userInfo = useSelector((state) => state.auth.userInfo)
+    const username = userInfo.username
     const userId = userInfo.id
 
+    const isContent = useSelector((state) => state.content.content)
     const [hasContent, sethasContent] = useState(false)
-    const [title, setTitle] = useState("")
+    const [content, setContent] = useState([])
+
     const [permission, setPermission] = useState(0)
-    const [content, setContent] = useState(`Edit me!`)
     const [date, setDate] = useState(new Date());
+
     const [newContent, setNewContent] = useState("");
     const [newTitle, setNewTitle] = useState("");
     const [newIsChecked, setNewIsChecked] = useState(false);
-    const [username, setUserName] = useState("");
-    const [open, setOpen] = useState(false);
-    const [currentId, setCurrentId] = useState("");
-    const closeModal = () => setOpen(false);
+
+    const [modelId, setModelId] = useState("")
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+
+    const [deleteModelId, setDeleteModelId] = useState("")
+    const [deleteShow, setDeleteShow] = useState(false);
+    const handleDeleteClose = () => setDeleteShow(false);
+
     const handlePermission = (e) => {
         setPermission(e.target.value);
     }
-    const modules = {
-        toolbar: [
-        ],
-    };
-    const formats = [];
-    const openModal = (event) => {
-        console.log("event.target.id =", event);
-        console.log("text", event.target.innerHTML);
-        setOpen(o => !o)
-        setCurrentId(event.target.id)
 
+    const handleUpdateContent = async (e) => {
+        e.preventDefault();
+        if (newContent === "" || newTitle === "") {
+            handleClose()
+            return
+        }
+        const contentData = {
+            _id: modelId,
+            content: newContent,
+            is_protected: newIsChecked,
+            title: newTitle
+        };
+        console.log("contentData =", contentData);
+
+        socket.emit("message", ({ room: username, message: contentData }));
+
+        await axiosInstance.patch(`/content/update/${modelId}`, contentData, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 200) {
+                    dispatch(updateOneContent(contentData))
+                    setContent(isContent)
+                    handleClose()
+                    toast.success("data updated Successfully");
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            })
+        setNewTitle(""); setNewIsChecked(false); setNewContent("")
     };
+
     const handleCreateNewContent = async (e) => {
         e.preventDefault();
+        console.log("create new content called");
+        if (newContent === "" || newTitle === "") {
+            handleClose()
+            return
+        }
         const contentData = {
             content: newContent,
             is_protected: newIsChecked,
             title: newTitle
         };
-        setNewContent("")
+        console.log("contentData =", contentData);
         setNewTitle("")
         setNewIsChecked(false)
-        console.log(contentData);
-        socket.emit("message", ({ room: username, message: contentData }));
-        try {
-            const res = await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true });
-            if (res.status === 201) {
-                toast.success("data added Successfully");
-                closeModal();
-            }
-        } catch (error) {
-            toast.error(error.response.data.message);
-        }
-        getinitialData();
-    };
-    const handleSubmit = (e) => {
-        console.log("permission =", permission);
-        e.preventDefault();
-        try {
-            axiosInstance.post(`/permission/create/${userId}`, { userList: username, permission_type: permission, permission_current_period_end: date }, { withCredentials: true })
-                .then((response) => {
-                    console.log("init.response =", response);
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        }
-        catch (error) {
-            if (error.response) {
-                console.log(error.response);
-                alert(error.response.data.message);
-            } else if (error.request) {
-                console.log("network error");
-            } else {
-                console.log(error);
-            }
-        }
-    }
-    const getinitialData = async () => {
-        try {
-            axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
-                .then((response) => {
-                    console.log("init.response =", response);
-                    setContent(response.data.content);
-                    setTitle(response.data.title);
-                    sethasContent(true)
-                    // console.log("hasContent =", hasContent)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    sethasContent(false)
-                    // console.log("hasContent =", hasContent)
-                });
-        }
-        catch (error) {
-            if (error.response) {
-                console.log(error.response);
-                alert(error.response.data.message);
-            } else if (error.request) {
-                console.log("network error");
-            } else {
-                console.log(error);
-            }
-        }
-    }
-    useEffect(() => {
+        setNewContent("")
 
+        socket.emit("message", ({ room: username, message: contentData }));
+
+        await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 201) {
+                    setContent(response.data.content);
+                    sethasContent(true)
+                    dispatch(addContent(response.data.content))
+                    handleClose();
+                    toast.success("data added Successfully");
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            })
+    };
+
+    const getinitialData = async () => {
+        await axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
+            .then((response) => {
+                setContent(response.data.content);
+                sethasContent(true)
+                dispatch(addContent(response.data.content))
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            });
+    }
+
+    useEffect(() => {
+        getinitialData()
         newEvent("view content", "view content", "/view-content");
 
         socket.emit('join_room', userInfo.username);
@@ -138,80 +166,56 @@ function ViewContent() {
             console.log("data from server", data);
             setContent(data.content);
         });
-
-        try {
-            axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
-                .then((response) => {
-                    console.log("init.response =", response);
-                    setContent(response.data.content);
-                    setTitle(response.data.title);
-                    sethasContent(true)
-                    // console.log("hasContent =", hasContent)
-                })
-                .catch((error) => {
-                    console.log(error);
-                    sethasContent(false)
-                    // console.log("hasContent =", hasContent)
-                });
-        }
-        catch (error) {
-            if (error.response) {
-                console.log(error.response);
-                alert(error.response.data.message);
-            } else if (error.request) {
-                console.log("network error");
-            } else {
-                console.log(error);
-            }
-        }
-
     }, []);
+
+    const openModal = (event) => {
+        setModelId(event)
+        if (event === "createContent") {
+            setNewTitle("")
+            setNewIsChecked(false)
+            setNewContent("")
+        } else {
+            setNewContent(isContent.filter((e) => e._id === event)[0].content ||  "")
+            setNewTitle(isContent.filter((e) => e._id === event)[0].title || "")
+            setNewIsChecked(isContent.filter((e) => e._id === event)[0].is_protected || false)
+            // handleUpdateShow()
+        }
+        setShow(true);
+    };
+
+    const deleteModel = (event) => {
+        console.log("deleteModelId", event);
+        setDeleteModelId(event)
+        setDeleteShow(true);
+    };
+    const handleDeleteContent = async (e) => {
+        e.preventDefault();
+        await axiosInstance.delete(`/content/delete/${deleteModelId}`, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 201) {
+                    dispatch(removeOneContent({ _id: deleteModelId }))
+                    setDeleteShow(false);
+                    setContent(isContent)
+                    toast.success("data deleted Successfully");
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            });
+        setDeleteModelId("");
+        setDeleteShow(false);
+    };
     return (
         <>
+            <Toaster />
             <Container className="mt-4">
-                <Container  >
-                    <Row  >
-                        <Col className='d-flex justify-content-center align-items-center mt-3'>
-                            <Popup open={open} closeOnDocumentClick onClose={closeModal}>
-                                <Form onSubmit={handleCreateNewContent}>
-                                    <InputGroup className="mb-3">
-                                        <Button type="submit" className="btn btn-primary mb-3">
-                                            Create Contact
-                                        </Button>
-                                    </InputGroup>
-
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label  >Title</Form.Label>
-                                        <Form.Control type="text" value={newTitle} placeholder="Title" onChange={e => setNewTitle(e.target.value)} />
-                                    </Form.Group>
-                                    <Form.Group className="mb-3">
-                                        <Form.Check
-                                            type="checkbox"
-                                            label="Protected Content"
-                                            checked={newIsChecked}
-                                            name="protected_content"
-                                            id="protected_content"
-                                            onChange={e => setNewIsChecked(e.target.checked)}
-                                        />
-                                    </Form.Group>
-                                    <CKEditor
-                                        editor={ClassicEditor}
-                                        data="<p>Hello from CKEditor&nbsp;5!</p>"
-                                        onReady={editor => {
-                                            // console.log("Editor is ready to use!", editor);
-                                        }
-                                        }
-                                        onChange={(event, editor) => {
-                                            const data = editor.getData();
-                                            setNewContent(data)
-                                            // console.log({ data });
-                                        }}
-                                    />
-                                </Form>
-                            </Popup>
-                        </Col>
-                    </Row>
-                </Container>
                 {hasContent ? (
                     <>
                         <div className="container  card rounded bg-white" style={{ marginBottom: "100px" }}>
@@ -221,48 +225,75 @@ function ViewContent() {
                                 </div>
                                 <div className="row">
                                     <div className="col-md-24  card-body">
-                                        <label className="labels" >{title}</label>
                                         <Container style={{ minHeight: "715px", marginTop: "50px" }}>
                                             <Row >
                                                 {content.map((e) => (
-                                                    <Col id={e._id} onClick={openModal}>
-                                                    <CardView title={e.title} content={e.content} _id={e._id} />
+                                                    <Col key={e._id} id={e._id} >
+                                                        <CardView title={e.title} editContent={openModal} deleteContent={deleteModel} content={e.content} _id={e._id} />
                                                     </Col>
                                                 ))}
                                             </Row>
                                         </Container>
                                     </div>
                                     <div className="d-flex justify-content-center align-items-center">
-                                    <button className="btn btn-primary mb-3" onClick={openModal}> <FaPlus /> Create New Content </button>
-
-                                </div>
-                                </div>
-                                {/* <form className="row g-3 needs-validation" onSubmit={handleSubmit} >
-                                    <div className="col-12">
-
-
-                                        <label htmlFor="userlist" className="form-label">Username or Email of users</label>
-                                        <div className="input-group has-validation">
-                                            <div className="dropdown">
-
-                                                <select value={permission} onChange={handlePermission} className=" btn btn-secondary dropdown-toggledropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                                    <option className="dropdown-item" value="0" href="#">None</option>
-                                                    <option className="dropdown-item" value="1" href="#">Read Only</option>
-                                                    <option className="dropdown-item" value="2" href="#">Read and Write</option>
-                                                </select>
-                                            </div>
-                                            <input type="text" name="username" className="form-control" value={username} id="userlist" onChange={e => setUserName(e.target.value)} required />
-                                            <div className="invalid-feedback">Please enter your username.</div>
-                                        </div>
+                                        {/* Update Content Model  */}
+                                        <Modal show={show} onHide={handleClose}>
+                                            <Modal.Header closeButton>
+                                                <Modal.Title>Create New Content</Modal.Title>
+                                            </Modal.Header>
+                                            <Modal.Body>
+                                                <Form>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Form.Label>Title</Form.Label>
+                                                        {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                                        <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
+                                                    </Form.Group>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Form.Label>Protected Content</Form.Label>
+                                                        <Form.Check // prettier-ignore
+                                                            type={"checkbox"}
+                                                            id={"protected_content"}
+                                                            label="Protected Content"
+                                                            checked={newIsChecked}
+                                                            onChange={e => setNewIsChecked(e.target.checked)}
+                                                        />
+                                                    </Form.Group>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                                                        <CKEditor
+                                                            editor={ClassicEditor}
+                                                            data={newContent}
+                                                            config={{ placeholder: "Placeholder text..." }}
+                                                            onReady={editor => { }}
+                                                            onChange={(event, editor) => {
+                                                                setNewContent(editor.getData())
+                                                            }}
+                                                        />
+                                                    </Form.Group>
+                                                </Form>
+                                            </Modal.Body>
+                                            <Modal.Footer>
+                                                <Button variant="secondary" onClick={handleClose}>Close</Button>
+                                                <Button variant="primary" onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent}>Save Changes</Button>
+                                            </Modal.Footer>
+                                        </Modal>
+                                        {/* delete content model */}
+                                        <Modal show={deleteShow} onHide={handleDeleteClose}>
+                                            <Modal.Header closeButton>
+                                                <Modal.Title>Modal heading</Modal.Title>
+                                            </Modal.Header>
+                                            <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+                                            <Modal.Footer>
+                                                <Button variant="secondary" onClick={handleDeleteClose}>
+                                                    Close
+                                                </Button>
+                                                <Button variant="danger" onClick={handleDeleteContent}>
+                                                    Delete Content
+                                                </Button>
+                                            </Modal.Footer>
+                                        </Modal>
+                                        <button className="btn btn-primary mb-3" onClick={e => openModal(e.target.id)} id='createContent'> <FaPlus /> Create New Content </button>
                                     </div>
-                                    <Calendar onChange={setDate} value={date} />
-
-                                    <div className="col-12">
-                                        <button className=" w-100 button-54" type="submit">give permission</button>
-                                    </div>
-
-                                </form> */}
-
+                                </div>
                             </div>
                         </div>
                     </>

@@ -3,7 +3,7 @@ import '../assets/profile.css'
 import { useSelector, useDispatch } from 'react-redux'
 import { updateUser } from '../store/slices/authSlice'
 import axiosInstance from '../api/api'
-import { toast } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast';
 import 'bootstrap/dist/css/bootstrap.min.css'
 var AWS = require('aws-sdk');
 function Profile() {
@@ -17,6 +17,10 @@ function Profile() {
     const [view, setView] = useState('hs')
     const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
     const userInfo = useSelector((state) => state.auth.userInfo)
+    const [currentPassword, setCurrentPassword] = useState("")
+    const [newPassword, setNewPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [disabled, setDisabled] = useState(true)
     const dispatch = useDispatch()
     const userData = {
         id: userInfo.id,
@@ -51,6 +55,38 @@ function Profile() {
         }
     }
 
+    const handleChangePassword = async (e) => {
+        e.preventDefault()
+        console.log("changing password");
+        if (currentPassword === "" || newPassword === "" || confirmPassword === "") {
+            toast.error("All fields are required")
+            return
+        }
+        if (newPassword !== confirmPassword) {
+            toast.error("New Passwords do not match")
+            return
+        }
+
+        const data = {
+            currentPassword: currentPassword,
+            newPassword: newPassword
+        }
+        console.log(data);
+
+        await axiosInstance.patch(`/auth/update-password/${userData.id}`, data, { withCredentials: true })
+            .then((response) => {
+                console.log(response);
+                setCurrentPassword("")
+                setNewPassword("")
+                setConfirmPassword("")
+                toast.success('Password Changed Successfully!')
+            })
+            .catch((error) => {
+                console.log(error);
+                toast.error(error.response.data.message)
+            });
+
+    }
     var config = {
         accessKeyId: "pPAzlk6rv4x34C6GoJEd",
         secretAccessKey: "aYuVmUYJonn7ESKAcDOop1O2dEca0v3RipG3FUUx",
@@ -69,10 +105,10 @@ function Profile() {
         data.readAsDataURL(e.target.files[0]);
         data.addEventListener("load", function () {
             setFile(data.result);
-        }); 
-        console.log(typeof(file));
+        });
+        console.log(typeof (file));
 
-      };
+    };
     const uploadImage = async (e) => {
         e.preventDefault()
         const formData = new FormData();
@@ -83,17 +119,26 @@ function Profile() {
         //    console.log("error uploading file");
         // }
         try {
-            await axiosInstance.post(`user/updateProfileImage/${userData.id}`, {file:file,username:username}, { withCredentials: true })
-                .then((response) => { console.log(response); })
+            await axiosInstance.post(`user/updateProfileImage/${userData.id}`, { file: file, username: username }, { withCredentials: true })
+                .then((response) => {
+                    console.log(response);
+                })
 
                 .catch((error) => { console.log(error); });
         } catch (error) {
             console.error(error);
         }
+        const fetchProfile = async () => {
+
+            const ne = await s3Client.getSignedUrl('getObject', { Bucket: 'minio', Key: `docopypaste/profile/${userInfo.username}/profile.png`, Expires: 60 * 60 })
+            console.log(ne);
+            setProfileImage(ne)
+        }
+
+        fetchProfile().catch((error) => { console.log(error); })
 
         console.log("Successfully uploaded data to myBucket/myKey");
     }
-
     useEffect(() => {
 
         console.log("auth from profile", isLoggedIn);
@@ -105,35 +150,35 @@ function Profile() {
 
         const fetchProfile = async () => {
 
-            const ne = await s3Client.getSignedUrl('getObject', { Bucket: 'minio', Key: `docopypaste/profile/${userInfo.username}/profile.png`, Expires: 60*60 })
+            const ne = await s3Client.getSignedUrl('getObject', { Bucket: 'minio', Key: `docopypaste/profile/${userInfo.username}/profile.png`, Expires: 60 * 60 })
             console.log(ne);
             setProfileImage(ne)
         }
 
         fetchProfile().catch((error) => { console.log(error); })
         try {
-            const res =  axiosInstance.get(`user/getProfile/${userData.id}`, { withCredentials: true })
-            .then((response) => {
+            const res = axiosInstance.get(`user/getProfile/${userData.id}`, { withCredentials: true })
+                .then((response) => {
 
-                response.data.signedUrl ? setProfileImage(response.data.signedUrl) : setProfileImage("assets/img/profile-img.jpg")
+                    response.data.signedUrl ? setProfileImage(response.data.signedUrl) : setProfileImage("assets/img/profile-img.jpg")
 
-                // if (response.data.content !== null) sethasContent(true); else sethasContent(false);
-              })
-              .catch((error) => {
-                console.log(error);
-              });
+                    // if (response.data.content !== null) sethasContent(true); else sethasContent(false);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
             // remove this console.log after testing
 
 
         } catch (error) {
-                console.error(error);
+            console.error(error);
         }
 
     }, [])
 
     return (
         <>
-
+            <div><Toaster /></div>
             <div id='main' className="container" style={{ marginLeft: "auto" }}>
                 <section className="section profile">
                     <div className="row">
@@ -283,31 +328,31 @@ function Profile() {
                                         )}
                                         {view === "profile-change-password" && (
                                             <div className="tab-pane fade show active pt-3" id="profile-change-password">
-                                                <form>
+                                                <form onSubmit={handleChangePassword}>
 
                                                     <div className="row mb-3">
                                                         <label htmlFor="currentPassword" className="col-md-4 col-lg-3 col-form-label">Current Password</label>
                                                         <div className="col-md-8 col-lg-9">
-                                                            <input name="password" type="password" className="form-control" id="currentPassword" />
+                                                            <input name="password" value={currentPassword} onChange={e => { setCurrentPassword(e.target.value) }} type="password" className="form-control" id="currentPassword" />
                                                         </div>
                                                     </div>
 
                                                     <div className="row mb-3">
                                                         <label htmlFor="newPassword" className="col-md-4 col-lg-3 col-form-label">New Password</label>
                                                         <div className="col-md-8 col-lg-9">
-                                                            <input name="newpassword" type="password" className="form-control" id="newPassword" />
+                                                            <input name="newpassword" value={newPassword} onChange={e => setNewPassword(e.target.value)} type="password" className="form-control" id="newPassword" />
                                                         </div>
                                                     </div>
 
                                                     <div className="row mb-3">
                                                         <label htmlFor="renewPassword" className="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
                                                         <div className="col-md-8 col-lg-9">
-                                                            <input name="renewpassword" type="password" className="form-control" id="renewPassword" />
+                                                            <input name="renewpassword" value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); setDisabled(false) }} type="password" className="form-control" id="renewPassword" />
                                                         </div>
                                                     </div>
 
                                                     <div className="text-center">
-                                                        <button type="submit" className="btn btn-primary">Change Password</button>
+                                                        <button type="submit" disabled={disabled} onClick={handleChangePassword} className="btn btn-primary">Change Password</button>
                                                     </div>
                                                 </form>
                                             </div>

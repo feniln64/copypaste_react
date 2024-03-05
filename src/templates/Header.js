@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux'
 import { removeUser } from '../store/slices/authSlice'
+import { removeContent } from "../store/slices/contentSlice";
 import axiosInstance from '../api/api'
 // import 'bootstrap/dist/css/bootstrap.min.css'
 import React from 'react'
@@ -31,8 +32,9 @@ const Header = () => {
             });
         localStorage.removeItem("jwt");
         localStorage.removeItem("userInfo");
-        navigate("/login");
         dispatch(removeUser())
+        dispatch(removeContent())
+        navigate("/login");
     }
 
     return (
