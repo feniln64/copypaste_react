@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react'
 import axiosInstance from '../api/api'
-import { Link, useNavigate,useLocation } from 'react-router-dom'
-// import toast, { Toaster } from 'react-hot-toast';
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { addNewUser } from '../store/slices/authSlice'
+import { addContent } from '../store/slices/contentSlice';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../assets/button.css'
 import '../assets/container.css'
@@ -40,10 +40,11 @@ export default function Login() {
                 const userInfo = res.data.userInfo
                 console.log("from data", userInfo);
                 dispatch(addNewUser(userInfo))
+                dispatch(addContent(res.data.content))
                 navigate("/");
             }
         } catch (error) {
-            toast.error(error.response.data.message,{icon:'👎'})
+            toast.error(error.response.data.message, { icon: '👎' })
         }
     };
 
@@ -55,8 +56,8 @@ export default function Login() {
 
     return (
         <>
-           <div><Toaster/></div>
-            <section className="container" style={{height:"85vh"}} >
+            <div><Toaster /></div>
+            <section className="container" style={{ height: "85vh" }} >
 
                 <section className="section register  d-flex flex-column align-items-center justify-content-center py-4">
                     <div className="container">
