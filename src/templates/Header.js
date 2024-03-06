@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { removeUser } from "../store/slices/authSlice";
+import { removeContent } from "../store/slices/contentSlice";
 import axiosInstance from "../api/api";
 // import 'bootstrap/dist/css/bootstrap.min.css'
 import React from "react";
@@ -13,18 +14,8 @@ import React from "react";
 // import Nav from "react-bootstrap/Nav";
 // import Navbar from "react-bootstrap/Navbar";
 // import NavDropdown from "react-bootstrap/NavDropdown";
-import { Menu as MenuIcon, AccountCircle } from "@mui/icons-material";
-import {
-    AppBar,
-    Avatar,
-    Box,
-    Button,
-    IconButton,
-    Menu,
-    MenuItem,
-    Toolbar,
-    Typography,
-} from "@mui/material";
+import { Menu as MenuIcon } from "@mui/icons-material";
+import { AppBar, Box, Button, IconButton, Menu, Toolbar } from "@mui/material";
 import useScreenSize from "../hooks/useScreenSize";
 import { NavDropdown } from "react-bootstrap";
 
@@ -55,14 +46,21 @@ const Header = () => {
             });
         localStorage.removeItem("jwt");
         localStorage.removeItem("userInfo");
-        navigate("/login");
         dispatch(removeUser());
+        dispatch(removeContent());
+        navigate("/login");
     }
 
     return (
         <>
-            <Box sx={{ flexGrow: 1 }}>
-                <AppBar position="fixed" sx={{ background: "#f6f9ff" }}>
+            <Box sx={{ flexGrow: 1, marginBottom: "100px" }}>
+                <AppBar
+                    position="fixed"
+                    sx={{
+                        background: "#f6f9ff",
+                        boxShadow: "inset 0 -1px 0 0 rgba(0, 0, 0, 0.1)",
+                    }}
+                >
                     <Toolbar>
                         <Link to="/" className="logo">
                             <img src="assets/img/old.png" alt="" />
@@ -166,23 +164,38 @@ const Header = () => {
                             </Box>
                         )}
                         {isLoggedIn && (
-                            <Box>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flex: 1,
+                                }}
+                            >
                                 {!isMobileView ? (
-                                    <Box>
-                                        <Box>
-                                            <Link
-                                                className="nav-link mx-2  "
-                                                to="/content"
-                                            >
-                                                Content
-                                            </Link>
-
-                                            <Link
-                                                className="nav-link mx-2  "
-                                                to="/add-domain"
-                                            >
-                                                Add Domain
-                                            </Link>
+                                    <Box sx={{ flex: 0.7 }}>
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                color: "black",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            <Button>
+                                                <Link
+                                                    className="nav-link mx-2  "
+                                                    to="/content"
+                                                >
+                                                    Content
+                                                </Link>
+                                            </Button>
+                                            <Button>
+                                                <Link
+                                                    className="nav-link mx-2  "
+                                                    to="/add-domain"
+                                                >
+                                                    Add Domain
+                                                </Link>
+                                            </Button>
                                         </Box>
                                         {/* <Avatar 
                                             src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
@@ -190,7 +203,13 @@ const Header = () => {
                                         /> */}
                                     </Box>
                                 ) : (
-                                    <>
+                                    <Box
+                                        sx={{
+                                            flex: 0.9,
+                                            justifyContent: "flex-end",
+                                            display: "flex",
+                                        }}
+                                    >
                                         <IconButton
                                             size="large"
                                             edge="start"
@@ -229,48 +248,59 @@ const Header = () => {
                                                     variant="contained"
                                                     color="inherit"
                                                 >
-                                                    <Link to="/login">
-                                                        Login
+                                                    <Link to="/content">
+                                                        Content
                                                     </Link>
                                                 </Button>
                                                 <Button
                                                     variant="contained"
                                                     color="inherit"
                                                 >
-                                                    <Link to="/register">
-                                                        Sign Up
+                                                    <Link to="/add-domain">
+                                                        Add Domain
                                                     </Link>
                                                 </Button>
                                             </Box>
                                         </Menu>
-                                    </>
+                                    </Box>
                                 )}
-                                <NavDropdown
-                                    title={
-                                        <span>
-                                            <img
-                                                style={{
-                                                    width: 30,
-                                                    height: 30,
-                                                }}
-                                                src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
-                                                className="rounded-circle"
-                                                alt="Black and White Portrait of a Man"
-                                            />
-                                        </span>
-                                    }
-                                    drop="start"
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: !isMobileView
+                                            ? "flex-end"
+                                            : "center",
+                                        alignItems: "center",
+                                        flex: !isMobileView ? 0.3 : 0.1,
+                                    }}
                                 >
-                                    <NavDropdown.Item>
-                                        <Link to="/profile">Profile</Link>
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item onClick={logout}>
-                                        Log Out
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item>
-                                        Contact us
-                                    </NavDropdown.Item>
-                                </NavDropdown>
+                                    <NavDropdown
+                                        title={
+                                            <span>
+                                                <img
+                                                    style={{
+                                                        width: 30,
+                                                        height: 30,
+                                                    }}
+                                                    src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
+                                                    className="rounded-circle"
+                                                    alt="Black and White Portrait of a Man"
+                                                />
+                                            </span>
+                                        }
+                                        drop="start"
+                                    >
+                                        <NavDropdown.Item>
+                                            <Link to="/profile">Profile</Link>
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Item onClick={logout}>
+                                            Log Out
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Item>
+                                            Contact us
+                                        </NavDropdown.Item>
+                                    </NavDropdown>
+                                </Box>
                             </Box>
                         )}
                     </Toolbar>

@@ -12,9 +12,7 @@ const Footer = () => {
     useEffect(() => {
         axiosInstance.get("/init/version")
             .then((response) => {
-                console.log("init.response =", response);
-                setServerVersion(response.data.version);
-                
+                setServerVersion(response.data.version);                
             })
             .catch((error) => {
                 console.log(error);

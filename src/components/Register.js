@@ -141,7 +141,7 @@ const Register = () => {
                     alignItems: "center",
                     flexDirection: "column",
                     // height: "85vh",
-                    padding: "60px !important",
+                    padding: "20px 60px !important",
                     background: "#f4f7ff",
                 }}
                 maxWidth="sm"
