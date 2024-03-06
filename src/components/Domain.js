@@ -7,10 +7,11 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useEffect } from 'react'
 import newEvent from '../api/postHog'
-import Popup from 'reactjs-popup';
 import toast, { Toaster } from 'react-hot-toast';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+
 function Domain() {
 
     const [domain, setDomain] = useState("")
@@ -24,7 +25,8 @@ function Domain() {
     const dispatch = useDispatch()
     const userId = userInfo.id
 
-    const closeModal = () => setOpen(false);
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
 
 
     const handleSubmit = async (e) => {
@@ -161,7 +163,26 @@ function Domain() {
                                     <button onClick={checkAvailability} className="btn btn-primary">Add Subdomain</button>
                                 </Col>
                             </Row>
-                            <Popup className='card rounded bg-white mt-5 mb-5' open={open} closeOnDocumentClick onClose={closeModal}>
+                            <Modal show={show} onHide={handleClose}>
+                                            <Modal.Header closeButton>
+                                                <Modal.Title>Create New Subdomain</Modal.Title>
+                                            </Modal.Header>
+                                            <Modal.Body>
+                                                <Form>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Form.Label>Title</Form.Label>
+                                                        {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                                        <Form.Control type="text" value={newSubdomain} placeholder="New Subdomain" onChange={e => setNewSubdomain(e.target.value)} autoFocus />
+                                                    </Form.Group>
+                                                </Form>
+                                            </Modal.Body>
+                                            <Modal.Footer>
+                                                <Button variant="secondary" onClick={handleClose}>Close</Button>
+                                                <Button variant="primary" onClick={handleSubmit}>Create New Subdoamin</Button>
+                                            </Modal.Footer>
+                                        </Modal>
+                                    
+                            {/* <Popup className='card rounded bg-white mt-5 mb-5' open={open} closeOnDocumentClick onClose={closeModal}>
                                 <Form onSubmit={handleSubmit}>
                                     <h3 className='card-title'>Create New Subdoamin</h3>
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -173,7 +194,7 @@ function Domain() {
                                         </Button>
                                     </Form.Group>
                                 </Form>
-                            </Popup>
+                            </Popup> */}
                         </div>
                     </>
                 )

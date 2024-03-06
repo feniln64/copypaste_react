@@ -18,8 +18,6 @@ import Card from 'react-bootstrap/Card';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { FaPlus } from "react-icons/fa6";
-import Popup from 'reactjs-popup';
-import 'reactjs-popup/dist/index.css';
 import '../assets/popup.css';
 import toast, { Toaster } from 'react-hot-toast';
 import InputGroup from 'react-bootstrap/InputGroup';
