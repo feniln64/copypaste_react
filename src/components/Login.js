@@ -23,6 +23,7 @@ import {
     Typography,
 } from "@mui/material";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
+import useScreenSize from "../hooks/useScreenSize";
 
 export default function Login() {
     const location = useLocation();
@@ -72,6 +73,8 @@ export default function Login() {
             toast.success(message);
         }
     }, [message]);
+
+    const [isMobileView] = useScreenSize();
 
     return (
         <>
@@ -219,7 +222,7 @@ export default function Login() {
                     alignItems: "center",
                     flexDirection: "column",
                     height: "85vh",
-                    padding: "0px 60px !important",
+                    padding: isMobileView ? "20px !important" : "0px 60px !important",
                     background: "#f4f7ff",
                 }}
                 maxWidth="sm"
@@ -228,7 +231,7 @@ export default function Login() {
                     sx={{
                         borderRadius: "0.5rem",
                         width: "inherit",
-                        padding: "60px",
+                        padding: isMobileView ? "30px" : "60px",
                         background: "#fff",
                         display: "flex",
                         gap: "12px",

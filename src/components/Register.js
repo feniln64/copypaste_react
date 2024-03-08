@@ -16,6 +16,7 @@ import {
     Typography,
 } from "@mui/material";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
+import useScreenSize from "../hooks/useScreenSize";
 
 const notify = (message) => toast("Here is your toast." + message);
 
@@ -63,6 +64,8 @@ const Register = () => {
             }
         }
     };
+
+    const [isMobileView] = useScreenSize();
 
     return (
         <>
@@ -140,8 +143,8 @@ const Register = () => {
                     justifyContent: "center",
                     alignItems: "center",
                     flexDirection: "column",
-                    // height: "85vh",
-                    padding: "20px 60px !important",
+                    height: isMobileView ? "85vh" : "auto",
+                    padding: isMobileView ? "20px !important" :  "20px 60px !important",
                     background: "#f4f7ff",
                 }}
                 maxWidth="sm"
@@ -150,7 +153,7 @@ const Register = () => {
                     sx={{
                         borderRadius: "0.5rem",
                         width: "inherit",
-                        padding: "60px",
+                        padding: isMobileView ? "30px" : "60px",
                         background: "#fff",
                         display: "flex",
                         gap: "12px",

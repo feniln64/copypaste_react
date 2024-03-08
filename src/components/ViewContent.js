@@ -28,6 +28,7 @@ import Form from 'react-bootstrap/Form';
 import CardView from '../views/CardView';
 import Modal from 'react-bootstrap/Modal';
 import ToggleButton from 'react-bootstrap/ToggleButton';
+import {CommonDialog} from '../common';
 
 function ViewContent() {
 
@@ -237,18 +238,14 @@ function ViewContent() {
                                     </div>
                                     <div className="d-flex justify-content-center align-items-center">
                                         {/* Update Content Model  */}
-                                        <Modal show={show} onHide={handleClose}>
-                                            <Modal.Header closeButton>
-                                                <Modal.Title>Create New Content</Modal.Title>
-                                            </Modal.Header>
-                                            <Modal.Body>
-                                                <Form>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Form.Label>Title</Form.Label>
-                                                        {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
-                                                        <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
-                                                    </Form.Group>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <CommonDialog open={show} onClose={handleClose}  onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent} title={"Create New Content"}>
+                                        <Form>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Title</Form.Label>
+                                                    {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                                    <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
+                                            </Form.Group>
+                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                         <Form.Label>Protected Content</Form.Label>
                                                         <Form.Check // prettier-ignore
                                                             type={"checkbox"}
@@ -269,13 +266,47 @@ function ViewContent() {
                                                             }}
                                                         />
                                                     </Form.Group>
+                                        </Form>
+                                        </CommonDialog>
+                                        {/* <Modal show={show} onHide={handleClose}>
+                                            <Modal.Header closeButton>
+                                                <Modal.Title>Create New Content</Modal.Title>
+                                            </Modal.Header>
+                                            <Modal.Body>
+                                                <Form>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Form.Label>Title</Form.Label>
+                                                        {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                                        {/* <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
+                                                    </Form.Group>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Form.Label>Protected Content</Form.Label>
+                                                        <Form.Check // prettier-ignore
+                                                            type={"checkbox"}
+                                                            id={"protected_content"}
+                                                            label="Protected Content"
+                                                            checked={newIsChecked}
+                                                            onChange={e => setNewIsChecked(e.target.checked)}
+                                                        />
+                                                    </Form.Group> */}
+                                                    {/* <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                                                        <CKEditor
+                                                            editor={ClassicEditor}
+                                                            data={newContent}
+                                                            config={{ placeholder: "Placeholder text..." }}
+                                                            onReady={editor => { }}
+                                                            onChange={(event, editor) => {
+                                                                setNewContent(editor.getData())
+                                                            }}
+                                                        />
+                                                    </Form.Group>
                                                 </Form>
                                             </Modal.Body>
                                             <Modal.Footer>
                                                 <Button variant="secondary" onClick={handleClose}>Close</Button>
                                                 <Button variant="primary" onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent}>Save Changes</Button>
-                                            </Modal.Footer>
-                                        </Modal>
+                                            </Modal.Footer> */}
+                                        {/* </Modal> */}
                                         {/* delete content model */}
                                         <Modal show={deleteShow} onHide={handleDeleteClose}>
                                             <Modal.Header closeButton>
