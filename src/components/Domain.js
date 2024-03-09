@@ -3,10 +3,16 @@ import React from "react";
 import axiosInstance from "../api/api";
 import { useSelector, useDispatch } from "react-redux";
 import { updateDomain } from "../store/slices/domainSlice";
-import { toast } from "react-hot-toast";
-import { useEffect } from "react";
-import newEvent from "../api/postHog";
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import { useEffect } from 'react'
+import newEvent from '../api/postHog'
+import toast, { Toaster } from 'react-hot-toast';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 function Domain() {
+
     const [domain, setDomain] = useState("");
 
     const userInfo = useSelector((state) => state.auth.userInfo);
@@ -15,6 +21,10 @@ function Domain() {
     const [subdomainObject, setSubdomainObject] = useState([]);
     const dispatch = useDispatch();
     const userId = userInfo.id;
+    const [newSubdomain, setNewSubdomain] = useState("")
+
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,22 +35,43 @@ function Domain() {
         };
         setDomain("");
 
-        try {
-            const res = await axiosInstance.post(
-                `/subdomain/create/${userId}`,
-                userData,
-                { withCredentials: true }
-            );
-            // remove this console.log after testing
-            if (res.status === 200) {
-                const response = res.data.subdomainObject;
-                console.log("subdomainObject", response);
-                dispatch(updateDomain(domain));
-            }
-        } catch (error) {
-            console.log(error);
-        }
+        const res = await axiosInstance.post(`/subdomain/create/${userId}`, userData, { withCredentials: true })
+            .then((response) => {
+                console.log("subdomainObject", response.data);
+                dispatch(updateDomain(newSubdomain))
+                toast.success("subdomain created successfully");
+                setShow(false)
+
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    toast.error("network error");
+                } else {
+                    toast.error(error);
+                }
+            });
     };
+
+    const checkAvailability = async (e) => {
+        const res = await axiosInstance.get(`/subdomain/availability/${userId}`, { withCredentials: true })
+            .then((response) => {
+                console.log("response", response);
+                setShow(o => !o)
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    toast.error("network error");
+                } else {
+                    toast.error(error);
+                }
+            });
+    }
 
     const handleQR = async (e) => {
         e.preventDefault();
@@ -49,13 +80,7 @@ function Domain() {
     useEffect(() => {
         newEvent("domain", "view domain", "/domain");
         try {
-            axiosInstance
-                .get(
-                    `/subdomain/getsubdomain/${userId}`,
-                    {},
-                    { withCredentials: true }
-                )
-
+            axiosInstance.get(`/subdomain/getsubdomain/${userId}`, {}, { withCredentials: true })
                 .then((response) => {
                     // console.log("init.response =", response);
                     if (response.status === 200) {
@@ -63,7 +88,7 @@ function Domain() {
 
                         console.log("subdomain", subdomain);
                         setHasSubdomain(true);
-                        setSubdomainObject([subdomain.data]);
+                        setSubdomainObject(subdomain.data)
                     }
                     if (response.status === 204) {
                         setHasSubdomain(false);
@@ -80,91 +105,82 @@ function Domain() {
 
     return (
         <>
-            {!hasSubdomain && (
-                <>
-                    <div style={{ backgroundColor: "white" }}>
-                        <form onSubmit={handleSubmit}>
-                            <h1>Add subdomain</h1>
-                            <div className="form-outline mb-4">
-                                <label
-                                    className="form-label"
-                                    htmlFor="subdomaain"
-                                >
-                                    subdomain
-                                </label>
-                                <input
-                                    type="text"
-                                    id="subdomaain"
-                                    value={domain}
-                                    onChange={(e) => setDomain(e.target.value)}
-                                    className="form-control"
-                                />
-                            </div>
-                            <h5>Your personal domain will be </h5>
-                            <h6>
-                                <a className="disabled" href={domain}>
-                                    https://{domain}.cpypst.online
-                                </a>
-                            </h6>
-
-                            <button
-                                type="submit"
-                                className="btn btn-primary btn-block mb-4"
-                            >
-                                Create Subdoamin
-                            </button>
-                        </form>
-                    </div>
-                </>
-            )}
-            {hasSubdomain && (
-                <>
-                    <div className="container card card rounded bg-white mt-5 mb-5">
-                        <h1 className="card-title">Found subdomain</h1>
-                        <table className="table" border={1}>
-                            <thead>
-                                <tr>
-                                    <th scope="col">Subdoamin</th>
-                                    <th scope="col">User Name</th>
-                                    <th scope="col">Domain</th>
-                                    <th scope="col">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {subdomainObject.map((subdomain) => (
-                                    <tr key={subdomain._id}>
-                                        <th scope="row">1</th>
-                                        <td>{subdomain.subdomain}</td>
-                                        {/* <td>{subdomain.userId}</td> */}
-                                        <td>
-                                            <a
-                                                href={
-                                                    "https://" +
-                                                    subdomain.subdomain +
-                                                    ".cpypst.online"
-                                                }
-                                            >
-                                                {subdomain.subdomain}
-                                                .cpypst.online
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <button
-                                                onClick={handleQR}
-                                                className="btn btn-primary"
-                                            >
-                                                Generate QR
-                                            </button>
-                                        </td>
+            <div><Toaster /></div>
+            {!hasSubdomain &&
+                (
+                    <>
+                        <div style={{ backgroundColor: "white" }} className="container">
+                            <form onSubmit={handleSubmit}>
+                                <h1>Add subdomain</h1>
+                                <div className="form-outline mb-4">
+                                    <label className="form-label" htmlFor="subdomaain">subdomain</label>
+                                    <input type="text" id="subdomaain" value={domain} onChange={e => setDomain(e.target.value)} className="form-control" />
+                                </div>
+                                <h5>Your personal domain will be  </h5>
+                                <h6><a className='disabled' href={domain}>https://{domain}.cpypst.online</a></h6>
+                                <button type="submit" className="btn btn-primary btn-block mb-4">Create Subdoamin</button>
+                            </form>
+                        </div>
+                    </>
+                )}
+            {hasSubdomain &&
+                (
+                    <>
+                        <div className="container card rounded bg-white mt-5 mb-5" >
+                            <h1 className="card-title">
+                                Found subdomain
+                            </h1>
+                            <table className='table' border={1}>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Subdoamin</th>
+                                        <th scope="col">User Name</th>
+                                        <th scope="col">Domain</th>
+                                        <th scope="col">Action</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </>
-            )}
+                                </thead>
+                                <tbody>
+                                    {subdomainObject.map(subdomain => (
+                                        <tr key={subdomain._id}>
+                                            <th scope="row">1</th>
+                                            <td>{subdomain.subdomain}</td>
+                                            {/* <td>{subdomain.userId}</td> */}
+                                            <td><a href={"https://" + subdomain.subdomain + ".cpypst.online"}>{subdomain.subdomain}.cpypst.online</a></td>
+                                            <td><button onClick={handleQR} className="btn btn-primary">Generate QR</button></td>
+                                        </tr>
+
+                                    ))}
+
+                                </tbody>
+                            </table>
+                            <Row >
+                                <Col className='mb-2 ali'>
+                                    <button onClick={checkAvailability} className="btn btn-primary">Add Subdomain</button>
+                                </Col>
+                            </Row>
+                            <Modal show={show} onHide={handleClose}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Create New Subdomain</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <Form>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Title</Form.Label>
+                                            {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                            <Form.Control type="text" value={newSubdomain} placeholder="New Subdomain" onChange={e => setNewSubdomain(e.target.value)} autoFocus />
+                                        </Form.Group>
+                                    </Form>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={handleClose}>Close</Button>
+                                    <Button variant="primary" onClick={handleSubmit}>Create New Subdoamin</Button>
+                                </Modal.Footer>
+                            </Modal>
+                        </div>
+                    </>
+                )}
         </>
-    );
+    )
 }
 
-export default Domain;
+export default Domain
