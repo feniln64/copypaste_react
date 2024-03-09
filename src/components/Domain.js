@@ -1,44 +1,46 @@
-import { useState } from 'react'
-import React from 'react'
-import axiosInstance from '../api/api'
-import { useSelector, useDispatch } from 'react-redux'
-import { updateDomain } from '../store/slices/domainSlice'
+import { useState } from "react";
+import React from "react";
+import axiosInstance from "../api/api";
+import { useSelector, useDispatch } from "react-redux";
+import { updateDomain } from "../store/slices/domainSlice";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useEffect } from 'react'
 import newEvent from '../api/postHog'
-import Popup from 'reactjs-popup';
 import toast, { Toaster } from 'react-hot-toast';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 function Domain() {
 
-    const [domain, setDomain] = useState("")
+    const [domain, setDomain] = useState("");
 
-    const userInfo = useSelector((state) => state.auth.userInfo)
-    const subdomain = useSelector((state) => state.auth.subdomain)
-    const [hasSubdomain, setHasSubdomain] = useState(false)
-    const [subdomainObject, setSubdomainObject] = useState([])
-    const [open, setOpen] = useState(false);
+    const userInfo = useSelector((state) => state.auth.userInfo);
+    const subdomain = useSelector((state) => state.auth.subdomain);
+    const [hasSubdomain, setHasSubdomain] = useState(false);
+    const [subdomainObject, setSubdomainObject] = useState([]);
+    const dispatch = useDispatch();
+    const userId = userInfo.id;
     const [newSubdomain, setNewSubdomain] = useState("")
-    const dispatch = useDispatch()
-    const userId = userInfo.id
 
-    const closeModal = () => setOpen(false);
-
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         const userData = {
-            subdomain: newSubdomain
+            userId: userId,
+            subdomain: domain,
+            active: true,
         };
-        setDomain("")
+        setDomain("");
+
         const res = await axiosInstance.post(`/subdomain/create/${userId}`, userData, { withCredentials: true })
             .then((response) => {
                 console.log("subdomainObject", response.data);
                 dispatch(updateDomain(newSubdomain))
                 toast.success("subdomain created successfully");
-                setOpen(false)
+                setShow(false)
 
             })
             .catch((error) => {
@@ -57,7 +59,7 @@ function Domain() {
         const res = await axiosInstance.get(`/subdomain/availability/${userId}`, { withCredentials: true })
             .then((response) => {
                 console.log("response", response);
-                setOpen(o => !o)
+                setShow(o => !o)
             })
             .catch((error) => {
                 if (error.response) {
@@ -72,39 +74,34 @@ function Domain() {
     }
 
     const handleQR = async (e) => {
-        e.preventDefault()
-        console.log("handleQR")
-    }
-
+        e.preventDefault();
+        console.log("handleQR");
+    };
     useEffect(() => {
         newEvent("domain", "view domain", "/domain");
+        try {
+            axiosInstance.get(`/subdomain/getsubdomain/${userId}`, {}, { withCredentials: true })
+                .then((response) => {
+                    // console.log("init.response =", response);
+                    if (response.status === 200) {
+                        var subdomain = response;
 
-        axiosInstance.get(`/subdomain/getsubdomain/${userId}`, {}, { withCredentials: true })
-            .then((response) => {
-                // console.log("init.response =", response);
-                if (response.status === 200) {
-                    var subdomain = response
-                    console.log("subdomain", subdomain);
-                    setHasSubdomain(true)
-                    setSubdomainObject(subdomain.data)
-                }
-                if (response.status === 204) {
-                    setHasSubdomain(false)
-                }
-            })
-            .catch((error) => {
-                setHasSubdomain(false)
-                if (error.response) {
-                    console.log(error.response);
-                    toast.error(error.response.data.message);
-                } else if (error.request) {
-                    toast.error("network error");
-                } else {
-                    toast.error(error);
-                }
-            });
+                        console.log("subdomain", subdomain);
+                        setHasSubdomain(true);
+                        setSubdomainObject(subdomain.data)
+                    }
+                    if (response.status === 204) {
+                        setHasSubdomain(false);
+                    }
+                })
+                .catch((error) => {
+                    setHasSubdomain(false);
+                    console.log(error);
+                });
+        } catch (error) {
+            console.log(error);
+        }
     }, []);
-
 
     return (
         <>
@@ -161,28 +158,29 @@ function Domain() {
                                     <button onClick={checkAvailability} className="btn btn-primary">Add Subdomain</button>
                                 </Col>
                             </Row>
-                            <Popup className='card rounded bg-white mt-5 mb-5' open={open} closeOnDocumentClick onClose={closeModal}>
-                                <Form onSubmit={handleSubmit}>
-                                    <h3 className='card-title'>Create New Subdoamin</h3>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Control type="text" value={newSubdomain} placeholder="New Subdomain" onChange={e => setNewSubdomain(e.target.value)} />
-                                    </Form.Group>
-                                    <Form.Group className="mb-2">
-                                        <Button type="submit" className="btn btn-primary mb-2">
-                                            Create Contact
-                                        </Button>
-                                    </Form.Group>
-                                </Form>
-                            </Popup>
+                            <Modal show={show} onHide={handleClose}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Create New Subdomain</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <Form>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Title</Form.Label>
+                                            {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                            <Form.Control type="text" value={newSubdomain} placeholder="New Subdomain" onChange={e => setNewSubdomain(e.target.value)} autoFocus />
+                                        </Form.Group>
+                                    </Form>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={handleClose}>Close</Button>
+                                    <Button variant="primary" onClick={handleSubmit}>Create New Subdoamin</Button>
+                                </Modal.Footer>
+                            </Modal>
                         </div>
                     </>
-                )
-            }
-
+                )}
         </>
     )
 }
-
-
 
 export default Domain

@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === 'dev') {
   baseURL = "https://node.cpypst.online"
 }
 const axiosInstance = axios.create({
-  baseURL: baseURL,
+  baseURL: "http://localhost:9000",
   headers: {
     "Content-Type": "application/json",
   },

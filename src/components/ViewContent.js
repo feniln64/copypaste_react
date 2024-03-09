@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import axiosInstance from '../api/api'
 import Calendar from 'react-calendar';
 import { useSelector, useDispatch } from 'react-redux'
-import { addContent, updateContent, updateOneContent,removeOneContent } from '../store/slices/contentSlice';
+import { addContent, updateContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
 import 'react-calendar/dist/Calendar.css';
 import { useState } from 'react';
 import ReactQuill from 'react-quill';
@@ -18,16 +18,14 @@ import Card from 'react-bootstrap/Card';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { FaPlus } from "react-icons/fa6";
-import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import '../assets/popup.css';
 import toast, { Toaster } from 'react-hot-toast';
-import InputGroup from 'react-bootstrap/InputGroup';
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
-import CardView from '../views/CardView';
 import Modal from 'react-bootstrap/Modal';
 import ToggleButton from 'react-bootstrap/ToggleButton';
+import { CommonDialog, CardView } from '../common';
 
 function ViewContent() {
 
@@ -38,7 +36,7 @@ function ViewContent() {
 
     const isContent = useSelector((state) => state.content.content)
     const [hasContent, sethasContent] = useState(false)
-    const [content, setContent] = useState([])
+    // const [content, setContent] = useState([])
 
     const [permission, setPermission] = useState(0)
     const [date, setDate] = useState(new Date());
@@ -53,6 +51,7 @@ function ViewContent() {
 
     const [deleteModelId, setDeleteModelId] = useState("")
     const [deleteShow, setDeleteShow] = useState(false);
+    const [deleteTitle, setDeleteTitle] = useState("")
     const handleDeleteClose = () => setDeleteShow(false);
 
     const handlePermission = (e) => {
@@ -79,7 +78,7 @@ function ViewContent() {
             .then((response) => {
                 if (response.status === 200) {
                     dispatch(updateOneContent(contentData))
-                    setContent(isContent)
+                    // setContent(isContent)
                     handleClose()
                     toast.success("data updated Successfully");
                 }
@@ -119,7 +118,7 @@ function ViewContent() {
         await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true })
             .then((response) => {
                 if (response.status === 201) {
-                    setContent(response.data.content);
+                    // setContent(response.data.content);
                     sethasContent(true)
                     dispatch(addContent(response.data.content))
                     handleClose();
@@ -158,7 +157,10 @@ function ViewContent() {
     }
 
     useEffect(() => {
-        getinitialData()
+        // getinitialData()
+        if (isContent.length > 0) {
+            sethasContent(true)
+        }
         newEvent("view content", "view content", "/view-content");
 
         socket.emit('join_room', userInfo.username);
@@ -175,7 +177,7 @@ function ViewContent() {
             setNewIsChecked(false)
             setNewContent("")
         } else {
-            setNewContent(isContent.filter((e) => e._id === event)[0].content ||  "")
+            setNewContent(isContent.filter((e) => e._id === event)[0].content || "")
             setNewTitle(isContent.filter((e) => e._id === event)[0].title || "")
             setNewIsChecked(isContent.filter((e) => e._id === event)[0].is_protected || false)
             // handleUpdateShow()
@@ -184,10 +186,11 @@ function ViewContent() {
     };
 
     const deleteModel = (event) => {
-        console.log("deleteModelId", event);
+        setDeleteTitle(isContent.filter((e) => e._id === event)[0].title || "")
         setDeleteModelId(event)
         setDeleteShow(true);
     };
+
     const handleDeleteContent = async (e) => {
         e.preventDefault();
         await axiosInstance.delete(`/content/delete/${deleteModelId}`, { withCredentials: true })
@@ -209,6 +212,7 @@ function ViewContent() {
                     console.log(error);
                 }
             });
+        setDeleteTitle("");
         setDeleteModelId("");
         setDeleteShow(false);
     };
@@ -227,7 +231,7 @@ function ViewContent() {
                                     <div className="col-md-24  card-body">
                                         <Container style={{ minHeight: "715px", marginTop: "50px" }}>
                                             <Row >
-                                                {content.map((e) => (
+                                                {isContent.map((e) => (
                                                     <Col key={e._id} id={e._id} >
                                                         <CardView title={e.title} editContent={openModal} deleteContent={deleteModel} content={e.content} _id={e._id} />
                                                     </Col>
@@ -237,54 +241,45 @@ function ViewContent() {
                                     </div>
                                     <div className="d-flex justify-content-center align-items-center">
                                         {/* Update Content Model  */}
-                                        <Modal show={show} onHide={handleClose}>
+                                        <CommonDialog open={show} onClose={handleClose} onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent} title={"Create New Content"}>
+                                            <Form>
+                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                    <Form.Label>Title</Form.Label>
+                                                    {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                                    <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
+                                                </Form.Group>
+                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                    <Form.Label>Protected Content</Form.Label>
+                                                    <Form.Check // prettier-ignore
+                                                        type={"checkbox"}
+                                                        id={"protected_content"}
+                                                        label="Protected Content"
+                                                        checked={newIsChecked}
+                                                        onChange={e => setNewIsChecked(e.target.checked)}
+                                                    />
+                                                </Form.Group>
+                                                <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                                                    <CKEditor
+                                                        editor={ClassicEditor}
+                                                        data={newContent}
+                                                        config={{ placeholder: "Placeholder text..." }}
+                                                        onReady={editor => { }}
+                                                        onChange={(event, editor) => {
+                                                            setNewContent(editor.getData())
+                                                        }}
+                                                    />
+                                                </Form.Group>
+                                            </Form>
+                                        </CommonDialog>
+                                        {/* Delete Content Model  */}
+                                        <Modal show={deleteShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handleDeleteClose}>
                                             <Modal.Header closeButton>
-                                                <Modal.Title>Create New Content</Modal.Title>
+                                                <Modal.Title>Delete Content "{deleteTitle}" ?</Modal.Title>
                                             </Modal.Header>
-                                            <Modal.Body>
-                                                <Form>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Form.Label>Title</Form.Label>
-                                                        {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
-                                                        <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
-                                                    </Form.Group>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Form.Label>Protected Content</Form.Label>
-                                                        <Form.Check // prettier-ignore
-                                                            type={"checkbox"}
-                                                            id={"protected_content"}
-                                                            label="Protected Content"
-                                                            checked={newIsChecked}
-                                                            onChange={e => setNewIsChecked(e.target.checked)}
-                                                        />
-                                                    </Form.Group>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                                                        <CKEditor
-                                                            editor={ClassicEditor}
-                                                            data={newContent}
-                                                            config={{ placeholder: "Placeholder text..." }}
-                                                            onReady={editor => { }}
-                                                            onChange={(event, editor) => {
-                                                                setNewContent(editor.getData())
-                                                            }}
-                                                        />
-                                                    </Form.Group>
-                                                </Form>
-                                            </Modal.Body>
-                                            <Modal.Footer>
-                                                <Button variant="secondary" onClick={handleClose}>Close</Button>
-                                                <Button variant="primary" onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent}>Save Changes</Button>
-                                            </Modal.Footer>
-                                        </Modal>
-                                        {/* delete content model */}
-                                        <Modal show={deleteShow} onHide={handleDeleteClose}>
-                                            <Modal.Header closeButton>
-                                                <Modal.Title>Modal heading</Modal.Title>
-                                            </Modal.Header>
-                                            <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+                                            <Modal.Body>To confirm deletion, Click on Delete Content.</Modal.Body>
                                             <Modal.Footer>
                                                 <Button variant="secondary" onClick={handleDeleteClose}>
-                                                    Close
+                                                    Cancel
                                                 </Button>
                                                 <Button variant="danger" onClick={handleDeleteContent}>
                                                     Delete Content
@@ -306,7 +301,7 @@ function ViewContent() {
                                         <Card.Body>
                                             <Card.Title>No Content</Card.Title>
                                             <Card.Text>
-                                                Add new content clieck on the button below
+                                                Add new content click on the button below
                                             </Card.Text>
                                         </Card.Body>
                                     </Card>
