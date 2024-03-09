@@ -3,17 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { removeUser } from "../store/slices/authSlice";
 import { removeContent } from "../store/slices/contentSlice";
 import axiosInstance from "../api/api";
-// import 'bootstrap/dist/css/bootstrap.min.css'
 import React from "react";
-// import "../assets/button.css"
-// import "../assets/navbar.css"
-// import "../assets/bizland.css"
-// import Button from 'react-bootstrap/Button';
-// import Container from "react-bootstrap/Container";
-// import Form from 'react-bootstrap/Form';
-// import Nav from "react-bootstrap/Nav";
-// import Navbar from "react-bootstrap/Navbar";
-// import NavDropdown from "react-bootstrap/NavDropdown";
 import { Menu as MenuIcon } from "@mui/icons-material";
 import { AppBar, Box, Button, IconButton, Menu, Toolbar } from "@mui/material";
 import useScreenSize from "../hooks/useScreenSize";

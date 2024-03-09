@@ -58,6 +58,7 @@ export default function Login() {
                 axiosInstance.defaults.headers.common["Authorization"] =
                     "Bearer " + res.data.accessToken;
                 const userInfo = res.data.userInfo;
+                userInfo.isLoggedIn = true;
                 console.log("from data", userInfo);
                 dispatch(addNewUser(userInfo));
                 dispatch(addContent(res.data.content));

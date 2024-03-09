@@ -7,30 +7,182 @@ import newEvent from '../api/postHog';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { Card } from 'react-bootstrap';
+import Form from 'react-bootstrap/Form';
 import toast, { Toaster } from 'react-hot-toast';
 import { socket } from "../api/socket";
-import { TailSpin } from 'react-loader-spinner'
 import { Link } from 'react-router-dom';
 import { Container as MuiContainer, Card as MuiCard, Box, Icon, Typography, Button } from "@mui/material";
 import LunchDiningRoundedIcon from '@mui/icons-material/LunchDiningRounded';
 import useScreenSize from '../hooks/useScreenSize';
-import {CardView} from '../common';
+import { useSelector, useDispatch } from 'react-redux'
+import { addContent, updateContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { CommonDialog, CardView } from '../common';
+import { FaPlus } from "react-icons/fa6";
+import Modal from 'react-bootstrap/Modal';
+import { MdOpenInFull } from "react-icons/md";
+import Card from 'react-bootstrap/Card';
+import ReactQuill from 'react-quill';
+import { IoRefreshOutline } from "react-icons/io5";
+import { addNewUser } from '../store/slices/authSlice';
+var subdomain = "";
+const modules = {
+  toolbar: [
+  ],
+};
+const formats = [];
 function Home() {
 
   var parsed = psl.parse(window.location.hostname);
-  var subdomain = "";
+  const dispatch = useDispatch()
+  const isContent = useSelector((state) => state.content.content)
+
+  const userInfo = useSelector((state) => state.auth.userInfo)
+  const userId = userInfo.userId
+  const username = userInfo.username
+
   const [isLoading, setLoading] = useState(true)
-  const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [hascontent, sethasContent] = useState(false);
+
+  const [newContent, setNewContent] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+  const [newIsChecked, setNewIsChecked] = useState(false);
+
+  const [modelId, setModelId] = useState("")
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+
+  const openModal = (event) => {
+    console.log("event =", event);
+    setModelId(event)
+    if (event === "createContent") {
+      setNewTitle("")
+      setNewIsChecked(false)
+      setNewContent("")
+    } else {
+      setNewContent(isContent.filter((e) => e._id === event)[0].content || "")
+      setNewTitle(isContent.filter((e) => e._id === event)[0].title || "")
+      setNewIsChecked(isContent.filter((e) => e._id === event)[0].is_protected || false)
+      // handleUpdateShow()
+    }
+    setShow(true);
+  };
+
+
+  const handleUpdateContent = async (e) => {
+    e.preventDefault();
+    if (newContent === "" || newTitle === "") {
+      handleClose()
+      return
+    }
+    const contentData = {
+      _id: modelId,
+      content: newContent,
+      is_protected: newIsChecked,
+      title: newTitle
+    };
+    console.log("contentData =", contentData);
+
+    socket.emit("updateContent", ({ room: username, message: contentData }));
+
+    await axiosInstance.patch(`/content/update/public/${modelId}`, contentData) // public route no need to send auth token (with credential)
+      .then((response) => {
+        if (response.status === 200) {
+          dispatch(updateOneContent(contentData))
+          // setContent(isContent)
+          handleClose()
+          toast.success("data updated Successfully");
+        }
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.log(error.response);
+          toast.error(error.response.data.message);
+        } else if (error.request) {
+          console.log("network error");
+        } else {
+          console.log(error);
+        }
+      })
+    setNewTitle(""); setNewIsChecked(false); setNewContent("")
+  };
+
+  const viewContent = (id) => {
+    console.log("view content called");
+    console.log("id =", id);
+  };  
+
+  const handleCreateNewContent = async (e) => {
+    e.preventDefault();
+    console.log("create new content called");
+    if (newContent === "" || newTitle === "") {
+      handleClose()
+      return
+    }
+    const contentData = {
+      subdomain: subdomain,
+      content: newContent,
+      is_protected: false,
+      title: newTitle
+    };
+    console.log("contentData =", contentData);
+    setNewTitle("")
+    setNewContent("")
+
+    socket.emit("newContent", ({ room: username, message: contentData }));
+
+    await axiosInstance.post(`/content/create/public/${userId}`, contentData) // public route no need to send auth token (with credential)
+      .then((response) => {
+        if (response.status === 201) {
+          // setContent(response.data.content);
+          sethasContent(true)
+          dispatch(addContent(response.data.content))
+          handleClose();
+          toast.success("data added Successfully");
+        }
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.log(error.response);
+          toast.error(error.response.data.message);
+        } else if (error.request) {
+          console.log("network error");
+        } else {
+          console.log(error);
+        }
+      })
+  };
+
+  const getinitialData = async () => {
+    await axiosInstance.get(`/init/getdata/${subdomain}`) // public route no need to send auth token (with credential)
+        .then((response) => {
+          if (response.data.content !== null && response.data.content.length > 0) 
+          {
+            console.log("response.data.content =", response.data.content);
+            sethasContent(true)
+            dispatch(addContent(response.data.content))
+          }
+        })
+        .catch((error) => {
+            if (error.response) {
+                console.log(error.response);
+                toast.error(error.response.data.message);
+            } else if (error.request) {
+                console.log("network error");
+            } else {
+                console.log(error);
+            }
+        });
+}
 
   useEffect(() => {
     console.log("subdomain is " + parsed.subdomain)
     newEvent("homepage", "homepage", "/homepage");
     subdomain = parsed.subdomain;
-    socket.emit('join_room', subdomain);
-    socket.on('message', (data) => {
+    
+    socket.on('updateContent', (data) => {
       console.log("data from server", data);
       // setContent(data.content);
     });
@@ -38,13 +190,17 @@ function Home() {
       subdomain = "";
     }
     else {
+      
       try {
         axiosInstance.get(`/init/getdata/${subdomain}`)
           .then((response) => {
             console.log("init.response =", response);
             if (response.data.content !== null && response.data.content.length > 0) {
               sethasContent(true);
-              setContent(response.data.content);
+              socket.emit('join_room', response.data.userId);
+              dispatch(addContent(response.data.content));
+              dispatch(addNewUser(response.data.userInfo));
+              // setContent(response.data.content);
               setTitle(response.data.title);
             } else sethasContent(false);
           })
@@ -86,44 +242,6 @@ function Home() {
           </section>
 
           <section id="featured-services" className="featured-services">
-            <div className="container" data-aos="fade-up">
-
-              <div className="row">
-                <div className="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
-                  <div className="icon-box" data-aos="fade-up" data-aos-delay="100">
-                    <div className="icon"><i className="bx bxl-dribbble"></i></div>
-                    <h4 className="title"><a href="">Lorem Ipsum</a></h4>
-                    <p className="description">Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi</p>
-                  </div>
-                </div>
-
-                <div className="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
-                  <div className="icon-box" data-aos="fade-up" data-aos-delay="200">
-                    <div className="icon"><i className="bx bx-file"></i></div>
-                    <h4 className="title"><a href="">Sed ut perspiciatis</a></h4>
-                    <p className="description">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore</p>
-                  </div>
-                </div>
-
-                <div className="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
-                  <div className="icon-box" data-aos="fade-up" data-aos-delay="300">
-                    <div className="icon"><i className="bx bx-tachometer"></i></div>
-                    <h4 className="title"><a href="">Magni Dolores</a></h4>
-                    <p className="description">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia</p>
-                  </div>
-                </div>
-
-                <div className="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
-                  <div className="icon-box" data-aos="fade-up" data-aos-delay="400">
-                    <div className="icon"><i className="bx bx-world"></i></div>
-                    <h4 className="title"><a href="">Nemo Enim</a></h4>
-                    <p className="description">At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis</p>
-                  </div>
-                </div>
-
-              </div>
-
-            </div>
             <h1>Features</h1>
             <MuiContainer sx={{
               display: "flex", gap: "20px", flex: 1, justifyContent: "space-between", minHeight: "260px",
@@ -243,45 +361,68 @@ function Home() {
       )}
       {hascontent && (
         <>
+          
           <div className="container  card rounded bg-white" style={{ marginBottom: "100px" }}>
             <div className="row">
               <div className="d-flex justify-content-center align-items-center mt-3">
                 <h4 className="text-right">User Content</h4>
+                <Button className='mt-2' variant='primary' onClick={getinitialData} ><IoRefreshOutline /></Button>
+
               </div>
               <div className="row">
                 <div className="col-md-24  card-body">
                   <Container style={{ minHeight: "715px", marginTop: "50px" }}>
                     <Row >
-                      {content.map((e) => (
-                        <Col key={e._id} id={e._id} >
-                          <CardView title={e.title} content={e.content} _id={e._id} />
-                        </Col>
+                      {isContent.map((e) => (
+                      <Col  key={e._id} >
+                          {/* <CardView title={e.title} editContent={openModal} deleteContent={null} content={e.content} _id={e._id} /> */}
+                          <Card key={e._id} id={e._id} style={{ width: '18rem' }}>
+                            <Card.Body>
+                              <Button className='mt-2' variant='primary' id={e._id} onClick={e => openModal(e.target.id)} ><MdOpenInFull id={e._id} /></Button>
+                              <Card.Title>{e.title}</Card.Title>
+                              <Card.Text>
+                                <ReactQuill
+                                  modules={modules}
+                                  formats={formats}
+                                  style={{ height: "auto", border: "none" }}
+                                  readOnly={true}
+                                  value={e.content}
+                                />
+                              </Card.Text>
+                            </Card.Body>
+                          </Card>
+                      </Col>
                       ))}
                     </Row>
                   </Container>
                 </div>
                 <div className="d-flex justify-content-center align-items-center">
+                  {/* Update Content Model  */}
+                  <CommonDialog open={show} onClose={handleClose} onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent} title={"Create New Content"}>
+                    <Form>
+                      <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        <Form.Label>Title</Form.Label>
+                        {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                        <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
+                      </Form.Group>
+                      <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                        <CKEditor
+                          editor={ClassicEditor}
+                          data={newContent}
+                          config={{ placeholder: "Placeholder text..." }}
+                          onReady={editor => { }}
+                          onChange={(event, editor) => {
+                            setNewContent(editor.getData())
+                          }}
+                        />
+                      </Form.Group>
+                    </Form>
+                  </CommonDialog>
+                  <button className="btn btn-primary mb-3" onClick={e => openModal(e.target.id)} id='createContent'> <FaPlus /> Create New Content </button>
                 </div>
               </div>
             </div>
           </div>
-          <Container style={{ minHeight: "715px", marginTop: "50px" }}>
-            <Row >
-              {content.map((e) => (
-                <Col>
-                  <Card key={content._id} style={{ width: '18rem' }}>
-                    <Card.Body>
-                      <Card.Title>{e.title}</Card.Title>
-                      <Card.Text>
-                        {e.content}
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-            <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
-          </Container>
         </>
       )}
     </>
