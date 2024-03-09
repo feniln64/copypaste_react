@@ -72,7 +72,7 @@ function ViewContent() {
         };
         console.log("contentData =", contentData);
 
-        socket.emit("message", ({ room: username, message: contentData }));
+        socket.emit("updateContent", ({ room: username, message: contentData }));
 
         await axiosInstance.patch(`/content/update/${modelId}`, contentData, { withCredentials: true })
             .then((response) => {
@@ -108,12 +108,11 @@ function ViewContent() {
             is_protected: newIsChecked,
             title: newTitle
         };
-        console.log("contentData =", contentData);
         setNewTitle("")
         setNewIsChecked(false)
         setNewContent("")
 
-        socket.emit("message", ({ room: username, message: contentData }));
+        socket.emit("newContent", ({ room: username, message: contentData }));
 
         await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true })
             .then((response) => {
@@ -140,7 +139,7 @@ function ViewContent() {
     const getinitialData = async () => {
         await axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
             .then((response) => {
-                setContent(response.data.content);
+                // setContent(response.data.content);
                 sethasContent(true)
                 dispatch(addContent(response.data.content))
             })
@@ -157,7 +156,7 @@ function ViewContent() {
     }
 
     useEffect(() => {
-        // getinitialData()
+        getinitialData()
         if (isContent.length > 0) {
             sethasContent(true)
         }
@@ -216,6 +215,7 @@ function ViewContent() {
         setDeleteModelId("");
         setDeleteShow(false);
     };
+
     return (
         <>
             <Toaster />
