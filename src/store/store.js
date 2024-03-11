@@ -8,11 +8,13 @@ import { persistReducer, persistStore,FLUSH,
   REGISTER, } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'
 import contentReducer from './slices/contentSlice';
+import subDomainSlice from './slices/domainSlice';
 import thunk from 'redux-thunk'
 
 const reducers = combineReducers({
   auth: authReducer,
   content: contentReducer,
+  subdomain: subDomainSlice
 });
 
 const persistConfig = {

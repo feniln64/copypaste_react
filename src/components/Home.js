@@ -81,7 +81,8 @@ function Home() {
       _id: modelId,
       content: newContent,
       is_protected: newIsChecked,
-      title: newTitle
+      title: newTitle,
+      is_shared: false
     };
     console.log("contentData =", contentData);
 
@@ -125,7 +126,8 @@ function Home() {
       subdomain: subdomain,
       content: newContent,
       is_protected: false,
-      title: newTitle
+      title: newTitle,
+      is_shared: false
     };
     console.log("contentData =", contentData);
     setNewTitle("")

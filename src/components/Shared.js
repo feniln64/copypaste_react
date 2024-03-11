@@ -27,7 +27,7 @@ import Modal from 'react-bootstrap/Modal';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import { CommonDialog, CardView } from '../common';
 
-function ViewContent() {
+function Shared() {
 
     const dispatch = useDispatch()
     const userInfo = useSelector((state) => state.auth.userInfo)
@@ -68,8 +68,7 @@ function ViewContent() {
             _id: modelId,
             content: newContent,
             is_protected: newIsChecked,
-            title: newTitle,
-            is_shared: false
+            title: newTitle
         };
         console.log("contentData =", contentData);
 
@@ -78,9 +77,7 @@ function ViewContent() {
         await axiosInstance.patch(`/content/update/${modelId}`, contentData, { withCredentials: true })
             .then((response) => {
                 if (response.status === 200) {
-                    console.log("response.data.updatedContent", response.data.updatedContent);
-                    // dispatch(updateOneContent(response.data.updatedContent))
-                    getinitialData()
+                    dispatch(updateOneContent(contentData))
                     // setContent(isContent)
                     handleClose()
                     toast.success("data updated Successfully");
@@ -322,4 +319,4 @@ function ViewContent() {
 }
 
 
-export default ViewContent
+export default Shared;

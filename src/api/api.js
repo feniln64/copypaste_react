@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { updateUser } from '../store/slices/authSlice'
 
 let baseURL  = ""
-if (process.env.NODE_ENV === 'dev') {
+if (process.env.NODE_ENV === 'development') {
   baseURL = "http://localhost:9000"
 } else {
   baseURL = "https://node.cpypst.online"
