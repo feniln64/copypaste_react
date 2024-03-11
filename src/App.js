@@ -9,8 +9,9 @@ import Error from './templates/Error';
 import Domain from './components/Domain';
 import ViewContent from './components/ViewContent';
 import Content from './components/EditContent';
-
+import Shared from './components/Shared';
 function App() {
+  console.log("process.env.NODE_ENV", process.env.NODE_ENV);
   return (
     <Routes>
         <Route path="/" element={<Layout />} >
@@ -20,6 +21,7 @@ function App() {
         <Route path={"/register"} element={<Register/>} />
         <Route path={"/profile"} element={<Profile/>} />
         <Route path={"/add-domain"} element={<Domain/>} />
+        <Route path={"/shared"} element={<Shared/>} />
         <Route path={"/content"} element={<ViewContent/>} />
         <Route path={"/create-content"} element={<Content/>} />
         <Route path={"*"} element={<Error/>} />

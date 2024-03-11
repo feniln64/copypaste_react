@@ -7,6 +7,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addNewUser } from "../store/slices/authSlice";
 import { addContent } from "../store/slices/contentSlice";
+import { initDomain } from "../store/slices/domainSlice";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../assets/button.css";
 import "../assets/container.css";
@@ -59,9 +60,10 @@ export default function Login() {
                     "Bearer " + res.data.accessToken;
                 const userInfo = res.data.userInfo;
                 userInfo.isLoggedIn = true;
-                console.log("from data", userInfo);
+                console.log(res.data);
                 dispatch(addNewUser(userInfo));
                 dispatch(addContent(res.data.content));
+                dispatch(initDomain(res.data.subdomains));
                 navigate("/");
             }
         } catch (error) {
