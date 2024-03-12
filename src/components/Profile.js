@@ -5,6 +5,8 @@ import { updateUser } from '../store/slices/authSlice'
 import axiosInstance from '../api/api'
 import toast, { Toaster } from 'react-hot-toast';
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { Box, Button, Divider, Grid, InputLabel, TextField, Typography } from '@mui/material'
+import useScreenSize from '../hooks/useScreenSize'
 var AWS = require('aws-sdk');
 function Profile() {
     const [file, setFile] = useState(null);
@@ -174,12 +176,14 @@ function Profile() {
             console.error(error);
         }
 
-    }, [])
+    }, []);
+
+    const [isMobileView] = useScreenSize();
 
     return (
         <>
             <div><Toaster /></div>
-            <div id='main' className="container" style={{ marginLeft: "auto" }}>
+            {/* <div id='main' className="container" style={{ marginLeft: "auto" }}>
                 <section className="section profile">
                     <div className="row">
                         <div className="col-xl-4">
@@ -365,7 +369,185 @@ function Profile() {
                         </div>
                     </div>
                 </section>
-            </div>
+            </div> */}
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: isMobileView ? "20px !important" : "40px !important",
+                    background: "#fff",
+                    gap: "30px",
+                    borderRadius: "8px",
+                    flex: 1,
+                    margin: "25px 75px"
+                }}
+            >
+                <Typography sx={{paddingX: "15px", fontWeight: "bold"}}>
+                    Profile
+                </Typography>
+                <Divider sx={{borderBottom: "1px solid #e6e8eb"}} />
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                        <InputLabel sx={{fontWeight: "bold"}}>
+                            First Name
+                        </InputLabel>
+                        <TextField
+                            variant="outlined"
+                            placeholder="FullName"
+                            name="name"
+                            value={namee}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            fullWidth
+                            sx={{
+                                "& input": { padding: "8px 16px !important" },
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <InputLabel sx={{fontWeight: "bold"}}>
+                            User Name
+                        </InputLabel>
+                        <TextField
+                            variant="outlined"
+                            placeholder="User Name"
+                            name="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            fullWidth
+                            sx={{
+                                "& input": { padding: "8px 16px !important" },
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <InputLabel sx={{fontWeight: "bold"}}>
+                            Email
+                        </InputLabel>
+                        <TextField
+                            variant="outlined"
+                            placeholder="Email"
+                            name="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            fullWidth
+                            sx={{
+                                "& input": { padding: "8px 16px !important" },
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <InputLabel sx={{fontWeight: "bold"}}>
+                            Avatar
+                        </InputLabel>
+                        <input name="profileImage" onChange={saveFile} type="file" className="form-control" id="profileImage" />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button 
+                            variant='contained'
+                            sx={{
+                                borderRadius: "6px",
+                                textTransform: "none",
+                                fontWeight: "bold",
+                                background: "#3758f9",
+                                "&:hover": {
+                                    background: "#3758f9",
+                                },
+                            }}
+                        >
+                            Update
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Box>
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: isMobileView ? "20px !important" : "40px !important",
+                    background: "#fff",
+                    gap: "30px",
+                    borderRadius: "8px",
+                    flex: 1,
+                    margin: "25px 75px"
+                }}
+            >
+                <Typography sx={{paddingX: "15px", fontWeight: "bold"}}>
+                    Change Password
+                </Typography>
+                <Divider sx={{borderBottom: "1px solid #e6e8eb"}} />
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                        <InputLabel sx={{fontWeight: "bold"}}>
+                            Current Password
+                        </InputLabel>
+                        <TextField
+                            variant="outlined"
+                            placeholder="Enter current password"
+                            name="currentPassword"
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            required
+                            fullWidth
+                            sx={{
+                                "& input": { padding: "8px 16px !important" },
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <InputLabel sx={{fontWeight: "bold"}}>
+                            New Password
+                        </InputLabel>
+                        <TextField
+                            variant="outlined"
+                            placeholder="New Password"
+                            name="newPassword"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            required
+                            fullWidth
+                            sx={{
+                                "& input": { padding: "8px 16px !important" },
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <InputLabel sx={{fontWeight: "bold"}}>
+                            Confirm new Password
+                        </InputLabel>
+                        <TextField
+                            variant="outlined"
+                            placeholder="Confirm new Password"
+                            name="confirmPassword"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            fullWidth
+                            sx={{
+                                "& input": { padding: "8px 16px !important" },
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button 
+                        variant='contained'
+                        sx={{
+                                borderRadius: "6px",
+                                background: "#3758f9",
+                                textTransform: "none",
+                                "&:hover": {
+                                    background: "#3758f9",
+                                },
+                                fontWeight: "bold",
+                            }}
+                        >
+                            Change Passsword
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Box>
         </>
     )
 }

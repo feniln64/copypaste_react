@@ -226,7 +226,7 @@ export default function Login() {
                     flexDirection: "column",
                     height: "85vh",
                     padding: isMobileView ? "20px !important" : "0px 60px !important",
-                    background: "#f4f7ff",
+                    background: "#f8f9fA",
                 }}
                 maxWidth="sm"
             >
