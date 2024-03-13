@@ -22,7 +22,15 @@ const contentSlice = createSlice({
     },
     updateOneContent: (state, action) => {  // used to update one data with edidt button
       // state.content = [...state.content.filter((content) => {if(content._id === action.payload._id){content.title=action.payload.title;content.content=action.payload.content;content.is_protetcted=action.payload.is_protetcted;return content}else{return content}})]
-      state.content = [...state.content.filter((content) => {if(content._id === action.payload._id){content=action.payload}})]
+      state.content = state.content.map(content => {
+        let data = {};
+        if (content._id === action.payload._id) {
+          data = action.payload;
+          return {...content, ...data}
+        }
+        return content;
+      })
+      // state.content = [...state.content.filter((content) => {if(content._id === action.payload._id){content=action.payload}})]
     
     },
   },

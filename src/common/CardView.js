@@ -3,8 +3,9 @@ import ReactQuill from 'react-quill';
 import { MdDeleteForever } from "react-icons/md";
 import { RiEditBoxFill } from "react-icons/ri";
 import { Button } from 'react-bootstrap';
-import { Box, Typography, Button as MUIButton } from '@mui/material';
+import { Box, Typography, Button as MUIButton, IconButton } from '@mui/material';
 import { useState } from 'react';
+import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 const modules = {
     toolbar: [
     ],
@@ -34,12 +35,13 @@ const CardView = (props) => {
             <Box 
                 sx={{
                     padding: "10px 20px", display: "flex", flexDirection: "column", gap: "15px", background: "#fff",
-                    boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px",
+                    boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px", position: "relative"
                 }}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-            >
+            >   
                 <Typography>{props.title}</Typography>
+                <IconButton sx={{ position: "absolute", right: "0px", top: "2px"}}><MoreVertRoundedIcon /></IconButton>
                 <Box>
                     <ReactQuill
                         modules={modules}

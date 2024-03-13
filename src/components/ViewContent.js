@@ -37,7 +37,7 @@ function ViewContent() {
     const userId = userInfo.id
 
     const isContent = useSelector((state) => state.content.content)
-    const [hasContent, sethasContent] = useState(false)
+        const [hasContent, sethasContent] = useState(false)
     // const [content, setContent] = useState([])
 
     const [permission, setPermission] = useState(0)
@@ -81,8 +81,8 @@ function ViewContent() {
             .then((response) => {
                 if (response.status === 200) {
                     console.log("response.data.updatedContent", response.data.updatedContent);
-                    // dispatch(updateOneContent(response.data.updatedContent))
-                    getinitialData()
+                    dispatch(updateOneContent(response.data.updatedContent))
+                    // getinitialData()
                     // setContent(isContent)
                     handleClose()
                     toast.success("data updated Successfully");
