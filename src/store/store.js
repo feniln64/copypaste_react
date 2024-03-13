@@ -9,12 +9,16 @@ import { persistReducer, persistStore,FLUSH,
 import storage from 'redux-persist/lib/storage'
 import contentReducer from './slices/contentSlice';
 import subDomainSlice from './slices/domainSlice';
+import sharedBySlice from './slices/sharedBySlice';
+import sharedToSlice from './slices/sharedToSlice';
 import thunk from 'redux-thunk'
 
 const reducers = combineReducers({
   auth: authReducer,
   content: contentReducer,
-  subdomain: subDomainSlice
+  subdomain: subDomainSlice,
+  sharedby: sharedBySlice,
+  sharedto: sharedToSlice,
 });
 
 const persistConfig = {
