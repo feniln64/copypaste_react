@@ -26,6 +26,8 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import { CommonDialog, CardView } from '../common';
+import { RiEditBoxFill } from "react-icons/ri";
+import { Flex } from 'antd';
 
 function Shared() {
 
@@ -33,8 +35,9 @@ function Shared() {
     const userInfo = useSelector((state) => state.auth.userInfo)
     const username = userInfo.username
     const userId = userInfo.id
+    const userEmail = userInfo.email
 
-    const isContent = useSelector((state) => state.content.content)
+    const isContent = useSelector((state) => state.sharedto.sharedto)
     const [hasContent, sethasContent] = useState(false)
     // const [content, setContent] = useState([])
 
@@ -49,14 +52,10 @@ function Shared() {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
 
-    const [deleteModelId, setDeleteModelId] = useState("")
-    const [deleteShow, setDeleteShow] = useState(false);
-    const [deleteTitle, setDeleteTitle] = useState("")
-    const handleDeleteClose = () => setDeleteShow(false);
-
-    const handlePermission = (e) => {
-        setPermission(e.target.value);
-    }
+    const modules = {
+        toolbar: []
+    };
+    const formats = [];
 
     const handleUpdateContent = async (e) => {
         e.preventDefault();
@@ -96,53 +95,13 @@ function Shared() {
         setNewTitle(""); setNewIsChecked(false); setNewContent("")
     };
 
-    const handleCreateNewContent = async (e) => {
-        e.preventDefault();
-        console.log("create new content called");
-        if (newContent === "" || newTitle === "") {
-            handleClose()
-            return
-        }
-        const contentData = {
-            content: newContent,
-            is_protected: newIsChecked,
-            title: newTitle,
-            is_shared: false
-        };
-        setNewTitle("")
-        setNewIsChecked(false)
-        setNewContent("")
-
-        socket.emit("newContent", ({ room: username, message: contentData }));
-
-        await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true })
-            .then((response) => {
-                if (response.status === 201) {
-                    // setContent(response.data.content);
-                    sethasContent(true)
-                    dispatch(addContent(response.data.content))
-                    handleClose();
-                    toast.success("data added Successfully");
-                }
-            })
-            .catch((error) => {
-                if (error.response) {
-                    console.log(error.response);
-                    toast.error(error.response.data.message);
-                } else if (error.request) {
-                    console.log("network error");
-                } else {
-                    console.log(error);
-                }
-            })
-    };
-
     const getinitialData = async () => {
-        await axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
+        console.log(" got data from server")
+        await axiosInstance.get(`permission/getsharedcontent/${userEmail}`, { withCredentials: true })
             .then((response) => {
-                // setContent(response.data.content);
+                setContent(response.data.sharedContent);
                 sethasContent(true)
-                dispatch(addContent(response.data.content))
+                // dispatch(addContent(response.data.content))
             })
             .catch((error) => {
                 if (error.response) {
@@ -171,50 +130,10 @@ function Shared() {
     }, []);
 
     const openModal = (event) => {
-        setModelId(event)
-        if (event === "createContent") {
-            setNewTitle("")
-            setNewIsChecked(false)
-            setNewContent("")
-        } else {
-            setNewContent(isContent.filter((e) => e._id === event)[0].content || "")
-            setNewTitle(isContent.filter((e) => e._id === event)[0].title || "")
-            setNewIsChecked(isContent.filter((e) => e._id === event)[0].is_protected || false)
-            // handleUpdateShow()
-        }
+        setNewContent(isContent.filter((e) => e._id === event)[0].content || "")
+        setNewTitle(isContent.filter((e) => e._id === event)[0].title || "")
+        setNewIsChecked(isContent.filter((e) => e._id === event)[0].is_protected || false)
         setShow(true);
-    };
-
-    const deleteModel = (event) => {
-        setDeleteTitle(isContent.filter((e) => e._id === event)[0].title || "")
-        setDeleteModelId(event)
-        setDeleteShow(true);
-    };
-
-    const handleDeleteContent = async (e) => {
-        e.preventDefault();
-        await axiosInstance.delete(`/content/delete/${deleteModelId}`, { withCredentials: true })
-            .then((response) => {
-                if (response.status === 201) {
-                    dispatch(removeOneContent({ _id: deleteModelId }))
-                    setDeleteShow(false);
-                    setContent(isContent)
-                    toast.success("data deleted Successfully");
-                }
-            })
-            .catch((error) => {
-                if (error.response) {
-                    console.log(error.response);
-                    toast.error(error.response.data.message);
-                } else if (error.request) {
-                    console.log("network error");
-                } else {
-                    console.log(error);
-                }
-            });
-        setDeleteTitle("");
-        setDeleteModelId("");
-        setDeleteShow(false);
     };
 
     return (
@@ -233,16 +152,30 @@ function Shared() {
                                         <Container style={{ minHeight: "715px", marginTop: "50px" }}>
                                             <Row >
                                                 {isContent.map((e) => (
-                                                    <Col key={e._id} id={e._id} >
-                                                        <CardView title={e.title} editContent={openModal} deleteContent={deleteModel} content={e.content} _id={e._id} />
-                                                    </Col>
+                                                   <Col key={e._id} id={e._id} >
+                                                   <Card id={e._id} style={{ width: '18rem' }}>
+                                                       <Card.Body>
+                                                           <Button className='mt-2' onClick={() => e.editContent(e._id)}><RiEditBoxFill /></Button>{' '}
+                                                           <Card.Title>{e.title}</Card.Title>
+                                                           <Card.Text>
+                                                               <ReactQuill
+                                                                   modules={modules}
+                                                                   formats={formats}
+                                                                   style={{ height: "auto", border: "none" }}
+                                                                   readOnly={true}
+                                                                   value={e.content}
+                                                               />
+                                                           </Card.Text>
+                                                       </Card.Body>
+                                                   </Card>
+                                               </Col>
                                                 ))}
                                             </Row>
                                         </Container>
                                     </div>
                                     <div className="d-flex justify-content-center align-items-center">
                                         {/* Update Content Model  */}
-                                        <CommonDialog open={show} onClose={handleClose} onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent} title={"Create New Content"}>
+                                        <CommonDialog open={show} onClose={handleClose} onClick={handleUpdateContent} title={"Create New Content"}>
                                             <Form>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                     <Form.Label>Title</Form.Label>
@@ -272,22 +205,7 @@ function Shared() {
                                                 </Form.Group>
                                             </Form>
                                         </CommonDialog>
-                                        {/* Delete Content Model  */}
-                                        <Modal show={deleteShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handleDeleteClose}>
-                                            <Modal.Header closeButton>
-                                                <Modal.Title>Delete Content "{deleteTitle}" ?</Modal.Title>
-                                            </Modal.Header>
-                                            <Modal.Body>To confirm deletion, Click on Delete Content.</Modal.Body>
-                                            <Modal.Footer>
-                                                <Button variant="secondary" onClick={handleDeleteClose}>
-                                                    Cancel
-                                                </Button>
-                                                <Button variant="danger" onClick={handleDeleteContent}>
-                                                    Delete Content
-                                                </Button>
-                                            </Modal.Footer>
-                                        </Modal>
-                                        <button className="btn btn-primary mb-3" onClick={e => openModal(e.target.id)} id='createContent'> <FaPlus /> Create New Content </button>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -297,18 +215,17 @@ function Shared() {
                     <>
                         <Container style={{ minHeight: "715px", marginTop: "50px" }}>
                             <Row >
-                                <Col>
+                                <Col className='d-flex justify-content-center'>
                                     <Card style={{ width: '18rem' }}>
                                         <Card.Body>
                                             <Card.Title>No Content</Card.Title>
                                             <Card.Text>
-                                                Add new content click on the button below
+                                                No shared content with you
                                             </Card.Text>
                                         </Card.Body>
                                     </Card>
                                 </Col>
                             </Row>
-                            <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
                         </Container>
                     </>
                 )

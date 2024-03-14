@@ -26,6 +26,8 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import { CommonDialog, CardView } from '../common';
+import { Box, Grid, Typography, Button as MUIButton } from '@mui/material';
+import useScreenSize from '../hooks/useScreenSize';
 
 function ViewContent() {
 
@@ -35,7 +37,7 @@ function ViewContent() {
     const userId = userInfo.id
 
     const isContent = useSelector((state) => state.content.content)
-    const [hasContent, sethasContent] = useState(false)
+        const [hasContent, sethasContent] = useState(false)
     // const [content, setContent] = useState([])
 
     const [permission, setPermission] = useState(0)
@@ -79,8 +81,8 @@ function ViewContent() {
             .then((response) => {
                 if (response.status === 200) {
                     console.log("response.data.updatedContent", response.data.updatedContent);
-                    // dispatch(updateOneContent(response.data.updatedContent))
-                    getinitialData()
+                    dispatch(updateOneContent(response.data.updatedContent))
+                    // getinitialData()
                     // setContent(isContent)
                     handleClose()
                     toast.success("data updated Successfully");
@@ -220,10 +222,13 @@ function ViewContent() {
         setDeleteShow(false);
     };
 
+    const [isMobileView] = useScreenSize();
+
     return (
         <>
             <Toaster />
-            <Container className="mt-4">
+            {/* <Container className="mt-4">
+                <>
                 {hasContent ? (
                     <>
                         <div className="container  card rounded bg-white" style={{ marginBottom: "100px" }}>
@@ -244,12 +249,12 @@ function ViewContent() {
                                         </Container>
                                     </div>
                                     <div className="d-flex justify-content-center align-items-center">
-                                        {/* Update Content Model  */}
+                                        {/* Update Content Model 
                                         <CommonDialog open={show} onClose={handleClose} onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent} title={"Create New Content"}>
                                             <Form>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                     <Form.Label>Title</Form.Label>
-                                                    {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                                    {/* <input type="text" placeholder="Title" value={newTitle} autoFocus />
                                                     <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
                                                 </Form.Group>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -275,7 +280,7 @@ function ViewContent() {
                                                 </Form.Group>
                                             </Form>
                                         </CommonDialog>
-                                        {/* Delete Content Model  */}
+                                        {/* Delete Content Model  
                                         <Modal show={deleteShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handleDeleteClose}>
                                             <Modal.Header closeButton>
                                                 <Modal.Title>Delete Content "{deleteTitle}" ?</Modal.Title>
@@ -314,9 +319,84 @@ function ViewContent() {
                             <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
                         </Container>
                     </>
-                )
-                }
-            </Container >
+                )}
+                </>
+            </Container > */}
+            <Box
+            sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: isMobileView ? "20px !important" : "40px !important",
+                    background: "#fff",
+                    gap: "30px",
+                    borderRadius: "8px",
+                    flex: 1,
+                    margin: isMobileView ? "25px 10px" : "25px 105px",
+                    boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px",
+                }}
+            >
+            <Typography variant='h5' fontWeight={"bold"} textAlign={"center"}>User Content</Typography>
+            <Grid container>
+                {isContent.map((e) => (
+                    <Grid item xs={12} md={4} sx={{padding:"20px"}}>
+                        <Box sx={{width: isMobileView ? "auto" : "18rem", borderRadius: "8px"}}>
+                            <CardView title={e.title} editContent={openModal} deleteContent={deleteModel} content={e.content} _id={e._id} />
+                        </Box>
+                    </Grid>
+                ))}
+            </Grid>
+            <Box sx={{display: "flex", justifyContent: "center"}}>
+                <MUIButton variant="contained" sx={{width: "fit-content", textTransform: "capitalize"}} onClick={e => openModal(e.target.id)} id='createContent'> <FaPlus />Create New Content </MUIButton>
+            </Box>
+            </Box>
+            <div className="d-flex justify-content-center align-items-center">
+                {/* Update Content Model  */}
+                <CommonDialog open={show} onClose={handleClose} onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent} title={"Create New Content"}>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Title</Form.Label>
+                                {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                    <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
+                                            </Form.Group>
+                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                    <Form.Label>Protected Content</Form.Label>
+                                                    <Form.Check // prettier-ignore
+                                                        type={"checkbox"}
+                                                        id={"protected_content"}
+                                                        label="Protected Content"
+                                                        checked={newIsChecked}
+                                                        onChange={e => setNewIsChecked(e.target.checked)}
+                                                    />
+                                                </Form.Group>
+                                                <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                                                    <CKEditor
+                                                        editor={ClassicEditor}
+                                                        data={newContent}
+                                                        config={{ placeholder: "Placeholder text..." }}
+                                                        onReady={editor => { }}
+                                                        onChange={(event, editor) => {
+                                                            setNewContent(editor.getData())
+                                                        }}
+                                                    />
+                                                </Form.Group>
+                                            </Form>
+                                        </CommonDialog>
+                                        {/* Delete Content Model  */}
+                                        <Modal show={deleteShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handleDeleteClose}>
+                                            <Modal.Header closeButton>
+                                                <Modal.Title>Delete Content "{deleteTitle}" ?</Modal.Title>
+                                            </Modal.Header>
+                                            <Modal.Body>To confirm deletion, Click on Delete Content.</Modal.Body>
+                                            <Modal.Footer>
+                                                <Button variant="secondary" onClick={handleDeleteClose}>
+                                                    Cancel
+                                                </Button>
+                                                <Button variant="danger" onClick={handleDeleteContent}>
+                                                    Delete Content
+                                                </Button>
+                                            </Modal.Footer>
+                                        </Modal>
+                                    </div>
         </>
     )
 }
