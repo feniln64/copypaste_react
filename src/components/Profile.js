@@ -5,8 +5,10 @@ import { updateUser } from '../store/slices/authSlice'
 import axiosInstance from '../api/api'
 import toast, { Toaster } from 'react-hot-toast';
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Box, Button, Divider, Grid, InputLabel, TextField, Typography } from '@mui/material'
+import { Box, Button, Divider, Grid, IconButton, InputAdornment, InputLabel, TextField, Typography } from '@mui/material'
 import useScreenSize from '../hooks/useScreenSize'
+import { VisibilityOff, Visibility } from "@mui/icons-material";
+
 var AWS = require('aws-sdk');
 function Profile() {
     const [file, setFile] = useState(null);
@@ -23,6 +25,11 @@ function Profile() {
     const [newPassword, setNewPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [disabled, setDisabled] = useState(true)
+    const [showPassword, setShowPassword] = useState({
+        currentPass: false,
+        newPass: false,
+        confirmPass: false,
+    });
     const dispatch = useDispatch()
     const userData = {
         id: userInfo.id,
@@ -182,7 +189,7 @@ function Profile() {
 
     return (
         <>
-            <div><Toaster /></div>
+            <div><Toaster position='bottom-right' reverseOrder={false}/></div>
             {/* <div id='main' className="container" style={{ marginLeft: "auto" }}>
                 <section className="section profile">
                     <div className="row">
@@ -386,6 +393,7 @@ function Profile() {
                     Profile
                 </Typography>
                 <Divider sx={{borderBottom: "1px solid #e6e8eb"}} />
+                <form onSubmit={handleSubmit}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
                         <InputLabel sx={{fontWeight: "bold"}}>
@@ -456,11 +464,14 @@ function Profile() {
                                     background: "#3758f9",
                                 },
                             }}
+                            type="submit" 
+                            onSubmit={handleSubmit}
                         >
                             Update
                         </Button>
                     </Grid>
                 </Grid>
+                </form>
             </Box>
             <Box
                 sx={{
@@ -478,75 +489,207 @@ function Profile() {
                     Change Password
                 </Typography>
                 <Divider sx={{borderBottom: "1px solid #e6e8eb"}} />
+                    <form onSubmit={handleChangePassword}>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                        <InputLabel sx={{fontWeight: "bold"}}>
-                            Current Password
-                        </InputLabel>
-                        <TextField
-                            variant="outlined"
-                            placeholder="Enter current password"
-                            name="currentPassword"
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
-                            required
-                            fullWidth
-                            sx={{
-                                "& input": { padding: "8px 16px !important" },
+                        <Grid item xs={12} md={6}>
+                            <InputLabel sx={{fontWeight: "bold"}}>
+                                Current Password
+                            </InputLabel>
+                            <TextField
+                                variant="outlined"
+                                placeholder="Enter current password"
+                                name="currentPassword"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                required
+                                fullWidth
+                                sx={{
+                                    "& input": { padding: "8px 16px !important" },
+                                }}
+                                type={showPassword.currentPass ? "text" : "password"}
+                                InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        {" "}
+                                        {showPassword.currentPass ? (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() =>
+                                                    setShowPassword(pre => ({...pre, currentPass: false}))
+                                                }
+                                            >
+                                                <Visibility
+                                                    sx={{
+                                                        color: "#9E9E9E",
+                                                        cursor: "pointer",
+                                                        width: "14px",
+                                                        height: "14px",
+                                                    }}
+                                                    fontSize="small"
+                                                />
+                                            </IconButton>
+                                        ) : (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() =>
+                                                    setShowPassword(pre => ({...pre, currentPass: true}))
+                                                }
+                                            >
+                                                <VisibilityOff
+                                                    sx={{
+                                                        color: "#9E9E9E",
+                                                        cursor: "pointer",
+                                                        width: "14px",
+                                                        height: "14px",
+                                                    }}
+                                                    fontSize="small"
+                                                />
+                                            </IconButton>
+                                        )}
+                                    </InputAdornment>
+                                ),
                             }}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <InputLabel sx={{fontWeight: "bold"}}>
-                            New Password
-                        </InputLabel>
-                        <TextField
-                            variant="outlined"
-                            placeholder="New Password"
-                            name="newPassword"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            required
-                            fullWidth
-                            sx={{
-                                "& input": { padding: "8px 16px !important" },
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <InputLabel sx={{fontWeight: "bold"}}>
+                                New Password
+                            </InputLabel>
+                            <TextField
+                                variant="outlined"
+                                placeholder="New Password"
+                                name="newPassword"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                                fullWidth
+                                sx={{
+                                    "& input": { padding: "8px 16px !important" },
+                                }}
+                                type={showPassword.newPass ? "text" : "password"}
+                                InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        {" "}
+                                        {showPassword.newPass ? (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() =>
+                                                    setShowPassword(pre => ({...pre, newPass: false}))
+                                                }
+                                            >
+                                                <Visibility
+                                                    sx={{
+                                                        color: "#9E9E9E",
+                                                        cursor: "pointer",
+                                                        width: "14px",
+                                                        height: "14px",
+                                                    }}
+                                                    fontSize="small"
+                                                />
+                                            </IconButton>
+                                        ) : (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() =>
+                                                    setShowPassword(pre => ({...pre, newPass: true}))
+                                                }
+                                            >
+                                                <VisibilityOff
+                                                    sx={{
+                                                        color: "#9E9E9E",
+                                                        cursor: "pointer",
+                                                        width: "14px",
+                                                        height: "14px",
+                                                    }}
+                                                    fontSize="small"
+                                                />
+                                            </IconButton>
+                                        )}
+                                    </InputAdornment>
+                                ),
                             }}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <InputLabel sx={{fontWeight: "bold"}}>
-                            Confirm new Password
-                        </InputLabel>
-                        <TextField
-                            variant="outlined"
-                            placeholder="Confirm new Password"
-                            name="confirmPassword"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                            fullWidth
-                            sx={{
-                                "& input": { padding: "8px 16px !important" },
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <InputLabel sx={{fontWeight: "bold"}}>
+                                Confirm new Password
+                            </InputLabel>
+                            <TextField
+                                variant="outlined"
+                                placeholder="Confirm new Password"
+                                name="confirmPassword"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                                fullWidth
+                                sx={{
+                                    "& input": { padding: "8px 16px !important" },
+                                }}
+                                type={showPassword.confirmPass ? "text" : "password"}
+                                InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        {" "}
+                                        {showPassword.confirmPass ? (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() =>
+                                                    setShowPassword(pre => ({...pre, confirmPass: false}))
+                                                }
+                                            >
+                                                <Visibility
+                                                    sx={{
+                                                        color: "#9E9E9E",
+                                                        cursor: "pointer",
+                                                        width: "14px",
+                                                        height: "14px",
+                                                    }}
+                                                    fontSize="small"
+                                                />
+                                            </IconButton>
+                                        ) : (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() =>
+                                                    setShowPassword(pre => ({...pre, confirmPass: true}))
+                                                }
+                                            >
+                                                <VisibilityOff
+                                                    sx={{
+                                                        color: "#9E9E9E",
+                                                        cursor: "pointer",
+                                                        width: "14px",
+                                                        height: "14px",
+                                                    }}
+                                                    fontSize="small"
+                                                />
+                                            </IconButton>
+                                        )}
+                                    </InputAdornment>
+                                ),
                             }}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Button 
-                        variant='contained'
-                        sx={{
-                                borderRadius: "6px",
-                                background: "#3758f9",
-                                textTransform: "none",
-                                "&:hover": {
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button 
+                            variant='contained'
+                            onSubmit={handleChangePassword}
+                            sx={{
+                                    borderRadius: "6px",
                                     background: "#3758f9",
-                                },
-                                fontWeight: "bold",
-                            }}
-                        >
-                            Change Passsword
-                        </Button>
-                    </Grid>
+                                    textTransform: "none",
+                                    "&:hover": {
+                                        background: "#3758f9",
+                                    },
+                                    fontWeight: "bold",
+                                }}
+                            >
+                                Change Passsword
+                            </Button>
+                        </Grid>
                 </Grid>
+                    </form>
             </Box>
         </>
     )

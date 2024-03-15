@@ -11,14 +11,15 @@ import Form from 'react-bootstrap/Form';
 import toast, { Toaster } from 'react-hot-toast';
 import { socket } from "../api/socket";
 import { Link } from 'react-router-dom';
-import { Container as MuiContainer, Card as MuiCard, Box, Icon, Typography, Button } from "@mui/material";
+import { Container as MuiContainer, Button } from "@mui/material";
 import LunchDiningRoundedIcon from '@mui/icons-material/LunchDiningRounded';
+import { GridViewRounded,LayersRounded, DashboardRounded } from '@mui/icons-material';
 import useScreenSize from '../hooks/useScreenSize';
 import { useSelector, useDispatch } from 'react-redux'
 import { addContent, updateContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CommonDialog, CardView } from '../common';
+import { CommonDialog, CardView, FeaturesCard, PricingCard } from '../common';
 import { FaPlus } from "react-icons/fa6";
 import Modal from 'react-bootstrap/Modal';
 import { MdOpenInFull } from "react-icons/md";
@@ -32,6 +33,32 @@ const modules = {
   ],
 };
 const formats = [];
+
+const featureData = [
+  {
+    icon: <LunchDiningRoundedIcon />,
+    title: "Free and Open-Source"
+  },
+  {
+    icon: <DashboardRounded />,
+    title: "Multipurpose Template"
+  },
+  {
+    icon: <LayersRounded />,
+    title: "High-quality Design"
+  },
+  {
+    icon: <GridViewRounded />,
+    title: "All Essential Elements"
+  },
+];
+
+const pricings = [
+  {price: 25},
+  {price: 59},
+  {price: 99},
+];
+
 function Home() {
 
   var parsed = psl.parse(window.location.hostname);
@@ -233,130 +260,34 @@ function Home() {
       {!hascontent && (
         <>
           <section id="hero" className="d-flex align-items-center" >
-            <div className="container" data-aos="zoom-out" data-aos-delay="100">
-              <h1>Welcome to <span>BizLand V4</span></h1>
-              <h2>We are team of talented designers making websites with Bootstrap</h2>
-              <div className="d-flex">
-                <a href="#about" className="btn-get-started scrollto">Get Started</a>
-                <a href="https://www.youtube.com/watch?v=jDDaplaOz7Q" className="glightbox btn-watch-video"><i className="bi bi-play-circle"></i><span>Watch Video</span></a>
-              </div>
+            <div className="container d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
+              <h1 style={{fontSize: isMobileView ? "20px" : "48px", textAlign: "center", fontWeight: "bold"}}>
+                Handle Your Contents across every Platforms using CPYST! 
+              </h1>
             </div>
           </section>
 
           <section id="featured-services" className="featured-services">
-            <h1>Features</h1>
+            <h1 style={{textAlign: "center"}}>Features</h1>
             <MuiContainer sx={{
               display: "flex", gap: "20px", flex: 1, justifyContent: "space-between", minHeight: "260px",
               padding: isMobileView ? "0 20px !important" : "0 112px !important",
               flexDirection: isMobileView ? "column" : "row"
             }} maxWidth={false}>
-              <MuiCard sx={{ flex: 0.25, borderRadius: "12px", padding: "24px", display: "flex", flexDirection: "column", rowGap: "20px" }}>
-                <Box sx={{
-                  background: "#3758f9", width: "70px", height: "70px", display: "flex", justifyContent: "center", alignItems: "center",
-                  borderRadius: "14px", position: "relative"
-                }}>
-                  <Box sx={{
-                    background: "#3758f9", width: "70px", height: "70px", display: "flex", justifyContent: "center", alignItems: "center",
-                    borderRadius: "14px", position: "absolute", transform: "rotate(25deg)", opacity: 0.25, "&:hover": {
-                      transform: "rotate(45deg)"
-                    }
-                  }} />
-                  <Icon sx={{ height: "37px", width: "37px", color: "white", zIndex: 2 }}><LunchDiningRoundedIcon /></Icon>
-                </Box>
-                <Typography fontWeight={600} fontSize={"24px"}>Free and Open-Source</Typography>
-                <Typography>Lorem Ipsum is simply dummy text of the printing and industry.</Typography>
-                <Typography fontWeight={600}>Learn More</Typography>
-              </MuiCard>
-              <MuiCard sx={{ flex: 0.25, borderRadius: "12px", padding: "24px", display: "flex", flexDirection: "column", rowGap: "20px" }}>
-                <Box sx={{
-                  background: "#3758f9", width: "70px", height: "70px", display: "flex", justifyContent: "center", alignItems: "center",
-                  borderRadius: "14px", position: "relative"
-                }}>
-                  <Box sx={{
-                    background: "#3758f9", width: "70px", height: "70px", display: "flex", justifyContent: "center", alignItems: "center",
-                    borderRadius: "14px", position: "absolute", transform: "rotate(25deg)", opacity: 0.25, "&:hover": {
-                      transform: "rotate(45deg)"
-                    }
-                  }} />
-                  <Icon sx={{ height: "37px", width: "37px", color: "white", zIndex: 2 }}><LunchDiningRoundedIcon /></Icon>
-                </Box>
-                <Typography fontWeight={600} fontSize={"24px"}>Free and Open-Source</Typography>
-                <Typography>Lorem Ipsum is simply dummy text of the printing and industry.</Typography>
-                <Typography fontWeight={600}>Learn More</Typography>
-              </MuiCard>
-              <MuiCard sx={{ flex: 0.25, borderRadius: "12px", padding: "24px", display: "flex", flexDirection: "column", rowGap: "20px" }}>
-                <Box sx={{
-                  background: "#3758f9", width: "70px", height: "70px", display: "flex", justifyContent: "center", alignItems: "center",
-                  borderRadius: "14px", position: "relative"
-                }}>
-                  <Box sx={{
-                    background: "#3758f9", width: "70px", height: "70px", display: "flex", justifyContent: "center", alignItems: "center",
-                    borderRadius: "14px", position: "absolute", transform: "rotate(25deg)", opacity: 0.25, "&:hover": {
-                      transform: "rotate(45deg)"
-                    }
-                  }} />
-                  <Icon sx={{ height: "37px", width: "37px", color: "white", zIndex: 2 }}><LunchDiningRoundedIcon /></Icon>
-                </Box>
-                <Typography fontWeight={600} fontSize={"24px"}>Free and Open-Source</Typography>
-                <Typography>Lorem Ipsum is simply dummy text of the printing and industry.</Typography>
-                <Typography fontWeight={600}>Learn More</Typography>
-              </MuiCard>
-              <MuiCard sx={{ flex: 0.25, borderRadius: "12px", padding: "24px", display: "flex", flexDirection: "column", rowGap: "20px" }}>
-                <Box sx={{
-                  background: "#3758f9", width: "70px", height: "70px", display: "flex", justifyContent: "center", alignItems: "center",
-                  borderRadius: "14px", position: "relative"
-                }}>
-                  <Box sx={{
-                    background: "#3758f9", width: "70px", height: "70px", display: "flex", justifyContent: "center", alignItems: "center",
-                    borderRadius: "14px", position: "absolute", transform: "rotate(25deg)", opacity: 0.25, "&:hover": {
-                      transform: "rotate(45deg)"
-                    }
-                  }} />
-                  <Icon sx={{ height: "37px", width: "37px", color: "white", zIndex: 2 }}><LunchDiningRoundedIcon /></Icon>
-                </Box>
-                <Typography fontWeight={600} fontSize={"24px"}>Free and Open-Source</Typography>
-                <Typography>Lorem Ipsum is simply dummy text of the printing and industry.</Typography>
-                <Typography fontWeight={600}>Learn More</Typography>
-              </MuiCard>
+              {featureData.map(data => (
+                <FeaturesCard title={data.title} icon={data.icon} />
+              ))}
             </MuiContainer>
           </section>
           <section>
-            <h1>Pricing</h1>
+            <h1 style={{textAlign: "center"}}>Pricing</h1>
             <MuiContainer sx={{
               display: "flex", gap: "20px", flex: 3, justifyContent: "space-between", minHeight: "416px",
               padding: isMobileView ? "0 20px !important" : "0 112px !important", flexDirection: isMobileView ? "column" : "row"
             }} maxWidth={false}>
-              <MuiCard sx={{ flex: 1, borderRadius: "12px", padding: isMobileView ? "40px 32px" : "56px", display: "flex", flexDirection: "column", rowGap: "20px" }}>
-                <h5>Starter</h5>
-                <Typography><span style={{ fontWeight: 600, fontSize: "18px" }}>$</span> <span style={{ fontWeight: 600, fontSize: "36px" }}>25.00</span> Per Month</Typography>
-                <h5>Features</h5>
-                <Typography>Up to 1 User</Typography>
-                <Typography>All UI components</Typography>
-                <Typography>Lifetime access</Typography>
-                <Typography>Free updates</Typography>
-                <Button variant='contained' sx={{ borderRadius: "8px", backgroundColor: "#3758f9", width: "fit-content", padding: "12px 28px" }}>Purchase Now</Button>
-              </MuiCard>
-              <MuiCard sx={{ flex: 1, borderRadius: "12px", padding: isMobileView ? "40px 32px" : "56px", display: "flex", flexDirection: "column", rowGap: "20px" }}>
-                <h5>Basic</h5>
-                <Typography><span style={{ fontWeight: 600, fontSize: "18px" }}>$</span> <span style={{ fontWeight: 600, fontSize: "36px" }}>59.00</span> Per Month</Typography>
-                <h5>Features</h5>
-                <Typography>Up to 1 User</Typography>
-                <Typography>All UI components</Typography>
-                <Typography>Lifetime access</Typography>
-                <Typography>Free updates</Typography>
-                <Button variant='contained' sx={{ borderRadius: "8px", backgroundColor: "#3758f9", width: "fit-content", padding: "12px 28px" }}>Purchase Now</Button>
-              </MuiCard>
-              <MuiCard sx={{ flex: 1, borderRadius: "12px", padding: isMobileView ? "40px 32px" : "56px", display: "flex", flexDirection: "column", rowGap: "20px" }}>
-                <h5>Premium</h5>
-                <Typography><span style={{ fontWeight: 600, fontSize: "18px" }}>$</span> <span style={{ fontWeight: 600, fontSize: "36px" }}>99.00</span> Per Month</Typography>
-                <h5>Features</h5>
-                <Typography>Up to 1 User</Typography>
-                <Typography>All UI components</Typography>
-                <Typography>Lifetime access</Typography>
-                <Typography>Free updates</Typography>
-                <Button variant='contained' sx={{ borderRadius: "8px", backgroundColor: "#3758f9", width: "fit-content", padding: "12px 28px" }}>Purchase Now</Button>
-              </MuiCard>
-
+              {pricings.map(data => (
+                <PricingCard price={data.price} />
+              ))}
             </MuiContainer>
           </section>
         </>

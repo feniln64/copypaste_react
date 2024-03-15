@@ -1,3 +1,4 @@
 import CommonDialog from "./CommonDialog";
 import CardView from "./CardView";
-export { CommonDialog, CardView };
+import { FeaturesCard, PricingCard } from "./HomePageCards";
+export { CommonDialog, CardView, FeaturesCard, PricingCard };

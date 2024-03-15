@@ -2,8 +2,9 @@ import Card from 'react-bootstrap/Card';
 import ReactQuill from 'react-quill';
 import { MdDeleteForever } from "react-icons/md";
 import { RiEditBoxFill } from "react-icons/ri";
+import { FaShareAlt } from "react-icons/fa";
 import { Button } from 'react-bootstrap';
-import { Box, Typography, Button as MUIButton, IconButton } from '@mui/material';
+import { Box, Typography, IconButton, Menu, List, ListItemButton, ListItemIcon } from '@mui/material';
 import { useState } from 'react';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 const modules = {
@@ -12,36 +13,29 @@ const modules = {
 };
 const formats = [];
 const CardView = (props) => {
-    const [isHovered, setIsHovered] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    const handleMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
     return (
 
         <>
-            {/* <Card id={props._id} style={{ width: '18rem' }}>
-                <Card.Body>
-                    <Button className='mt-2'  onClick={() => props.editContent(props._id)}><RiEditBoxFill /></Button>{' '}
-                    <Button className='mt-2'  variant="danger" onClick={() => props.deleteContent(props._id)}><MdDeleteForever /></Button>
-                    <Card.Title>{props.title}</Card.Title>
-                    <Card.Text>
-                        <ReactQuill
-                            modules={modules}
-                            formats={formats}
-                            style={{ height: "auto", border: "none" }}
-                            readOnly={true}
-                            value={props.content}
-                        />
-                    </Card.Text>
-                </Card.Body>
-            </Card> */}
             <Box 
                 sx={{
-                    padding: "10px 20px", display: "flex", flexDirection: "column", gap: "15px", background: "#fff",
+                    padding: "20px", display: "flex", flexDirection: "column", gap: "15px", background: "#fff",
                     boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px", position: "relative"
                 }}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
             >   
                 <Typography>{props.title}</Typography>
-                <IconButton sx={{ position: "absolute", right: "0px", top: "2px"}}><MoreVertRoundedIcon /></IconButton>
+                <IconButton sx={{ position: "absolute", right: "0px", top: "2px"}}
+                onClick={handleMenu}
+                ><MoreVertRoundedIcon /></IconButton>
                 <Box>
                     <ReactQuill
                         modules={modules}
@@ -51,39 +45,59 @@ const CardView = (props) => {
                         value={props.content}
                     />
                 </Box>
-                    <Box sx={{display: "flex", visibility: isHovered ? "visible" : "hidden", gap: "10px"}}>
-                        <MUIButton 
-                            variant='contained'
-                            onClick={() => props.editContent(props._id)}
-                            sx={{
-                                maxWidth: "56px",
-                                width: "40px",
-                                height: "40px",
-                                minWidth: "auto",
-                                padding: "6px 0px !important",
-                            }}
-                        >
-                            <RiEditBoxFill />
-                        </MUIButton>
-                        <MUIButton 
-                            variant='contained'
-                            sx={{
-                                maxWidth: "56px",
-                                width: "40px",
-                                height: "40px",
-                                minWidth: "auto",
-                                padding: "6px 0px !important",
-                                background: (theme) => theme.palette.error.main,
-                                ":hover": {
-                                background: (theme) => theme.palette.error.main,
-                                }
-                            }} 
-                            onClick={() => props.editContent(props._id)}>
-                            <MdDeleteForever />
-                        </MUIButton>
-                    </Box>
             </Box>
-
+            <Menu
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center",
+                }}
+                keepMounted
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+            >
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        padding: "12px",
+                        gap: "12px",
+                    }}
+                >
+                    <List>
+                        <ListItemButton
+                            onClick={() => {props.editContent(props._id); handleClose()}}
+                        >
+                            <ListItemIcon sx={{minWidth: "30px"}}>
+                            <RiEditBoxFill />
+                            </ListItemIcon>
+                            Edit
+                        </ListItemButton>
+                        <ListItemButton
+                            onClick={() => {props.deleteContent(props._id);
+                            handleClose()}}
+                        >
+                            <ListItemIcon sx={{minWidth: "30px", color: "red"}}>
+                            <MdDeleteForever />
+                            </ListItemIcon>
+                            Delete
+                        </ListItemButton>
+                        <ListItemButton
+                            onClick={() => {props.editPermission(props._id);
+                            handleClose()}}
+                        >
+                            <ListItemIcon sx={{minWidth: "30px"}}>
+                            <FaShareAlt />
+                            </ListItemIcon>
+                            Share
+                        </ListItemButton>
+                    </List>
+                </Box>
+            </Menu>
         </>
 
     );
