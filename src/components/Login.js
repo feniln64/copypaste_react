@@ -9,6 +9,7 @@ import { addNewUser } from "../store/slices/authSlice";
 import { addContent } from "../store/slices/contentSlice";
 import { initDomain } from "../store/slices/domainSlice";
 import { initSharedBy } from "../store/slices/sharedBySlice";
+import {initSharedWithMe} from '../store/slices/sharedWithMeSlice'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../assets/button.css";
 import "../assets/container.css";
@@ -41,7 +42,7 @@ export default function Login() {
         e.preventDefault();
         const userData = {
             email: email,
-            password: password,
+            password: password
         };
         console.log(userData);
         setEmail("");
@@ -51,14 +52,11 @@ export default function Login() {
             const res = await axiosInstance.post("/auth/sign-in", userData, {
                 withCredentials: true,
             });
-            // remove this console.log after testing
-
             if (res.status === 200) {
                 // alert.success("Login Successful");
                 newEvent("login", "logged in", "/login");
                 toast.success("Successfully Login!");
-                axiosInstance.defaults.headers.common["Authorization"] =
-                    "Bearer " + res.data.accessToken;
+                axiosInstance.defaults.headers.common["Authorization"] ="Bearer " + res.data.accessToken;
                 const userInfo = res.data.userInfo;
                 userInfo.isLoggedIn = true;
                 console.log(res.data);
@@ -66,6 +64,7 @@ export default function Login() {
                 dispatch(addContent(res.data.content));
                 dispatch(initDomain(res.data.subdomains));
                 dispatch(initSharedBy(res.data.sharedByMe));
+                dispatch(initSharedWithMe(res.data.shraedWithMe));
                 navigate("/");
             }
         } catch (error) {
@@ -84,7 +83,7 @@ export default function Login() {
     return (
         <>
             <div>
-                <Toaster />
+                <Toaster position='bottom-right' reverseOrder={false}/>
             </div>
             <Container
                 sx={{
@@ -139,6 +138,7 @@ export default function Login() {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             fullWidth
+                            value={email}
                             sx={{
                                 "& input": { padding: "8px 16px !important" },
                             }}
@@ -147,6 +147,7 @@ export default function Login() {
                             variant="outlined"
                             placeholder="Password"
                             name="password"
+                            value={password}
                             type={showPassword ? "text" : "password"}
                             onChange={(e) => setPassword(e.target.value)}
                             required

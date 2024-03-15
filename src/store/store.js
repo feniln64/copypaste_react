@@ -10,7 +10,7 @@ import storage from 'redux-persist/lib/storage'
 import contentReducer from './slices/contentSlice';
 import subDomainSlice from './slices/domainSlice';
 import sharedBySlice from './slices/sharedBySlice';
-import sharedToSlice from './slices/sharedToSlice';
+import sharedWithMeSlice from './slices/sharedWithMeSlice';
 import thunk from 'redux-thunk'
 
 const reducers = combineReducers({
@@ -18,7 +18,7 @@ const reducers = combineReducers({
   content: contentReducer,
   subdomain: subDomainSlice,
   sharedby: sharedBySlice,
-  sharedto: sharedToSlice,
+  sharedwithme: sharedWithMeSlice,
 });
 
 const persistConfig = {

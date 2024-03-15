@@ -189,7 +189,7 @@ function Profile() {
 
     return (
         <>
-            <div><Toaster /></div>
+            <div><Toaster position='bottom-right' reverseOrder={false}/></div>
             {/* <div id='main' className="container" style={{ marginLeft: "auto" }}>
                 <section className="section profile">
                     <div className="row">

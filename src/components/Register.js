@@ -40,29 +40,26 @@ const Register = () => {
             name: name,
         };
         setPassword("");
-        try {
-            const res = await axiosInstance.post("/auth/sign-up", userData, {
-                withCredentials: true,
-            });
-            // remove this console.log after testing
-            console.log(res);
-            if (res.status === 200) {
-                newEvent("register", "registered", "/register");
-                navigate("/login", {
-                    state: { message: "Registered Successfully" },
-                });
-                // toast.success('Registered Successfully')
-            }
-        } catch (error) {
-            if (error.response) {
-                console.log(error.response);
-                toast.error(error.response.data.message, { icon: "👎" });
-            } else if (error.request) {
-                toast.error("network error");
-            } else {
-                toast.error(error);
-            }
-        }
+        await axiosInstance.post("/auth/sign-up", userData, { withCredentials: true })
+            .then((res) => {
+                console.log(res);
+                if (res.status === 200) {
+                    newEvent("register", "registered", "/register");
+                    navigate("/login", {
+                        state: { message: "Registered Successfully" },
+                    });
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message, { icon: "👎" });
+                } else if (error.request) {
+                    toast.error("network error");
+                } else {
+                    toast.error(error);
+                }
+            })
     };
 
     const [isMobileView] = useScreenSize();
@@ -70,7 +67,7 @@ const Register = () => {
     return (
         <>
             <div>
-                <Toaster />
+                <Toaster position='bottom-right' reverseOrder={false} />
             </div>
 
             {/* <div className="container" style={{ marginTop: "60px", height: "77vh" }}>
@@ -144,7 +141,7 @@ const Register = () => {
                     alignItems: "center",
                     flexDirection: "column",
                     height: isMobileView ? "85vh" : "auto",
-                    padding: isMobileView ? "20px !important" :  "20px 60px !important",
+                    padding: isMobileView ? "20px !important" : "20px 60px !important",
                     background: "#f4f7ff",
                 }}
                 maxWidth="sm"
@@ -187,6 +184,7 @@ const Register = () => {
                             variant="outlined"
                             placeholder="Name"
                             name="name"
+                            value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
                             fullWidth
@@ -198,6 +196,7 @@ const Register = () => {
                             variant="outlined"
                             placeholder="Email"
                             name="email"
+                            value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             fullWidth
@@ -209,6 +208,7 @@ const Register = () => {
                             variant="outlined"
                             placeholder="User Name"
                             name="username"
+                            value={userName}
                             onChange={(e) => setuserName(e.target.value)}
                             required
                             fullWidth
@@ -220,6 +220,7 @@ const Register = () => {
                             variant="outlined"
                             placeholder="Password"
                             name="password"
+                            value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             fullWidth

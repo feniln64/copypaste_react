@@ -26,22 +26,6 @@ const CardView = (props) => {
     return (
 
         <>
-            {/* <Card id={props._id} style={{ width: '18rem' }}>
-                <Card.Body>
-                    <Button className='mt-2'  onClick={() => props.editContent(props._id)}><RiEditBoxFill /></Button>{' '}
-                    <Button className='mt-2'  variant="danger" onClick={() => props.deleteContent(props._id)}><MdDeleteForever /></Button>
-                    <Card.Title>{props.title}</Card.Title>
-                    <Card.Text>
-                        <ReactQuill
-                            modules={modules}
-                            formats={formats}
-                            style={{ height: "auto", border: "none" }}
-                            readOnly={true}
-                            value={props.content}
-                        />
-                    </Card.Text>
-                </Card.Body>
-            </Card> */}
             <Box 
                 sx={{
                     padding: "20px", display: "flex", flexDirection: "column", gap: "15px", background: "#fff",
@@ -103,6 +87,8 @@ const CardView = (props) => {
                             Delete
                         </ListItemButton>
                         <ListItemButton
+                            onClick={() => {props.editPermission(props._id);
+                            handleClose()}}
                         >
                             <ListItemIcon sx={{minWidth: "30px"}}>
                             <FaShareAlt />
