@@ -176,7 +176,7 @@ function Domain() {
 
     return (
         <>
-            <div><Toaster /></div>
+            <div><Toaster position="bottom-right" reverseOrder={false}/></div>
             {!hasSubdomain &&
                 (
                     <>

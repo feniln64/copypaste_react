@@ -1,11 +1,9 @@
 /* eslint-disable*/
 import React from 'react'
-import { Link } from "react-router-dom";
 import { useEffect } from 'react';
 import axiosInstance from '../api/api'
-import Calendar from 'react-calendar';
 import { useSelector, useDispatch } from 'react-redux'
-import { addContent, updateContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
+import {initSharedWithMe, removeSharedWithMe,removeOneSharedWithMe, addNewSharedWithMe} from '../store/slices/sharedWithMeSlice'
 import 'react-calendar/dist/Calendar.css';
 import { useState } from 'react';
 import ReactQuill from 'react-quill';
@@ -17,32 +15,24 @@ import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { FaPlus } from "react-icons/fa6";
 import 'reactjs-popup/dist/index.css';
 import '../assets/popup.css';
 import toast, { Toaster } from 'react-hot-toast';
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
-import Modal from 'react-bootstrap/Modal';
-import ToggleButton from 'react-bootstrap/ToggleButton';
 import { CommonDialog, CardView } from '../common';
 import { RiEditBoxFill } from "react-icons/ri";
-import { Flex } from 'antd';
 
 function Shared() {
 
     const dispatch = useDispatch()
     const userInfo = useSelector((state) => state.auth.userInfo)
-    const username = userInfo.username
-    const userId = userInfo.id
+    const username = userInfo.username                                                                                                  
     const userEmail = userInfo.email
 
-    const isContent = useSelector((state) => state.sharedto.sharedto)
-    const [hasContent, sethasContent] = useState(false)
+    const isContent = useSelector((state) => state.sharedwithme.sharedwithme)
+    const [hasPermission, setHasPermission] = useState(false)
     // const [content, setContent] = useState([])
-
-    const [permission, setPermission] = useState(0)
-    const [date, setDate] = useState(new Date());
 
     const [newContent, setNewContent] = useState("");
     const [newTitle, setNewTitle] = useState("");
@@ -97,11 +87,10 @@ function Shared() {
 
     const getinitialData = async () => {
         console.log(" got data from server")
-        await axiosInstance.get(`permission/getsharedcontent/${userEmail}`, { withCredentials: true })
+        await axiosInstance.get(`permission/shared/withme/${userEmail}`, { withCredentials: true })
             .then((response) => {
-                setContent(response.data.sharedContent);
-                sethasContent(true)
-                // dispatch(addContent(response.data.content))
+                setHasPermission(true)
+                dispatch(initSharedWithMe(response.data.sharedContent))
             })
             .catch((error) => {
                 if (error.response) {
@@ -118,15 +107,15 @@ function Shared() {
     useEffect(() => {
         getinitialData()
         if (isContent.length > 0) {
-            sethasContent(true)
+            setHasPermission(true)
         }
-        newEvent("view content", "view content", "/view-content");
+        newEvent("view permission to me", "permission", "/shared");
 
-        socket.emit('join_room', userInfo.username);
-        socket.on('message', (data) => {
-            console.log("data from server", data);
-            setContent(data.content);
-        });
+        // socket.emit('join_room', userInfo.username);
+        // socket.on('message', (data) => {
+        //     console.log("data from server", data);
+        //     dispatch(initSharedWithMe(response.data.sharedContent))
+        // });
     }, []);
 
     const openModal = (event) => {
@@ -138,9 +127,9 @@ function Shared() {
 
     return (
         <>
-            <Toaster />
+            <Toaster position='bottom-right' reverseOrder={false} />
             <Container className="mt-4">
-                {hasContent ? (
+                {hasPermission ? (
                     <>
                         <div className="container  card rounded bg-white" style={{ marginBottom: "100px" }}>
                             <div className="row">

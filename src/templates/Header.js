@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { removeUser } from "../store/slices/authSlice";
 import { removeContent } from "../store/slices/contentSlice";
 import {removeDomain} from "../store/slices/domainSlice";
+import {removeSharedWithMe} from '../store/slices/sharedWithMeSlice'
+import {removeSharedBy} from '../store/slices/sharedBySlice'
 import axiosInstance from "../api/api";
 import React from "react";
 import { Menu as MenuIcon } from "@mui/icons-material";
@@ -40,6 +42,8 @@ const Header = () => {
         dispatch(removeUser());
         dispatch(removeContent());
         dispatch(removeDomain());
+        dispatch(removeSharedWithMe());
+        dispatch(removeSharedBy());
         navigate("/login");
     }
 

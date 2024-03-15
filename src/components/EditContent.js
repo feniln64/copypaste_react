@@ -108,7 +108,7 @@ function Content() {
     }, []);
     return (
         <>
-            <Toaster position="top-center" reverseOrder={false} />
+            <Toaster position='bottom-right' reverseOrder={false} />
             <Container className="shadow-sm" style={{ marginTop: "50px", marginBottom: "50px" }} >
                 <Row>
                     <Col >
