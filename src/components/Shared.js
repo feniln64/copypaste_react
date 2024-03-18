@@ -42,11 +42,6 @@ function Shared() {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
 
-    const modules = {
-        toolbar: []
-    };
-    const formats = [];
-
     const handleUpdateContent = async (e) => {
         e.preventDefault();
         if (newContent === "" || newTitle === "") {
@@ -91,11 +86,15 @@ function Shared() {
             .then((response) => {
                 setHasPermission(true)
                 dispatch(initSharedWithMe(response.data.sharedContent))
+                console.log("response.data.sharedContent", response.data.sharedContent)
             })
             .catch((error) => {
                 if (error.response) {
                     console.log(error.response);
                     toast.error(error.response.data.message);
+                    if (error.response.status === 401) {
+                        dispatch(removeSharedWithMe())
+                    }
                 } else if (error.request) {
                     console.log("network error");
                 } else {
@@ -148,9 +147,9 @@ function Shared() {
                                                            <Card.Title>{e.title}</Card.Title>
                                                            <Card.Text>
                                                                <ReactQuill
-                                                                   modules={modules}
-                                                                   formats={formats}
-                                                                   style={{ height: "auto", border: "none" }}
+                                                                   modules={{ toolbar: false}}
+                                                                   formats={[]}
+                                                                   style={{ height: "auto", border: "none !important" }}
                                                                    readOnly={true}
                                                                    value={e.content}
                                                                />
