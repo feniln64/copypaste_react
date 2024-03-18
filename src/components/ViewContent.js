@@ -1,78 +1,112 @@
 /* eslint-disable*/
-import React from 'react'
-import { useEffect } from 'react';
+import React,{ useEffect ,useState} from 'react'
 import axiosInstance from '../api/api'
 import { useSelector, useDispatch } from 'react-redux'
-import { addContent, updateContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
+import { addContent, addNewContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
 import { initSharedBy, removeSharedBy, removeOneSharedBy, addNewSharedBy } from '../store/slices/sharedBySlice';
-import 'react-calendar/dist/Calendar.css';
-import { useState } from 'react';
 import newEvent from '../api/postHog';
 import { socket } from "../api/socket";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { FaPlus } from "react-icons/fa6";
-import 'reactjs-popup/dist/index.css';
 import '../assets/popup.css';
 import toast, { Toaster } from 'react-hot-toast';
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import { CommonDialog, CardView } from '../common';
-import { Box, Grid, Typography, Button as MUIButton, MenuItem,Select as MUISelect,InputLabel } from '@mui/material';
+import { Box, Grid, Typography, Button as MUIButton, MenuItem, Select as MUISelect, InputLabel, OutlinedInput, Chip } from '@mui/material';
 import useScreenSize from '../hooks/useScreenSize';
 import { Select } from 'antd';
-import { DatePicker, Space } from 'antd';
-const { RangePicker } = DatePicker;
-import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { ModelTraining } from '@mui/icons-material';
-dayjs.extend(customParseFormat);
+import { Container, Row, Col } from 'react-bootstrap';
+import { AiOutlineClose } from "react-icons/ai";
+var options = []
+
 function ViewContent() {
 
     const dateFormat = 'MM-DD-YYYY';
-    const options = [];
-    const today = dayjs().format(dateFormat);
-    const dispatch = useDispatch()  
+    const dispatch = useDispatch()
     const userInfo = useSelector((state) => state.auth.userInfo)
     const username = userInfo.username
     const userId = userInfo.id
-
+    
     const isContent = useSelector((state) => state.content.content)
+    const permissions = useSelector((state) => state.sharedby.sharedby)
     const [hasContent, sethasContent] = useState(false)
-    // const [content, setContent] = useState([])
-
-    const [permissionType, setPermissionType] = useState(0)
-    const [date, setDate] = useState(new Date());
-
+    
     const [newContent, setNewContent] = useState("");
     const [newTitle, setNewTitle] = useState("");
     const [newIsChecked, setNewIsChecked] = useState(false);
-
+    
     const [modelId, setModelId] = useState("")
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
-
+    
     const [deleteModelId, setDeleteModelId] = useState("")
     const [deleteShow, setDeleteShow] = useState(false);
     const [deleteTitle, setDeleteTitle] = useState("")
     const handleDeleteClose = () => setDeleteShow(false);
-
+    
+    const [permissionType, setPermissionType] = useState(0)
+    const [contentId, setContentId] = useState("")
+    const [deletePermissionShow, setDeletePermissionShow] = useState(false);
+    const [allowedUsers, setAllowedUsers] = useState([])
+    const [deleteUser, setDeleteUser] = useState("")
     const [permissionShow, setPermissionShow] = useState(false)
-    const [editModelId, setEditModelId] = useState("")
     const [users, setUsers] = useState([])
-    const handlePermissionClose = () => setPermissionShow(false);
-
-    const handlePermission = (e) => {
+    const handlePermissionClose = () => {setPermissionShow(false);options=[]};
+    const handleDeletePermissionClose = () => setDeletePermissionShow(false);
+    const handlePermission = async (e) => {
         e.preventDefault();
-        const data = {
+        const permissionData = {
             userList: users,
-            permission_current_period_end: date,
             permission_type: permissionType
         }
-        // dispatch(addNewSharedBy(res.data.message.sharedbyMe))
+        setUsers([])
+        setPermissionType(0)
+        await axiosInstance.post(`permission/create/${contentId}`, permissionData, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 201) {
+                    dispatch(addNewSharedBy(response.data.sharedbyMe))
+                    toast.success("permission sent Successfully");
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            })
+        setPermissionShow(false);
     }
 
+    const handleDeletePermission = async (e) => {
+        e.preventDefault();
+        console.log("deleteUser", deleteUser);
+        console.log("contentId", contentId);
+        // await axiosInstance.delete(`permission/delete/${deleteUser}/${contentId}`, { withCredentials: true })
+        //     .then((response) => {
+        //         if (response.status === 201) {
+        //             dispatch(removeOneSharedBy({ contentId: contentId, userEmail: e.target.id }))
+        //             toast.success("permission deleted Successfully");
+        //         }
+        //     })
+        //     .catch((error) => {
+        //         if (error.response) {
+        //             console.log(error.response);
+        //             toast.error(error.response.data.message);
+        //         } else if (error.request) {
+        //             console.log("network error");
+        //         } else {
+        //             console.log(error);
+        //         }
+        //     })
+    }
+    
     const handleUpdateContent = async (e) => {
         e.preventDefault();
         if (newContent === "" || newTitle === "") {
@@ -131,16 +165,14 @@ function ViewContent() {
         setNewIsChecked(false)
         setNewContent("")
 
-        socket.emit("newContent", ({ room: username, message: contentData }));
-
         await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true })
             .then((response) => {
                 if (response.status === 201) {
-                    // setContent(response.data.content);
                     sethasContent(true)
-                    dispatch(addContent(response.data.content))
+                    dispatch(addNewContent(response.data.createdContent))
                     handleClose();
                     toast.success("data added Successfully");
+                    socket.emit("newcontent", ({ room: username, message: response.data.createdContent }));
                 }
             })
             .catch((error) => {
@@ -175,20 +207,6 @@ function ViewContent() {
             });
     }
 
-    useEffect(() => {
-        getinitialData()
-        if (isContent.length > 0) {
-            sethasContent(true)
-        }
-        newEvent("view content", "view content", "/view-content");
-
-        socket.emit('join_room', userInfo.username);
-        socket.on('message', (data) => {
-            console.log("data from server", data);
-            setContent(data.content);
-        });
-    }, []);
-
     const openModal = (event) => {
         setModelId(event)
         if (event === "createContent") {
@@ -211,15 +229,26 @@ function ViewContent() {
     };
 
     const permissionModel = (event) => {
-        console.log("permissionModel called");
+        setContentId(event)
         setPermissionShow(true);
+        // console.log("permissions", permissions);
+        setAllowedUsers([])
+        permissions.filter((e) => e.contentId === event).map((e) => {
+            setAllowedUsers(e.user_emails)
+            for (let i = 0; i < e.user_emails.length; i++) {
+                options.push({ label: e.user_emails[i], value: e.user_emails[i] })
+            }
+        })
+        // console.log("allowedUsers", allowedUsers);
+        console.log("options", options);
+        // for (let i = 0; i < permissions.length; i++) {
+        //     if (permissions[i].contentId === event) {
+        //         console.log("permissions[i].allowedUsers", permissions[i].user_emails);
+        //         setAllowedUsers(permissions[i].user_emails)
+        //     }
+        // }
+        // console.log("allowedUsers", allowedUsers);
     };
-
-    const addUsers = async (value) => {
-        console.log("value =", value);
-        setUsers(value);
-        console.log("users =", users);
-    }
 
     const handleDeleteContent = async (e) => {
         e.preventDefault();
@@ -247,8 +276,37 @@ function ViewContent() {
         setDeleteShow(false);
     };
 
+    const addUsers = async (value) => {
+        setUsers(value);
+
+    }
+    const handleDeletePermissionModel = (e) => {
+        // console.log("e.target.id", e.target.id);
+        // console.log("deleteUser", contentId);
+        setDeleteUser(e.target.id)
+        setDeletePermissionShow(true)
+    }
+
+    useEffect(() => {
+        getinitialData()
+        if (isContent.length > 0) {
+            sethasContent(true)
+        }
+        newEvent("view content", "view content", "/view-content");
+
+        socket.emit('join_room', userInfo.username);
+        socket.on('message', (data) => {
+            console.log("data from server", data);
+            console.log("data from server", data);
+            // setContent(data.content);
+        });
+        socket.on('newcontent', (data) => {
+            console.log("data from server", data);
+            dispatch(addNewContent(data))
+        });
+    }, []);
+        
     const [isMobileView] = useScreenSize();
-    const { RangePicker } = DatePicker;
     return (
         <>
             <Toaster position='bottom-right' reverseOrder={false} />
@@ -268,7 +326,7 @@ function ViewContent() {
                 <Typography variant='h5' fontWeight={"bold"} textAlign={"center"}>User Content</Typography>
                 <Grid container>
                     {isContent.map((e) => (
-                        <Grid item xs={12} md={4} sx={{ padding: "20px" }}>
+                        <Grid key={e._id} item xs={12} md={4} sx={{ padding: "20px" }}>
                             <Box sx={{ width: isMobileView ? "auto" : "18rem", borderRadius: "8px" }}>
                                 <CardView title={e.title} editContent={openModal} editPermission={permissionModel} deleteContent={deleteModel} content={e.content} _id={e._id} />
                             </Box>
@@ -326,6 +384,21 @@ function ViewContent() {
                         </Button>
                     </Modal.Footer>
                 </Modal>
+                {/* delete permission models */}
+                <Modal show={deletePermissionShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handlePermissionClose}>
+                    <Modal.Header closeButton>
+                        <Modal.Title> <h6>Delete Permission for  "{deleteUser}" ? </h6></Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>To confirm deletion, Click on Delete User.</Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleDeletePermissionClose}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={handleDeletePermission}>
+                            Delete User
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
                 {/* permission Model */}
                 <Modal show={permissionShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handlePermissionClose}>
                     <Modal.Header closeButton>
@@ -337,24 +410,37 @@ function ViewContent() {
                             <Select
                                 mode="tags"
                                 style={{ width: '100%' }}
-                                open={false}
+                                // open={false}
                                 onChange={addUsers}
                                 placeholder="enter user email and press enter"
                                 options={options}
                             />
+
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Pick Date till want to give permission!</Form.Label>
-                            <Form.Control min={today}  type="date" placeholder="Date" onChange={e => setDate(e.target.value)} />
-                            
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <MUISelect labelId="selct-permission-type"  id="selct-permission-type" value={permissionType} label="Permission Type" onChange={e => setPermissionType(e.target.value)}>
+                            <MUISelect labelId="selct-permission-type" id="selct-permission-type" value={permissionType} label="Permission Type" onChange={e => setPermissionType(e.target.value)}>
                                 <MenuItem value={0}>Permission Type</MenuItem>
                                 <MenuItem value={1}>Read</MenuItem>
                                 <MenuItem value={2}>Read & Write</MenuItem>
                             </MUISelect>
                         </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Shared with</Form.Label>
+                            <Container>
+                                {allowedUsers.map((e) => (
+                                    <Row>
+                                        <Col xs={14} md={10} style={{ backgroundColor: "pink" }}>
+                                            <Chip key={contentId} label={e} />
+                                        </Col>
+                                        <Col className='d-flex align-self-center justify-content-center' xs={4} md={2}>
+                                            <AiOutlineClose id={e} onClick={handleDeletePermissionModel}/>
+                                        </Col>
+                                    </Row>
+                                ))}
+                            </Container>
+                        </Form.Group>
+
                     </Modal.Body>
 
                     <Modal.Footer>

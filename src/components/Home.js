@@ -10,29 +10,22 @@ import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import toast, { Toaster } from 'react-hot-toast';
 import { socket } from "../api/socket";
-import { Link } from 'react-router-dom';
 import { Container as MuiContainer, Button } from "@mui/material";
 import LunchDiningRoundedIcon from '@mui/icons-material/LunchDiningRounded';
 import { GridViewRounded,LayersRounded, DashboardRounded } from '@mui/icons-material';
 import useScreenSize from '../hooks/useScreenSize';
 import { useSelector, useDispatch } from 'react-redux'
-import { addContent, updateContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
+import { addContent, updateOneContent, addNewContent } from '../store/slices/contentSlice';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CommonDialog, CardView, FeaturesCard, PricingCard } from '../common';
+import { CommonDialog, FeaturesCard, PricingCard } from '../common';
 import { FaPlus } from "react-icons/fa6";
-import Modal from 'react-bootstrap/Modal';
 import { MdOpenInFull } from "react-icons/md";
 import Card from 'react-bootstrap/Card';
 import ReactQuill from 'react-quill';
 import { IoRefreshOutline } from "react-icons/io5";
 import { addNewUser } from '../store/slices/authSlice';
 var subdomain = "";
-const modules = {
-  toolbar: [
-  ],
-};
-const formats = [];
 
 const featureData = [
   {
@@ -69,8 +62,6 @@ function Home() {
   const userId = userInfo.userId
   const username = userInfo.username
 
-  const [isLoading, setLoading] = useState(true)
-  const [title, setTitle] = useState("");
   const [hascontent, sethasContent] = useState(false);
 
   const [newContent, setNewContent] = useState("");
@@ -96,7 +87,6 @@ function Home() {
     }
     setShow(true);
   };
-
 
   const handleUpdateContent = async (e) => {
     e.preventDefault();
@@ -207,30 +197,22 @@ function Home() {
 }
 
   useEffect(() => {
-    console.log("subdomain is " + parsed.subdomain)
     newEvent("homepage", "homepage", "/homepage");
-    subdomain = parsed.subdomain;
-    
-    socket.on('updateContent', (data) => {
-      console.log("data from server", data);
-      // setContent(data.content);
-    });
+    subdomain = parsed.sld;
+    console.log("subdomain =", subdomain);
+
     if (subdomain === null) {
       subdomain = "";
     }
     else {
-      
-      try {
         axiosInstance.get(`/init/getdata/${subdomain}`)
           .then((response) => {
             console.log("init.response =", response);
             if (response.data.content !== null && response.data.content.length > 0) {
               sethasContent(true);
-              socket.emit('join_room', response.data.userId);
+              socket.emit('join_room', response.data.userInfo.username);
               dispatch(addContent(response.data.content));
               dispatch(addNewUser(response.data.userInfo));
-              // setContent(response.data.content);
-              setTitle(response.data.title);
             } else sethasContent(false);
           })
           .catch((error) => {
@@ -238,18 +220,14 @@ function Home() {
             console.log(error);                //here
           });
       }
-      catch (error) {
-        if (error.response) {
-          console.log(error.response);
-          alert(error.response.data.message);
-        } else if (error.request) {
-          console.log("network error");
-        } else {
-          console.log(error);
-        }
-      }
-    }
-    setLoading(false);
+    socket.on('updatecontent', (data) => {
+      console.log("data from server", data);
+      // setContent(data.content);
+    });
+
+    socket.on('newcontent', (data) => {
+      getinitialData();
+    });
   }, []);
 
   const [isMobileView] = useScreenSize();
@@ -304,19 +282,18 @@ function Home() {
               </div>
               <div className="row">
                 <div className="col-md-24  card-body">
-                  <Container style={{ minHeight: "715px", marginTop: "50px" }}>
-                    <Row >
+                  <Container   style={{ minHeight: "715px", marginTop: "50px", alignItems:"center" }}>
+                    <Row style={{display:"flex",alignItems:"center"}} className='d-flex justify-content-center' >
                       {isContent.map((e) => (
                       <Col  key={e._id} >
                           {/* <CardView title={e.title} editContent={openModal} deleteContent={null} content={e.content} _id={e._id} /> */}
                           <Card key={e._id} id={e._id} style={{ width: '18rem' }}>
                             <Card.Body>
-                              <Button className='mt-2' variant='primary' id={e._id} onClick={e => openModal(e.target.id)} ><MdOpenInFull id={e._id} /></Button>
-                              <Card.Title>{e.title}</Card.Title>
+                              <Card.Title > <button id={e._id} onClick={e => openModal(e.target.id)} style={{fontWeight:"bold",textTransform:"", border:"none", backgroundColor:"white"}} >{e.title}</button></Card.Title>
                               <Card.Text>
                                 <ReactQuill
-                                  modules={modules}
-                                  formats={formats}
+                                  modules={{ toolbar: false }}
+                                  formats={[]}
                                   style={{ height: "auto", border: "none" }}
                                   readOnly={true}
                                   value={e.content}

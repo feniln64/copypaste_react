@@ -7,11 +7,7 @@ import { Button } from 'react-bootstrap';
 import { Box, Typography, IconButton, Menu, List, ListItemButton, ListItemIcon } from '@mui/material';
 import { useState } from 'react';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
-const modules = {
-    toolbar: [
-    ],
-};
-const formats = [];
+
 const CardView = (props) => {
     const [anchorEl, setAnchorEl] = useState(null);
 
@@ -32,14 +28,14 @@ const CardView = (props) => {
                     boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px", position: "relative"
                 }}
             >   
-                <Typography>{props.title}</Typography>
+                <Typography > <button style={{fontWeight:"bold",textTransform:"", border:"none", backgroundColor:"white"}} onClick={() => {props.editContent(props._id); handleClose()}}>{props.title}</button></Typography>
                 <IconButton sx={{ position: "absolute", right: "0px", top: "2px"}}
                 onClick={handleMenu}
                 ><MoreVertRoundedIcon /></IconButton>
                 <Box>
                     <ReactQuill
-                        modules={modules}
-                        formats={formats}
+                        modules={{toolbar: false}}
+                        formats={[]}
                         style={{ height: "auto", border: "none" }}
                         readOnly={true}
                         value={props.content}
