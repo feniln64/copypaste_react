@@ -10,6 +10,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { FaPlus } from "react-icons/fa6";
 import '../assets/popup.css';
+import '../assets/content.css';
 import toast, { Toaster } from 'react-hot-toast';
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';

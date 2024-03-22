@@ -5,6 +5,7 @@ import axiosInstance from '../api/api'
 import { useSelector, useDispatch } from 'react-redux'
 import {initSharedWithMe, removeSharedWithMe,removeOneSharedWithMe, addNewSharedWithMe} from '../store/slices/sharedWithMeSlice'
 import 'react-calendar/dist/Calendar.css';
+import '../assets/content.css';
 import { useState } from 'react';
 import ReactQuill from 'react-quill';
 import newEvent from '../api/postHog';

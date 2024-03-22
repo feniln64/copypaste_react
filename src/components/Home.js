@@ -21,6 +21,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CommonDialog, FeaturesCard, PricingCard } from '../common';
 import { FaPlus } from "react-icons/fa6";
 import { MdOpenInFull } from "react-icons/md";
+import '../assets/content.css';
 import Card from 'react-bootstrap/Card';
 import ReactQuill from 'react-quill';
 import { IoRefreshOutline } from "react-icons/io5";

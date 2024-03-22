@@ -1,3 +1,8 @@
 .ck-editor__editable {
     min-height: 500px !important;
 }
+
+p{
+    margin: 0;
+    padding: 0;
+}
