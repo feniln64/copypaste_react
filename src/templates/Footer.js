@@ -20,7 +20,7 @@ const Footer = () => {
     }, [])
     return (
         <>
-            <footer id="footer"  className="footer py-4 px-xl-5 bg-primary" style={{marginLeft:"auto",height:"80px"}}>
+            <footer id="footer"  className="footer py-4 px-xl-5 bg-primary" style={{marginLeft:"auto",height:"80px",bottom:0}}>
                 <div className="text-white mb-3 mb-md-0">
                     Copyright © 2020. All rights reserved.
                     {version}
