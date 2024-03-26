@@ -1,7 +1,7 @@
 {
   "name": "copypaste_react",
-  "version": "1.9.5",
-  "description": "version update",
+  "version": "1.9.6",
+  "description": "some update",
   "private": true,
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^40.0.0",

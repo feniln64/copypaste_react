@@ -20,7 +20,6 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CommonDialog, FeaturesCard, PricingCard } from '../common';
 import { FaPlus } from "react-icons/fa6";
-import { MdOpenInFull } from "react-icons/md";
 import '../assets/content.css';
 import Card from 'react-bootstrap/Card';
 import ReactQuill from 'react-quill';
@@ -55,7 +54,7 @@ const pricings = [
 
 function Home() {
 
-  var parsed = psl.parse(window.location.hostname);
+  var parsed = psl.parse(window.location.subdoamin);
   const dispatch = useDispatch()
   const isContent = useSelector((state) => state.content.content)
 
@@ -199,7 +198,7 @@ function Home() {
 
   useEffect(() => {
     newEvent("homepage", "homepage", "/homepage");
-    subdomain = parsed.sld;
+    subdomain = parsed.subdoamin;
     console.log("subdomain =", subdomain);
 
     if (subdomain === null) {
