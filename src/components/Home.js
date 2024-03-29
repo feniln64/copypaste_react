@@ -54,7 +54,7 @@ const pricings = [
 
 function Home() {
 
-  var parsed = psl.parse(window.location.subdoamin);
+  var parsed = psl.parse(window.location.hostname);
   const dispatch = useDispatch()
   const isContent = useSelector((state) => state.content.content)
 
@@ -103,8 +103,6 @@ function Home() {
     };
     console.log("contentData =", contentData);
 
-    socket.emit("updateContent", ({ room: username, message: contentData }));
-
     await axiosInstance.patch(`/content/update/public/${modelId}`, contentData) // public route no need to send auth token (with credential)
       .then((response) => {
         if (response.status === 200) {
@@ -112,6 +110,7 @@ function Home() {
           // setContent(isContent)
           handleClose()
           toast.success("data updated Successfully");
+          socket.emit('updatecontent', { room: username, message: contentData });
         }
       })
       .catch((error) => {
@@ -198,7 +197,7 @@ function Home() {
 
   useEffect(() => {
     newEvent("homepage", "homepage", "/homepage");
-    subdomain = parsed.subdoamin;
+    subdomain = parsed.subdomain;
     console.log("subdomain =", subdomain);
 
     if (subdomain === null) {
@@ -228,6 +227,11 @@ function Home() {
     socket.on('newcontent', (data) => {
       getinitialData();
     });
+
+    socket.on('deletecontent', (data) => {
+      getinitialData();
+    });
+
   }, []);
 
   const [isMobileView] = useScreenSize();
@@ -296,7 +300,7 @@ function Home() {
                                   formats={[]}
                                   style={{ height: "auto", border: "none" }}
                                   readOnly={true}
-                                  value={e.content}
+                                  value={e.content.slice(0, 20)}
                                 />
                               </Card.Text>
                             </Card.Body>

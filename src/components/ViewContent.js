@@ -123,7 +123,7 @@ function ViewContent() {
         };
         console.log("contentData =", contentData);
 
-        socket.emit("updateContent", ({ room: username, message: contentData }));
+        socket.emit("updatecontent", ({ room: username, message: contentData }));
 
         await axiosInstance.patch(`/content/update/${modelId}`, contentData, { withCredentials: true })
             .then((response) => {
@@ -258,8 +258,8 @@ function ViewContent() {
                 if (response.status === 201) {
                     dispatch(removeOneContent({ _id: deleteModelId }))
                     setDeleteShow(false);
-                    setContent(isContent)
                     toast.success("data deleted Successfully");
+                    socket.emit("deletecontent", ({ room: username}));
                 }
             })
             .catch((error) => {
@@ -302,9 +302,13 @@ function ViewContent() {
             // setContent(data.content);
         });
         socket.on('newcontent', (data) => {
-            console.log("data from server", data);
-            dispatch(addNewContent(data))
+            getinitialData()
         });
+
+        socket.on('updatecontent', (data) => {
+            getinitialData()
+        });
+
     }, []);
         
     const [isMobileView] = useScreenSize();
@@ -329,7 +333,8 @@ function ViewContent() {
                     {isContent.map((e) => (
                         <Grid key={e._id} item xs={12} md={4} sx={{ padding: "20px" }}>
                             <Box sx={{ width: isMobileView ? "auto" : "18rem", borderRadius: "8px" }}>
-                                <CardView title={e.title} editContent={openModal} editPermission={permissionModel} deleteContent={deleteModel} content={e.content} _id={e._id} />
+                                {/* {if (e.content.length > 10) e.content = e.content.slice(0, 10) + "..."} */}
+                                <CardView title={e.title} editContent={openModal} editPermission={permissionModel} deleteContent={deleteModel} content={e.content.slice(0, 20) } _id={e._id} />
                             </Box>
                         </Grid>
                     ))}
