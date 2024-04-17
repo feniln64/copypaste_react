@@ -252,6 +252,14 @@ const Header = () => {
                                                     variant="contained"
                                                     color="inherit"
                                                 >
+                                                    <Link to="/shared">
+                                                        Shared
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="inherit"
+                                                >
                                                     <Link to="/content">
                                                         Content
                                                     </Link>

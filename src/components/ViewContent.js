@@ -54,7 +54,8 @@ function ViewContent() {
     const [allowedUsers, setAllowedUsers] = useState([])
     const [deleteUser, setDeleteUser] = useState("")
     const [permissionShow, setPermissionShow] = useState(false)
-    const [users, setUsers] = useState([])
+    const [users, setUsers] = useState([]);
+    const [editable, setEditable] = useState(false);
     const handlePermissionClose = () => {setPermissionShow(false);options=[]};
     const handleDeletePermissionClose = () => setDeletePermissionShow(false);
     const handlePermission = async (e) => {
@@ -208,7 +209,7 @@ function ViewContent() {
             });
     }
 
-    const openModal = (event) => {
+    const openModal = (event, editable= true) => {
         setModelId(event)
         if (event === "createContent") {
             setNewTitle("")
@@ -221,6 +222,7 @@ function ViewContent() {
             // handleUpdateShow()
         }
         setShow(true);
+        setEditable(editable);
     };
 
     const deleteModel = (event) => {
@@ -311,7 +313,7 @@ function ViewContent() {
 
     }, []);
         
-    const [isMobileView] = useScreenSize();
+    const [isMobileView, isTabletView] = useScreenSize();
     return (
         <>
             <Toaster position='bottom-right' reverseOrder={false} />
@@ -331,10 +333,24 @@ function ViewContent() {
                 <Typography variant='h5' fontWeight={"bold"} textAlign={"center"}>User Content</Typography>
                 <Grid container>
                     {isContent.map((e) => (
-                        <Grid key={e._id} item xs={12} md={4} sx={{ padding: "20px" }}>
+                        <Grid key={e._id} item xs={12} md={4}
+                            sx={{
+                                padding: "20px",
+                                display: isTabletView ? 'flex' : 'block',
+                                justifyContent: isTabletView ? 'center' : 'flex-start',
+                                // border: '1px solid red'
+                            }}
+                        >
                             <Box sx={{ width: isMobileView ? "auto" : "18rem", borderRadius: "8px" }}>
                                 {/* {if (e.content.length > 10) e.content = e.content.slice(0, 10) + "..."} */}
-                                <CardView title={e.title} editContent={openModal} editPermission={permissionModel} deleteContent={deleteModel} content={e.content.slice(0, 20) } _id={e._id} />
+                                <CardView
+                                    title={e.title}
+                                    editContent={openModal}
+                                    editPermission={permissionModel}
+                                    deleteContent={deleteModel}
+                                    content={e.content.slice(0, 20) }
+                                    _id={e._id}
+                                />
                             </Box>
                         </Grid>
                     ))}
@@ -345,7 +361,13 @@ function ViewContent() {
             </Box>
             <div className="d-flex justify-content-center align-items-center">
                 {/* Update Content Model  */}
-                <CommonDialog open={show} onClose={handleClose} onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent} title={"Create New Content"}>
+                <CommonDialog 
+                    open={show}
+                    onClose={handleClose}
+                    onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent}
+                    title={"Create New Content"}
+                    showFooter={editable}
+                >
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Title</Form.Label>

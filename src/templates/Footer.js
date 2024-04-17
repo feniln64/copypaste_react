@@ -20,7 +20,7 @@ const Footer = () => {
     }, [])
     return (
         <>
-            <footer id="footer"  className="footer py-4 px-xl-5 bg-primary" style={{marginLeft:"auto",height:"80px",bottom:0}}>
+            <footer id="footer"  className="footer py-4 px-xl-5 bg-primary" style={{marginLeft:"auto",bottom:0}}>
                 <div className="text-white mb-3 mb-md-0">
                     Copyright © 2020. All rights reserved.
                     {version}
@@ -30,8 +30,8 @@ const Footer = () => {
                 </div>
                 <div className="text-white mb-3 mb-md-0">
                     Server Version: {serverVersion}
-                </div>
-                <div>
+                {/* </div>
+                <div> */}
                     <a href="#!" className="text-white me-4">
                         <i className="fab fa-facebook-f"></i>
                     </a>
