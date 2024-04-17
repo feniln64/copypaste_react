@@ -386,7 +386,7 @@ function Profile() {
                     gap: "30px",
                     borderRadius: "8px",
                     flex: 1,
-                    margin: "25px 75px"
+                    margin: "105px 75px"
                 }}
             >
                 <Typography sx={{paddingX: "15px", fontWeight: "bold"}}>

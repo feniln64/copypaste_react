@@ -143,6 +143,7 @@ const Register = () => {
                     height: isMobileView ? "85vh" : "auto",
                     padding: isMobileView ? "20px !important" : "20px 60px !important",
                     background: "#f4f7ff",
+                    marginTop: isMobileView ? "0px" : "100px",
                 }}
                 maxWidth="sm"
             >

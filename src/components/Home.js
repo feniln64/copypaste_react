@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useEffect } from 'react';
 import axiosInstance from '../api/api'
 import psl from 'psl';
+import data from '../assets/data.json';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import newEvent from '../api/postHog';
 import Container from 'react-bootstrap/Container';
@@ -241,15 +242,105 @@ function Home() {
       <div><Toaster /></div>
       {!hascontent && (
         <>
-          <section id="hero" className="d-flex align-items-center" >
+        <section class="section section-header text-dark " style={{ backgroundColor: 'white' }}>
+            <div class="container mb-3">
+              <div class="row justify-content-center" style={{marginBottom:"100px"}} >
+                <div class="col-12 col-md-10 text-center ">
+                  <h1 class="display-2 font-weight-bolder ">
+                    Simple & Reliable.
+                  </h1>
+                  <p class="lead  mb-lg-5">CPYPST helps you share important data securly <br />with custom domain with private and public access.</p>
+                </div>
+                <div class="col-12 col-md-10  justify-content-center">
+                  <img class="d-none d-md-inline-block" src="./assets/img/scene.svg" alt="Mobile App Mockup" />
+                </div>
+              </div>
+            </div>
+            <div class="container mb-5">
+              <div class="row mb-5">
+                {data.features.map((e, i) => (
+                  <div key={i} class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+                    <div class="card border-0 bg-white text-center p-1">
+                      <div class="card-header bg-white border-0 pb-0">
+                        <div class="icon icon-lg icon-primary mb-4">
+                          <span class={`fas ${e.icon}`}></span>
+                        </div>
+                        <h2 class="h3 text-dark m-0">{e.title}</h2>
+                      </div>
+                      <div class="card-body">
+                        <p>
+                          {e.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div class="container " >
+                <div class="row justify-content-center mb-5 mb-lg-7">
+                    <div class="col-12 col-lg-8 text-center">
+                        <h2 class="h1 mb-4">Better in every way</h2>
+                        <p class="lead">Self-Service Analytics or ad hoc reporting gives users the ability to develop rapid reports, empowering users to analyze their data.</p>
+                    </div>
+                </div>
+                <div class="row row-grid align-items-center mb-5 mb-lg-7" >
+                    <div class="col-12 col-lg-5" style={{marginBottom:"100px"}}>
+                        <h2 class="mb-4">A thoughtful way to pay</h2>
+                        <p>Simpler App remembers your important details, so you can fill carts, not forms. And everything is encrypted so you can speed safely through checkout.</p>
+                        <p>Now, you can offset the carbon emissions produced by your deliveries—for free. All you have to do is check out with Shop Pay, one of the first carbon-neutral way to pay.</p>
+                        <a href="#" class="btn btn-dark mt-3 animate-up-2">
+                            Learn More
+                            <span class="icon icon-xs ml-2">
+                                <i class="fas fa-external-link-alt"></i>
+                            </span>
+                        </a>
+                    </div>
+                    <div class="col-12 col-lg-6 ml-lg-auto">
+                        <img src="./assets/img/scene-3.svg" class="w-100" alt=""/>
+                    </div>
+                </div>
+                <div class="row row-grid align-items-center mb-5 mb-lg-7">
+                    <div class="col-12 col-lg-5 order-lg-2">
+                        <h2 class="mb-4">Get it. Don't sweat it.</h2>
+                        <p>We track your desktop and mobile keyword rankings from any location and plot your full ranking history on a handy graph.</p>
+                        <p>You can set up automated ranking reports to be sent to your email address, so you’ll never forget to check your ranking progress.</p>
+                        <a href="#" class="btn btn-dark mt-3 animate-up-2">
+                            Learn More
+                            <span class="icon icon-xs ml-2">
+                                <i class="fas fa-external-link-alt"></i>
+                            </span>
+                        </a>
+                    </div>
+                    <div class="col-12 col-lg-6 mr-lg-auto">
+                        <img src="./assets/img/scene-2.svg" class="w-100" alt=""/>
+                    </div>
+                </div>
+                <div class="row">
+                  {data.about.map((e, i) => (
+                    <div key={i} class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="card border-light p-4">
+                        <div class="card-body">
+                            <h2 class="display-2 mb-2">{e.title}</h2>
+                            <span>{e.description}</span>
+                        </div>
+                    </div>
+                </div>))}
+                </div>
+            </div>
+
+
+          </section>
+          {/* <section id="hero" className="d-flex align-items-center" >
             <div className="container d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
               <h1 style={{fontSize: isMobileView ? "20px" : "48px", textAlign: "center", fontWeight: "bold"}}>
                 Handle Your Contents across every Platforms using CPYST! 
               </h1>
             </div>
-          </section>
+          </section> */}
 
-          <section id="featured-services" className="featured-services">
+          {/* <section id="featured-services" className="featured-services">
             <h1 style={{textAlign: "center"}}>Features</h1>
             <MuiContainer sx={{
               display: "flex", gap: "20px", flex: 1, justifyContent: "space-between", minHeight: "260px",
@@ -271,7 +362,7 @@ function Home() {
                 <PricingCard price={data.price} />
               ))}
             </MuiContainer>
-          </section>
+          </section> */}
         </>
       )}
       {hascontent && (

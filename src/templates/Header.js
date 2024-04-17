@@ -49,7 +49,7 @@ const Header = () => {
 
     return (
         <>
-            <Box sx={{ flexGrow: 1, marginBottom: "100px" }}>
+            <Box sx={{ flexGrow: 1, marginBottom: "60px" }}>
                 <AppBar
                     position="fixed"
                     sx={{

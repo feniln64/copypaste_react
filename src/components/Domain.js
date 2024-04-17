@@ -180,7 +180,7 @@ function Domain() {
             {!hasSubdomain &&
                 (
                     <>
-                        <div style={{ backgroundColor: "white" }} className="container">
+                        <div style={{ backgroundColor: "white",marginTop:"100px"}} >
                             <form onSubmit={handleCreateSubdomain}>
                                 <h1>Add subdomain</h1>
                                 <div className="form-outline mb-4">
@@ -197,7 +197,7 @@ function Domain() {
             {hasSubdomain &&
                 (
                     <>
-                        <div className="container card rounded bg-white mt-5 mb-5" >
+                        <div className="container card rounded bg-white  mb-5" style={{marginTop:"100px"}}>
                             <h1 className="card-title">
                                 Found subdomain
                             </h1>

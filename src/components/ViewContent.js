@@ -326,7 +326,7 @@ function ViewContent() {
                     gap: "30px",
                     borderRadius: "8px",
                     flex: 1,
-                    margin: isMobileView ? "25px 10px" : "25px 105px",
+                    margin: isMobileView ? "25px 10px" : "100px 105px",
                     boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px",
                 }}
             >
