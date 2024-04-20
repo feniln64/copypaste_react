@@ -333,7 +333,7 @@ function ViewContent() {
                 <Typography variant='h5' fontWeight={"bold"} textAlign={"center"}>User Content</Typography>
                 <Grid container>
                     {isContent.map((e) => (
-                        <Grid key={e._id} item xs={12} md={4}
+                        <Grid key={e._id} item xs={12} md={6} lg={4}
                             sx={{
                                 padding: "20px",
                                 display: isTabletView ? 'flex' : 'block',

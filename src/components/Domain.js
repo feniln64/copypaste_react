@@ -12,9 +12,11 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { QRCode } from 'antd';
+import useScreenSize from "../hooks/useScreenSize";
 function Domain() {
 
     const dispatch = useDispatch();
+    const [isMobileView] = useScreenSize();
 
     const [domain, setDomain] = useState("");
     const [subDomainId, setSubDomainId] = useState("");
@@ -180,7 +182,7 @@ function Domain() {
             {!hasSubdomain &&
                 (
                     <>
-                        <div style={{ backgroundColor: "white",marginTop:"100px"}} >
+                        <div style={{ backgroundColor: "white",marginTop:"100px", overflow: isMobileView ? 'scroll' : 'auto'}} >
                             <form onSubmit={handleCreateSubdomain}>
                                 <h1>Add subdomain</h1>
                                 <div className="form-outline mb-4">
@@ -197,7 +199,7 @@ function Domain() {
             {hasSubdomain &&
                 (
                     <>
-                        <div className="container card rounded bg-white  mb-5" style={{marginTop:"100px"}}>
+                        <div className="container card rounded bg-white  mb-5" style={{marginTop:"100px", overflow: isMobileView ? 'scroll' : 'auto'}}>
                             <h1 className="card-title">
                                 Found subdomain
                             </h1>
