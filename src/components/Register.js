@@ -143,6 +143,7 @@ const Register = () => {
                     height: isMobileView ? "85vh" : "auto",
                     padding: isMobileView ? "20px !important" : "20px 60px !important",
                     background: "#f4f7ff",
+                    marginTop: isMobileView ? "0px" : "100px",
                 }}
                 maxWidth="sm"
             >
@@ -291,9 +292,9 @@ const Register = () => {
                             type="submit"
                             sx={{
                                 borderRadius: "8px",
-                                background: "#3758f9",
+                                background: "#0d6efd",
                                 "&:hover": {
-                                    background: "#3758f9",
+                                    background: "#0d6efd",
                                 },
                             }}
                         >

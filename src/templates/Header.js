@@ -49,7 +49,7 @@ const Header = () => {
 
     return (
         <>
-            <Box sx={{ flexGrow: 1, marginBottom: "100px" }}>
+            <Box sx={{ flexGrow: 1, marginBottom: "60px" }}>
                 <AppBar
                     position="fixed"
                     sx={{
@@ -77,9 +77,9 @@ const Header = () => {
                                             to="/login"
                                             variant="contained"
                                             sx={{
-                                                backgroundColor: "#3758f9",
+                                                backgroundColor: "#0d6efd",
                                                 "&:hover": {
-                                                    backgroundColor: "#3758f9",
+                                                    backgroundColor: "#0d6efd",
                                                     color: "#fff",
                                                 },
                                             }}
@@ -91,9 +91,9 @@ const Header = () => {
                                             to="/register"
                                             variant="contained"
                                             sx={{
-                                                backgroundColor: "#3758f9",
+                                                backgroundColor: "#0d6efd",
                                                 "&:hover": {
-                                                    backgroundColor: "#3758f9",
+                                                    backgroundColor: "#0d6efd",
                                                     color: "#fff",
                                                 },
                                             }}
@@ -111,7 +111,7 @@ const Header = () => {
                                             onClick={handleMenu}
                                         >
                                             <MenuIcon
-                                                sx={{ fill: "#3758f9" }}
+                                                sx={{ fill: "#0d6efd" }}
                                             />
                                         </IconButton>
                                         <Menu
@@ -222,7 +222,7 @@ const Header = () => {
                                             onClick={handleMenu}
                                         >
                                             <MenuIcon
-                                                sx={{ fill: "#3758f9" }}
+                                                sx={{ fill: "#0d6efd" }}
                                             />
                                         </IconButton>
                                         <Menu
@@ -248,6 +248,14 @@ const Header = () => {
                                                     gap: "12px",
                                                 }}
                                             >
+                                                <Button
+                                                    variant="contained"
+                                                    color="inherit"
+                                                >
+                                                    <Link to="/shared">
+                                                        Shared
+                                                    </Link>
+                                                </Button>
                                                 <Button
                                                     variant="contained"
                                                     color="inherit"

@@ -13,7 +13,7 @@ import {
     useTheme,
 } from "@mui/material";
 
-const CommonDialog = ({ open, onClose, title, children, onClick }) => {
+const CommonDialog = ({ open, onClose, title, children, onClick, showFooter }) => {
     const theme = useTheme();
 
     return (
@@ -46,19 +46,21 @@ const CommonDialog = ({ open, onClose, title, children, onClick }) => {
             </DialogTitle>
             <DialogContent>{children}</DialogContent>
             <DialogActions>
-                <Box sx={{display: "flex", gap: "10px"}}>
-                    <Button variant="outlined" onClick={onClose} sx={{borderRadius: "8px"}}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="contained"
-                        type={"submit"}
-                        onClick={onClick}
-                        sx={{borderRadius: "8px"}}
-                    >
-                        Submit
-                    </Button>
-                </Box>
+                {showFooter ? (
+                    <Box sx={{display: "flex", gap: "10px"}}>
+                        <Button variant="outlined" onClick={onClose} sx={{borderRadius: "8px"}}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="contained"
+                            type={"submit"}
+                            onClick={onClick}
+                            sx={{borderRadius: "8px"}}
+                        >
+                            Submit
+                        </Button>
+                    </Box>
+                ) : null}
             </DialogActions>
         </Dialog>
     );
@@ -70,6 +72,7 @@ CommonDialog.propTypes = {
     title: PropTypes.string,
     children: PropTypes.node,
     onClick: PropTypes.func,
+    showFooter: PropTypes.bool,
 };
 
 CommonDialog.defaultProps = {
@@ -78,6 +81,7 @@ CommonDialog.defaultProps = {
     title: "",
     children: <div />,
     onClick: () => {},
+    showFooter: true
 };
 
 export default CommonDialog;

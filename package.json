@@ -1,7 +1,7 @@
 {
   "name": "copypaste_react",
-  "version": "1.9.7",
-  "description": "new socket server",
+  "version": "2.0.0",
+  "description": "shared content update route fix",
   "private": true,
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^40.0.0",

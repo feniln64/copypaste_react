@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useEffect } from 'react';
 import axiosInstance from '../api/api'
 import psl from 'psl';
+import data from '../assets/data.json';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import newEvent from '../api/postHog';
 import Container from 'react-bootstrap/Container';
@@ -12,7 +13,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { socket } from "../api/socket";
 import { Container as MuiContainer, Button } from "@mui/material";
 import LunchDiningRoundedIcon from '@mui/icons-material/LunchDiningRounded';
-import { GridViewRounded,LayersRounded, DashboardRounded } from '@mui/icons-material';
+import { GridViewRounded, LayersRounded, DashboardRounded } from '@mui/icons-material';
 import useScreenSize from '../hooks/useScreenSize';
 import { useSelector, useDispatch } from 'react-redux'
 import { addContent, updateOneContent, addNewContent } from '../store/slices/contentSlice';
@@ -47,9 +48,9 @@ const featureData = [
 ];
 
 const pricings = [
-  {price: 25},
-  {price: 59},
-  {price: 99},
+  { price: 25 },
+  { price: 59 },
+  { price: 99 },
 ];
 
 function Home() {
@@ -129,7 +130,7 @@ function Home() {
   const viewContent = (id) => {
     console.log("view content called");
     console.log("id =", id);
-  };  
+  };
 
   const handleCreateNewContent = async (e) => {
     e.preventDefault();
@@ -175,25 +176,24 @@ function Home() {
 
   const getinitialData = async () => {
     await axiosInstance.get(`/init/getdata/${subdomain}`) // public route no need to send auth token (with credential)
-        .then((response) => {
-          if (response.data.content !== null && response.data.content.length > 0) 
-          {
-            console.log("response.data.content =", response.data.content);
-            sethasContent(true)
-            dispatch(addContent(response.data.content))
-          }
-        })
-        .catch((error) => {
-            if (error.response) {
-                console.log(error.response);
-                toast.error(error.response.data.message);
-            } else if (error.request) {
-                console.log("network error");
-            } else {
-                console.log(error);
-            }
-        });
-}
+      .then((response) => {
+        if (response.data.content !== null && response.data.content.length > 0) {
+          console.log("response.data.content =", response.data.content);
+          sethasContent(true)
+          dispatch(addContent(response.data.content))
+        }
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.log(error.response);
+          toast.error(error.response.data.message);
+        } else if (error.request) {
+          console.log("network error");
+        } else {
+          console.log(error);
+        }
+      });
+  }
 
   useEffect(() => {
     newEvent("homepage", "homepage", "/homepage");
@@ -204,21 +204,21 @@ function Home() {
       subdomain = "";
     }
     else {
-        axiosInstance.get(`/init/getdata/${subdomain}`)
-          .then((response) => {
-            console.log("init.response =", response);
-            if (response.data.content !== null && response.data.content.length > 0) {
-              sethasContent(true);
-              socket.emit('join_room', response.data.userInfo.username);
-              dispatch(addContent(response.data.content));
-              dispatch(addNewUser(response.data.userInfo));
-            } else sethasContent(false);
-          })
-          .catch((error) => {
-            toast.error(error.response.data.message);
-            console.log(error);                //here
-          });
-      }
+      axiosInstance.get(`/init/getdata/${subdomain}`)
+        .then((response) => {
+          console.log("init.response =", response);
+          if (response.data.content !== null && response.data.content.length > 0) {
+            sethasContent(true);
+            socket.emit('join_room', response.data.userInfo.username);
+            dispatch(addContent(response.data.content));
+            dispatch(addNewUser(response.data.userInfo));
+          } else sethasContent(false);
+        })
+        .catch((error) => {
+          toast.error(error.response.data.message);
+          console.log(error);                //here
+        });
+    }
     socket.on('updatecontent', (data) => {
       console.log("data from server", data);
       // setContent(data.content);
@@ -241,42 +241,88 @@ function Home() {
       <div><Toaster /></div>
       {!hascontent && (
         <>
-          <section id="hero" className="d-flex align-items-center" >
-            <div className="container d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
-              <h1 style={{fontSize: isMobileView ? "20px" : "48px", textAlign: "center", fontWeight: "bold"}}>
-                Handle Your Contents across every Platforms using CPYST! 
-              </h1>
+          <section class="section section-header text-dark " style={{ backgroundColor: 'white' }}>
+            <div class="container mb-3">
+              <div class="row justify-content-center" style={{ marginBottom: "100px" }} >
+                <div class="col-12 col-md-10 text-center ">
+                  <h1 class="display-2 font-weight-bolder ">
+                    Simple & Reliable.
+                  </h1>
+                  <p class="lead  mb-lg-5">CPYPST helps you share important data securly <br />with custom domain with private and public access.</p>
+                </div>
+                <div class="col-12 col-md-10  justify-content-center">
+                  <img class="d-none d-md-inline-block" src="./assets/img/scene.svg" alt="Mobile App Mockup" />
+                </div>
+              </div>
             </div>
-          </section>
+            <div class="container mb-5">
+              <div class="row mb-5">
+                {data.features.map((e, i) => (
+                  <div key={i} class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+                    <div class="card border-0 bg-white text-center p-1">
+                      <div class="card-header bg-white border-0 pb-0">
+                        <div class="icon icon-lg icon-primary mb-4">
+                          <span class={`fas ${e.icon}`}></span>
+                        </div>
+                        <h2 class="h3 text-dark m-0">{e.title}</h2>
+                      </div>
+                      <div class="card-body">
+                        <p>
+                          {e.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          <section id="featured-services" className="featured-services">
-            <h1 style={{textAlign: "center"}}>Features</h1>
-            <MuiContainer sx={{
-              display: "flex", gap: "20px", flex: 1, justifyContent: "space-between", minHeight: "260px",
-              padding: isMobileView ? "0 20px !important" : "0 112px !important",
-              flexDirection: isMobileView ? "column" : "row"
-            }} maxWidth={false}>
-              {featureData.map(data => (
-                <FeaturesCard title={data.title} icon={data.icon} />
-              ))}
-            </MuiContainer>
-          </section>
-          <section>
-            <h1 style={{textAlign: "center"}}>Pricing</h1>
-            <MuiContainer sx={{
-              display: "flex", gap: "20px", flex: 3, justifyContent: "space-between", minHeight: "416px",
-              padding: isMobileView ? "0 20px !important" : "0 112px !important", flexDirection: isMobileView ? "column" : "row"
-            }} maxWidth={false}>
-              {pricings.map(data => (
-                <PricingCard price={data.price} />
-              ))}
-            </MuiContainer>
+            <div class="container " >
+              <div class="row justify-content-center mb-5 mb-lg-7">
+                <div class="col-12 col-lg-8 text-center">
+                  <h2 class="h1 mb-4">Better in every way</h2>
+                  <p class="lead">Self-Service Analytics or ad hoc reporting gives users the ability to develop rapid reports, empowering users to analyze their data.</p>
+                </div>
+              </div>
+              <div class="row row-grid align-items-center mb-5 mb-lg-7" >
+                <div class="col-12 col-lg-5" style={{ marginBottom: "100px" }}>
+                  <h2 class="mb-4">A thoughtful way to pay</h2>
+                  <p>Simpler App remembers your important details, so you can fill carts, not forms. And everything is encrypted so you can speed safely through checkout.</p>
+                  <p>Now, you can offset the carbon emissions produced by your deliveries—for free. All you have to do is check out with Shop Pay, one of the first carbon-neutral way to pay.</p>
+
+                </div>
+                <div class="col-12 col-lg-6 ml-lg-auto">
+                  <img src="./assets/img/scene-3.svg" class="w-100" alt="" />
+                </div>
+              </div>
+              <div class="row row-grid align-items-center mb-5 mb-lg-7">
+                <div class="col-12 col-lg-5 order-lg-2">
+                  <h2 class="mb-4">Get it. Don't sweat it.</h2>
+                  <p>We track your desktop and mobile keyword rankings from any location and plot your full ranking history on a handy graph.</p>
+                  <p>You can set up automated ranking reports to be sent to your email address, so you’ll never forget to check your ranking progress.</p>
+
+                </div>
+                <div class="col-12 col-lg-6 mr-lg-auto">
+                  <img src="./assets/img/scene-2.svg" class="w-100" alt="" />
+                </div>
+              </div>
+              <div class="row">
+                {data.about.map((e, i) => (
+                  <div key={i} class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="card border-light p-4">
+                      <div class="card-body">
+                        <h2 class="display-2 mb-2">{e.title}</h2>
+                        <span>{e.description}</span>
+                      </div>
+                    </div>
+                  </div>))}
+              </div>
+            </div>
           </section>
         </>
       )}
       {hascontent && (
         <>
-          
           <div className="container  card rounded bg-white" style={{ marginBottom: "100px" }}>
             <div className="row">
               <div className="d-flex justify-content-center align-items-center mt-3">
@@ -286,14 +332,14 @@ function Home() {
               </div>
               <div className="row">
                 <div className="col-md-24  card-body">
-                  <Container   style={{ minHeight: "715px", marginTop: "50px", alignItems:"center" }}>
-                    <Row style={{display:"flex",alignItems:"center"}} className='d-flex justify-content-center' >
+                  <Container style={{ minHeight: "715px", marginTop: "50px", alignItems: "center" }}>
+                    <Row style={{ display: "flex", alignItems: "center" }} className='d-flex justify-content-center' >
                       {isContent.map((e) => (
-                      <Col  key={e._id} >
+                        <Col key={e._id} >
                           {/* <CardView title={e.title} editContent={openModal} deleteContent={null} content={e.content} _id={e._id} /> */}
                           <Card key={e._id} id={e._id} style={{ width: '18rem' }}>
                             <Card.Body>
-                              <Card.Title > <button id={e._id} onClick={e => openModal(e.target.id)} style={{fontWeight:"bold",textTransform:"", border:"none", backgroundColor:"white"}} >{e.title}</button></Card.Title>
+                              <Card.Title > <button id={e._id} onClick={e => openModal(e.target.id)} style={{ fontWeight: "bold", textTransform: "", border: "none", backgroundColor: "white" }} >{e.title}</button></Card.Title>
                               <Card.Text>
                                 <ReactQuill
                                   modules={{ toolbar: false }}
@@ -305,7 +351,7 @@ function Home() {
                               </Card.Text>
                             </Card.Body>
                           </Card>
-                      </Col>
+                        </Col>
                       ))}
                     </Row>
                   </Container>

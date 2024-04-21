@@ -386,7 +386,7 @@ function Profile() {
                     gap: "30px",
                     borderRadius: "8px",
                     flex: 1,
-                    margin: "25px 75px"
+                    margin: "105px 75px"
                 }}
             >
                 <Typography sx={{paddingX: "15px", fontWeight: "bold"}}>
@@ -459,9 +459,9 @@ function Profile() {
                                 borderRadius: "6px",
                                 textTransform: "none",
                                 fontWeight: "bold",
-                                background: "#3758f9",
+                                background: "#0d6efd",
                                 "&:hover": {
-                                    background: "#3758f9",
+                                    background: "#0d6efd",
                                 },
                             }}
                             type="submit" 
@@ -677,10 +677,10 @@ function Profile() {
                             onSubmit={handleChangePassword}
                             sx={{
                                     borderRadius: "6px",
-                                    background: "#3758f9",
+                                    background: "#0d6efd",
                                     textTransform: "none",
                                     "&:hover": {
-                                        background: "#3758f9",
+                                        background: "#0d6efd",
                                     },
                                     fontWeight: "bold",
                                 }}

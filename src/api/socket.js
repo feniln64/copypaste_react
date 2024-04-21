@@ -1,7 +1,7 @@
 import {io}  from 'socket.io-client';
 let baseURL  = ""
 if (process.env.NODE_ENV === 'development') {
-  baseURL = "http://localhost:9001"
+  baseURL = "https://socket-server.cpypst.online"
 } else {
   baseURL = "https://socket-server.cpypst.online"
 }
