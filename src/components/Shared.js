@@ -25,6 +25,7 @@ import useScreenSize from "../hooks/useScreenSize";
 import { CardView, CommonDialog } from "../common";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { current } from "@reduxjs/toolkit";
 
 function Shared() {
   const dispatch = useDispatch();
@@ -33,7 +34,6 @@ function Shared() {
   const userEmail = userInfo.email;
 
   const isContent = useSelector((state) => state.sharedwithme.sharedwithme);
-  console.log(">>>isContent", isContent);
   const [hasPermission, setHasPermission] = useState(false);
 
   const [newContent, setNewContent] = useState("");
@@ -54,23 +54,21 @@ function Shared() {
       return;
     }
     const contentData = {
-      _id: modelId,
       content: newContent,
       is_protected: newIsChecked,
       title: newTitle,
+      current_user: userEmail,
     };
     console.log("contentData =", contentData);
 
-    socket.emit("updateContent", { room: username, message: contentData });
+    socket.emit("updatecontent", { room: username, message: contentData });
 
     await axiosInstance
-      .patch(`/content/update/${modelId}`, contentData, {
-        withCredentials: true,
-      })
+      .patch(`/content/update/shared/${modelId}`, contentData, {withCredentials: true})
       .then((response) => {
         if (response.status === 200) {
-          dispatch(updateOneContent(contentData));
           // setContent(isContent)
+          getinitialData();
           handleClose();
           toast.success("data updated Successfully");
         }
@@ -88,6 +86,7 @@ function Shared() {
     setNewTitle("");
     setNewIsChecked(false);
     setNewContent("");
+    handleClose();
   };
 
   const getinitialData = async () => {
@@ -131,9 +130,8 @@ function Shared() {
   const openModal = (event, editable = true) => {
     setNewContent(isContent.filter((e) => e._id === event)[0].content || "");
     setNewTitle(isContent.filter((e) => e._id === event)[0].title || "");
-    setNewIsChecked(
-      isContent.filter((e) => e._id === event)[0].is_protected || false
-    );
+    setNewIsChecked(isContent.filter((e) => e._id === event)[0].is_protected || false);
+    setModelId(isContent.filter((e) => e._id === event)[0]._id || "");
     setShow(true);
 		setEditable(editable);
   };
@@ -156,7 +154,7 @@ function Shared() {
         }}
       >
         <Typography variant="h5" fontWeight={"bold"} textAlign={"center"}>
-          User Content
+          Shared Content
         </Typography>
         <Grid container>
           {isContent.map((e) => (
@@ -175,7 +173,7 @@ function Shared() {
                   shouldShare={false}
                   _id={e._id}
                   shouldEdit={e.permission_type === 2}
-                  content={e.content}
+                  content={e.content.slice(0, 20) + "..."}
                 />
               </Box>
             </Grid>
@@ -203,7 +201,7 @@ function Shared() {
                 autoFocus
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
               <Form.Label>Protected Content</Form.Label>
               <Form.Check // prettier-ignore
                 type={"checkbox"}
@@ -212,7 +210,7 @@ function Shared() {
                 checked={newIsChecked}
                 onChange={(e) => setNewIsChecked(e.target.checked)}
               />
-            </Form.Group>
+            </Form.Group> */}
             <Form.Group
               className="mb-3"
               controlId="exampleForm.ControlTextarea1"

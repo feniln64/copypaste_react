@@ -348,7 +348,7 @@ function ViewContent() {
                                     editContent={openModal}
                                     editPermission={permissionModel}
                                     deleteContent={deleteModel}
-                                    content={e.content.slice(0, 20) }
+                                    content={e.content.slice(0, 20)+"..." }
                                     _id={e._id}
                                 />
                             </Box>

@@ -232,7 +232,7 @@ function Domain() {
                                 </Col>
                             </Row>
                             {/* create domain model */}
-                            <Modal show={show} onHide={handleClose}>
+                            <Modal show={show} centered onHide={handleClose}>
                                 <Modal.Header closeButton>
                                     <Modal.Title>Create New Subdomain</Modal.Title>
                                 </Modal.Header>
