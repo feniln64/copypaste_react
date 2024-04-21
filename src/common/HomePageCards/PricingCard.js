@@ -14,7 +14,7 @@ const PricingCard = ({price}) => {
         <Typography>All UI components</Typography>
         <Typography>Lifetime access</Typography>
         <Typography>Free updates</Typography>
-        <Button variant='contained' sx={{ borderRadius: "8px", backgroundColor: "#3758f9", width: "fit-content", padding: "12px 28px" }}>Purchase Now</Button>
+        <Button variant='contained' sx={{ borderRadius: "8px", backgroundColor: "#0d6efd", width: "fit-content", padding: "12px 28px" }}>Purchase Now</Button>
     </Card>
 )}
 

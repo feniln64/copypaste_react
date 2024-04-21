@@ -292,9 +292,9 @@ const Register = () => {
                             type="submit"
                             sx={{
                                 borderRadius: "8px",
-                                background: "#3758f9",
+                                background: "#0d6efd",
                                 "&:hover": {
-                                    background: "#3758f9",
+                                    background: "#0d6efd",
                                 },
                             }}
                         >
