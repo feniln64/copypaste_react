@@ -11,7 +11,7 @@ import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import toast, { Toaster } from 'react-hot-toast';
 import { socket } from "../api/socket";
-import { Container as MuiContainer, Button } from "@mui/material";
+import { Container as MuiContainer, Button, Box, Typography, Grid, Button as MUIButton } from "@mui/material";
 import LunchDiningRoundedIcon from '@mui/icons-material/LunchDiningRounded';
 import { GridViewRounded, LayersRounded, DashboardRounded } from '@mui/icons-material';
 import useScreenSize from '../hooks/useScreenSize';
@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { addContent, updateOneContent, addNewContent } from '../store/slices/contentSlice';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CommonDialog, FeaturesCard, PricingCard } from '../common';
+import { CardView, CommonDialog, FeaturesCard, PricingCard } from '../common';
 import { FaPlus } from "react-icons/fa6";
 import '../assets/content.css';
 import Card from 'react-bootstrap/Card';
@@ -72,8 +72,9 @@ function Home() {
   const [modelId, setModelId] = useState("")
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const [editable, setEditable] = useState(false);
 
-  const openModal = (event) => {
+  const openModal = (event, editable = true) => {
     console.log("event =", event);
     setModelId(event)
     if (event === "createContent") {
@@ -87,6 +88,7 @@ function Home() {
       // handleUpdateShow()
     }
     setShow(true);
+    setEditable(editable)
   };
 
   const handleUpdateContent = async (e) => {
@@ -234,7 +236,7 @@ function Home() {
 
   }, []);
 
-  const [isMobileView] = useScreenSize();
+  const [isMobileView,isTabletView] = useScreenSize();
 
   return (
     <>
@@ -323,39 +325,50 @@ function Home() {
       )}
       {hascontent && (
         <>
-          <div className="container  card rounded bg-white" style={{ marginBottom: "100px" }}>
-            <div className="row">
-              <div className="d-flex justify-content-center align-items-center mt-3">
-                <h4 className="text-right">User Content</h4>
-                <Button className='mt-2' variant='primary' onClick={getinitialData} ><IoRefreshOutline /></Button>
-
-              </div>
-              <div className="row">
-                <div className="col-md-24  card-body">
-                  <Container style={{ minHeight: "715px", marginTop: "50px", alignItems: "center" }}>
-                    <Row style={{ display: "flex", alignItems: "center" }} className='d-flex justify-content-center' >
-                      {isContent.map((e) => (
-                        <Col key={e._id} >
-                          {/* <CardView title={e.title} editContent={openModal} deleteContent={null} content={e.content} _id={e._id} /> */}
-                          <Card key={e._id} id={e._id} style={{ width: '18rem' }}>
-                            <Card.Body>
-                              <Card.Title > <button id={e._id} onClick={e => openModal(e.target.id)} style={{ fontWeight: "bold", textTransform: "", border: "none", backgroundColor: "white" }} >{e.title}</button></Card.Title>
-                              <Card.Text>
-                                <ReactQuill
-                                  modules={{ toolbar: false }}
-                                  formats={[]}
-                                  style={{ height: "auto", border: "none" }}
-                                  readOnly={true}
-                                  value={e.content.slice(0, 20)}
+          
+                <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: isMobileView ? "20px !important" : "40px !important",
+                    background: "#fff",
+                    gap: "30px",
+                    borderRadius: "8px",
+                    flex: 1,
+                    margin: isMobileView ? "25px 10px" : "100px 105px",
+                    boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px",
+                }}
+            >
+                <Typography variant='h5' fontWeight={"bold"} textAlign={"center"}>User Content</Typography>
+                <Grid container>
+                    {isContent.map((e) => (
+                        <Grid key={e._id} item xs={12} md={6} lg={4}
+                            sx={{
+                                padding: "20px",
+                                display: isTabletView ? 'flex' : 'block',
+                                justifyContent: isTabletView ? 'center' : 'flex-start',
+                                // border: '1px solid red'
+                            }}
+                        >
+                            <Box sx={{ width: isMobileView ? "auto" : "18rem", borderRadius: "8px" }}>
+                                {/* {if (e.content.length > 10) e.content = e.content.slice(0, 10) + "..."} */}
+                                <CardView
+                                    title={e.title}
+                                    editContent={openModal}
+                                    content={e.content.slice(0, 20)+"..." }
+                                    _id={e._id}
+                                    shouldDelete={false}
+                                    shouldShare={false}
+                                    shouldEdit
                                 />
-                              </Card.Text>
-                            </Card.Body>
-                          </Card>
-                        </Col>
-                      ))}
-                    </Row>
-                  </Container>
-                </div>
+                            </Box>
+                        </Grid>
+                    ))}
+                </Grid>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <MUIButton variant="contained" sx={{ width: "fit-content", textTransform: "capitalize" }} onClick={e => openModal(e.target.id)} id='createContent'> <FaPlus />Create New Content </MUIButton>
+                </Box>
+            </Box>
                 <div className="d-flex justify-content-center align-items-center">
                   {/* Update Content Model  */}
                   <CommonDialog open={show} onClose={handleClose} onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent} title={"Create New Content"}>
@@ -378,11 +391,8 @@ function Home() {
                       </Form.Group>
                     </Form>
                   </CommonDialog>
-                  <button className="btn btn-primary mb-3" onClick={e => openModal(e.target.id)} id='createContent'> <FaPlus /> Create New Content </button>
+                  {/* <button className="btn btn-primary mb-3" onClick={e => openModal(e.target.id)} id='createContent'> <FaPlus /> Create New Content </button> */}
                 </div>
-              </div>
-            </div>
-          </div>
         </>
       )}
     </>
