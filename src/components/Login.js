@@ -64,8 +64,7 @@ export default function Login() {
                 dispatch(addContent(res.data.content));
                 dispatch(initDomain(res.data.subdomains));
                 dispatch(initSharedBy(res.data.sharedByMe));
-                dispatch(initSharedWithMe(res.data.shraedWithMe));
-                navigate("/");
+                navigate("/content");
             }
         } catch (error) {
             toast.error(error.response.data.message, { icon: "👎" });
