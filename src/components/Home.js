@@ -241,32 +241,32 @@ function Home() {
       <div><Toaster /></div>
       {!hascontent && (
         <>
-          <section class="section section-header text-dark " style={{ backgroundColor: 'white' }}>
-            <div class="container mb-3">
-              <div class="row justify-content-center" style={{ marginBottom: "100px" }} >
-                <div class="col-12 col-md-10 text-center ">
-                  <h1 class="display-2 font-weight-bolder ">
+          <section className="section section-header text-dark " style={{ backgroundColor: 'white' }}>
+            <div className="container mb-3">
+              <div className="row justify-content-center" style={{ marginBottom: "100px" }} >
+                <div className="col-12 col-md-10 text-center ">
+                  <h1 className="display-2 font-weight-bolder ">
                     Simple & Reliable.
                   </h1>
-                  <p class="lead  mb-lg-5">CPYPST helps you share important data securly <br />with custom domain with private and public access.</p>
+                  <p className="lead  mb-lg-5">CPYPST helps you share important data securly <br />with custom domain with private and public access.</p>
                 </div>
-                <div class="col-12 col-md-10  justify-content-center">
-                  <img class="d-none d-md-inline-block" src="./assets/img/scene.svg" alt="Mobile App Mockup" />
+                <div className="col-12 col-md-10  justify-content-center">
+                  <img className="d-none d-md-inline-block" src="./assets/img/scene.svg" alt="Mobile App Mockup" />
                 </div>
               </div>
             </div>
-            <div class="container mb-5">
-              <div class="row mb-5">
+            <div className="container mb-5">
+              <div className="row mb-5">
                 {data.features.map((e, i) => (
-                  <div key={i} class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-                    <div class="card border-0 bg-white text-center p-1">
-                      <div class="card-header bg-white border-0 pb-0">
-                        <div class="icon icon-lg icon-primary mb-4">
-                          <span class={`fas ${e.icon}`}></span>
+                  <div key={i} className="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+                    <div className="card border-0 bg-white text-center p-1">
+                      <div className="card-header bg-white border-0 pb-0">
+                        <div className="icon icon-lg icon-primary mb-4">
+                          <span className={`fas ${e.icon}`}></span>
                         </div>
-                        <h2 class="h3 text-dark m-0">{e.title}</h2>
+                        <h2 className="h3 text-dark m-0">{e.title}</h2>
                       </div>
-                      <div class="card-body">
+                      <div className="card-body">
                         <p>
                           {e.description}
                         </p>
@@ -277,41 +277,41 @@ function Home() {
               </div>
             </div>
 
-            <div class="container " >
-              <div class="row justify-content-center mb-5 mb-lg-7">
-                <div class="col-12 col-lg-8 text-center">
-                  <h2 class="h1 mb-4">Better in every way</h2>
-                  <p class="lead">Self-Service Analytics or ad hoc reporting gives users the ability to develop rapid reports, empowering users to analyze their data.</p>
+            <div className="container " >
+              <div className="row justify-content-center mb-5 mb-lg-7">
+                <div className="col-12 col-lg-8 text-center">
+                  <h2 className="h1 mb-4">Better in every way</h2>
+                  <p className="lead">Self-Service Analytics or ad hoc reporting gives users the ability to develop rapid reports, empowering users to analyze their data.</p>
                 </div>
               </div>
-              <div class="row row-grid align-items-center mb-5 mb-lg-7" >
-                <div class="col-12 col-lg-5" style={{ marginBottom: "100px" }}>
-                  <h2 class="mb-4">A thoughtful way to pay</h2>
+              <div className="row row-grid align-items-center mb-5 mb-lg-7" >
+                <div className="col-12 col-lg-5" style={{ marginBottom: "100px" }}>
+                  <h2 className="mb-4">A thoughtful way to pay</h2>
                   <p>Simpler App remembers your important details, so you can fill carts, not forms. And everything is encrypted so you can speed safely through checkout.</p>
                   <p>Now, you can offset the carbon emissions produced by your deliveries—for free. All you have to do is check out with Shop Pay, one of the first carbon-neutral way to pay.</p>
 
                 </div>
-                <div class="col-12 col-lg-6 ml-lg-auto">
-                  <img src="./assets/img/scene-3.svg" class="w-100" alt="" />
+                <div className="col-12 col-lg-6 ml-lg-auto">
+                  <img src="./assets/img/scene-3.svg" className="w-100" alt="" />
                 </div>
               </div>
-              <div class="row row-grid align-items-center mb-5 mb-lg-7">
-                <div class="col-12 col-lg-5 order-lg-2">
-                  <h2 class="mb-4">Get it. Don't sweat it.</h2>
+              <div className="row row-grid align-items-center mb-5 mb-lg-7">
+                <div className="col-12 col-lg-5 order-lg-2">
+                  <h2 className="mb-4">Get it. Don't sweat it.</h2>
                   <p>We track your desktop and mobile keyword rankings from any location and plot your full ranking history on a handy graph.</p>
                   <p>You can set up automated ranking reports to be sent to your email address, so you’ll never forget to check your ranking progress.</p>
 
                 </div>
-                <div class="col-12 col-lg-6 mr-lg-auto">
-                  <img src="./assets/img/scene-2.svg" class="w-100" alt="" />
+                <div className="col-12 col-lg-6 mr-lg-auto">
+                  <img src="./assets/img/scene-2.svg" className="w-100" alt="" />
                 </div>
               </div>
-              <div class="row">
+              <div className="row">
                 {data.about.map((e, i) => (
-                  <div key={i} class="col-12 col-md-6 col-lg-4 mb-4">
-                    <div class="card border-light p-4">
-                      <div class="card-body">
-                        <h2 class="display-2 mb-2">{e.title}</h2>
+                  <div key={i} className="col-12 col-md-6 col-lg-4 mb-4">
+                    <div className="card border-light p-4">
+                      <div className="card-body">
+                        <h2 className="display-2 mb-2">{e.title}</h2>
                         <span>{e.description}</span>
                       </div>
                     </div>
