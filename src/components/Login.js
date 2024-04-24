@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import axiosInstance from "../api/api";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 // import toast, { Toaster } from 'react-hot-toast';
-import { useDispatch } from "react-redux";
+import { useDispatch , useSelector} from "react-redux";
 import { addNewUser } from "../store/slices/authSlice";
 import { addContent } from "../store/slices/contentSlice";
 import { initDomain } from "../store/slices/domainSlice";
@@ -33,6 +33,8 @@ export default function Login() {
     const message = location.state?.message;
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const is_loggedin = useSelector((state) => state.auth.isLoggedIn);
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [checked, setIsChecked] = useState(false);
@@ -57,6 +59,7 @@ export default function Login() {
                 newEvent("login", "logged in", "/login");
                 toast.success("Successfully Login!");
                 axiosInstance.defaults.headers.common["Authorization"] ="Bearer " + res.data.accessToken;
+                localStorage.setItem("refreshToken", res.data.refreshToken);
                 const userInfo = res.data.userInfo;
                 userInfo.isLoggedIn = true;
                 console.log(res.data);
@@ -72,6 +75,9 @@ export default function Login() {
     };
 
     useEffect(() => {
+        if (is_loggedin) {
+            navigate("/content");
+        }
         if (message) {
             toast.success(message);
         }

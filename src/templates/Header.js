@@ -37,7 +37,7 @@ const Header = () => {
             .catch((error) => {
                 console.log(error);
             });
-        localStorage.removeItem("jwt");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("userInfo");
         dispatch(removeUser());
         dispatch(removeContent());

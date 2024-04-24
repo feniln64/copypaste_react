@@ -27,7 +27,7 @@ function Shared() {
   const username = userInfo.username;
   const userEmail = userInfo.email;
 
-  const isContent = useSelector((state) => state.sharedwithme.sharedwithme) || [];
+  const isSharedContent = useSelector((state) => state.sharedwithme.sharedwithme);
   const [hasPermission, setHasPermission] = useState(false);
 
   const [newContent, setNewContent] = useState("");
@@ -61,7 +61,7 @@ function Shared() {
       .patch(`/content/update/shared/${modelId}`, contentData, { withCredentials: true })
       .then((response) => {
         if (response.status === 200) {
-          // setContent(isContent)
+          // setContent(isSharedContent)
           getinitialData();
           handleClose();
           toast.success("data updated Successfully");
@@ -84,13 +84,11 @@ function Shared() {
   };
 
   const getinitialData = async () => {
-    console.log(" got data from server");
     await axiosInstance
       .get(`permission/shared/withme/${userEmail}`, { withCredentials: true })
       .then((response) => {
         setHasPermission(true);
         dispatch(initSharedWithMe(response.data.sharedContent));
-        console.log("response.data.sharedContent", response.data.sharedContent);
       })
       .catch((error) => {
         if (error.response) {
@@ -108,19 +106,18 @@ function Shared() {
   };
 
   useEffect(() => {
-    console.log("calling getinitialData");
     getinitialData();
-    if (isContent.length > 0) {
+    if (isSharedContent.length > 0) {
       setHasPermission(true);
     }
     newEvent("view permission to me", "permission", "/shared");
   }, []);
 
   const openModal = (event, editable = true) => {
-    setNewContent(isContent.filter((e) => e._id === event)[0].content || "");
-    setNewTitle(isContent.filter((e) => e._id === event)[0].title || "");
-    setNewIsChecked(isContent.filter((e) => e._id === event)[0].is_protected || false);
-    setModelId(isContent.filter((e) => e._id === event)[0]._id || "");
+    setNewContent(isSharedContent.filter((e) => e._id === event)[0].content || "");
+    setNewTitle(isSharedContent.filter((e) => e._id === event)[0].title || "");
+    setNewIsChecked(isSharedContent.filter((e) => e._id === event)[0].is_protected || false);
+    setModelId(isSharedContent.filter((e) => e._id === event)[0]._id || "");
     setShow(true);
     setEditable(editable);
   };
@@ -128,85 +125,107 @@ function Shared() {
   return (
     <>
       <Toaster position="bottom-right" reverseOrder={false} />
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          padding: isMobileView ? "20px !important" : "40px !important",
-          background: "#fff",
-          gap: "30px",
-          borderRadius: "8px",
-          flex: 1,
-          margin: isMobileView ? "25px 10px" : "100px 105px",
-          boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px",
-        }}
-      >
-        <Typography variant="h5" fontWeight={"bold"} textAlign={"center"}>
-          Shared Content
-        </Typography>
-        <Grid container>
-          {isContent.map((e) => (
-            <Grid key={e._id} item xs={12} md={4} sx={{ padding: "20px" }}>
-              <Box
-                sx={{
-                  width: isMobileView ? "auto" : "18rem",
-                  borderRadius: "8px",
-                }}
-              >
-                <CardView
-                  title={e.title}
-                  editContent={openModal}
-                  shouldDelete={false}
-                  shouldShare={false}
-                  _id={e._id}
-                  shouldEdit={e.permission_type === 2}
-                  content={e.content.slice(0, 20) + "..."}
-                />
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-      <div className="d-flex justify-content-center align-items-center">
-        {/* Update Content Model  */}
-        <CommonDialog
-          open={show}
-          onClose={handleClose}
-          onClick={handleUpdateContent}
-          title={"Create New Content"}
-          showFooter={editable}
+      {!hasPermission && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            padding: isMobileView ? "20px !important" : "40px !important",
+            background: "#fff",
+            gap: "30px",
+            borderRadius: "8px",
+            flex: 1,
+            margin: isMobileView ? "25px 10px" : "100px 105px",
+            boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px",
+          }}
         >
-          <Form>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label>Title</Form.Label>
-              {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
-              <Form.Control
-                type="text"
-                placeholder="Title"
-                onChange={(e) => setNewTitle(e.target.value)}
-                value={newTitle}
-                autoFocus
-              />
-            </Form.Group>
 
-            <Form.Group
-              className="mb-3"
-              controlId="exampleForm.ControlTextarea1"
+          <Typography variant="h5" fontWeight={"bold"} textAlign={"center"}>
+            No Content Shared with you
+          </Typography>
+        </Box>
+      )}
+      {hasPermission && (
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              padding: isMobileView ? "20px !important" : "40px !important",
+              background: "#fff",
+              gap: "30px",
+              borderRadius: "8px",
+              flex: 1,
+              margin: isMobileView ? "25px 10px" : "100px 105px",
+              boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px",
+            }}
+          >
+            <Typography variant="h5" fontWeight={"bold"} textAlign={"center"}>
+              Shared Content
+            </Typography>
+            <Grid container>
+              {isSharedContent.map((e) => (
+                <Grid key={e._id} item xs={12} md={4} sx={{ padding: "20px" }}>
+                  <Box
+                    sx={{
+                      width: isMobileView ? "auto" : "18rem",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <CardView
+                      title={e.title}
+                      editContent={openModal}
+                      shouldDelete={false}
+                      shouldShare={false}
+                      _id={e._id}
+                      shouldEdit={e.permission_type === 2}
+                      content={e.content.slice(0, 20) + "..."}
+                    />
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+          <div className="d-flex justify-content-center align-items-center">
+            {/* Update Content Model  */}
+            <CommonDialog
+              open={show}
+              onClose={handleClose}
+              onClick={handleUpdateContent}
+              title={"Create New Content"}
+              showFooter={editable}
             >
-              <CKEditor
-                editor={ClassicEditor}
-                data={newContent}
-                config={{ placeholder: "Placeholder text..." }}
-                onReady={(editor) => { }}
-                onChange={(event, editor) => {
-                  setNewContent(editor.getData());
-                }}
-              />
-            </Form.Group>
-          </Form>
-        </CommonDialog>
-      </div>
+              <Form>
+                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                  <Form.Label>Title</Form.Label>
+                  {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                  <Form.Control
+                    type="text"
+                    placeholder="Title"
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    value={newTitle}
+                    autoFocus
+                  />
+                </Form.Group>
+
+                <Form.Group
+                  className="mb-3"
+                  controlId="exampleForm.ControlTextarea1"
+                >
+                  <CKEditor
+                    editor={ClassicEditor}
+                    data={newContent}
+                    config={{ placeholder: "Placeholder text..." }}
+                    onReady={(editor) => { }}
+                    onChange={(event, editor) => {
+                      setNewContent(editor.getData());
+                    }}
+                  />
+                </Form.Group>
+              </Form>
+            </CommonDialog>
+          </div>
+        </>)}
     </>
   );
 }

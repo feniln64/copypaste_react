@@ -1,7 +1,7 @@
 {
   "name": "copypaste_react",
-  "version": "2.0.1",
-  "description": "shared page and shared content update route fix",
+  "version": "2.0.2",
+  "description": "bug fixes and new features",
   "private": true,
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^40.0.0",
