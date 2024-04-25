@@ -10,12 +10,12 @@ import Domain from './components/Domain';
 import ViewContent from './components/ViewContent';
 import Content from './components/EditContent';
 import Shared from './components/Shared';
+import Forgotpassword from './components/Forgotpassword';
+import Resetpassword from './components/Resetpassword';
 function App() {
-  console.log("process.env.NODE_ENV", process.env.NODE_ENV);
   return (
     <Routes>
         <Route path="/" element={<Layout />} >
-
         <Route index element={<Home/>} />
         <Route path={"/login"} element={<Login/>} />
         <Route path={"/register"} element={<Register/>} />
@@ -24,6 +24,8 @@ function App() {
         <Route path={"/shared"} element={<Shared/>} />
         <Route path={"/content"} element={<ViewContent/>} />
         <Route path={"/create-content"} element={<Content/>} />
+        <Route path={"/forgot-password"} element={<Forgotpassword/> } />
+        <Route path={"/reset-password/:token"} element={<Resetpassword/> } />
         <Route path={"*"} element={<Error/>} />
 
         </Route>

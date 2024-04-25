@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeUser } from "../store/slices/authSlice";
 import { removeContent } from "../store/slices/contentSlice";
@@ -28,7 +29,7 @@ const Header = () => {
         setAnchorEl(null);
     };
 
-    function logout() {
+    const logout = () => {
         axiosInstance
             .post("/auth/logout", {}, { withCredentials: true })
             .then((response) => {

@@ -8,36 +8,49 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { Box, Button, Divider, Grid, IconButton, InputAdornment, InputLabel, TextField, Typography } from '@mui/material'
 import useScreenSize from '../hooks/useScreenSize'
 import { VisibilityOff, Visibility } from "@mui/icons-material";
-
+import reactCookie from 'react-cookies'
+import { useNavigate } from 'react-router-dom'
+import { removeUser } from '../store/slices/authSlice'
 var AWS = require('aws-sdk');
+
 function Profile() {
+
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const [file, setFile] = useState(null);
     const [email, setEmail] = useState()
-    const [namee, setName] = useState('')
+    const [name, setName] = useState('')
     const [username, setUsername] = useState()
     const [profileImage, setProfileImage] = useState('')
     const [fileName, setFileName] = useState('')
 
     const [view, setView] = useState('hs')
-    const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
     const userInfo = useSelector((state) => state.auth.userInfo)
+
     const [currentPassword, setCurrentPassword] = useState("")
     const [newPassword, setNewPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
-    const [disabled, setDisabled] = useState(true)
+    
     const [showPassword, setShowPassword] = useState({
         currentPass: false,
         newPass: false,
         confirmPass: false,
     });
-    const dispatch = useDispatch()
+
+    const logout = () => {
+        navigate("/login");
+        dispatch(removeUser());
+    }
+
     const userData = {
         id: userInfo.id,
         email: email,
-        name: namee,
+        name: name,
         username: username,
         premium_user: userInfo.premium_user
     };
+    
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
@@ -107,51 +120,53 @@ function Profile() {
     const s3Client = new AWS.S3();
 
 
-    const saveFile = (e) => {
-        setFile(e.target.files[0]);
-        setFileName(e.target.files[0].name);
-        const data = new FileReader();
-        data.readAsDataURL(e.target.files[0]);
-        data.addEventListener("load", function () {
-            setFile(data.result);
-        });
-        console.log(typeof (file));
+    // const saveFile = (e) => {
+    //     setFile(e.target.files[0]);
+    //     setFileName(e.target.files[0].name);
+    //     const data = new FileReader();
+    //     data.readAsDataURL(e.target.files[0]);
+    //     data.addEventListener("load", function () {
+    //         setFile(data.result);
+    //     });
+    //     console.log(typeof (file));
 
-    };
-    const uploadImage = async (e) => {
-        e.preventDefault()
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append("fileName", fileName);
-        // const response = await s3Client.putObject({ Bucket: 'minio', Key: `docopypaste/profile/${file.name}`, Body: `${file}` })
-        // if (!response) {
-        //    console.log("error uploading file");
-        // }
-        try {
-            await axiosInstance.post(`user/updateProfileImage/${userData.id}`, { file: file, username: username }, { withCredentials: true })
-                .then((response) => {
-                    console.log(response);
-                })
+    // };
+    // const uploadImage = async (e) => {
+    //     e.preventDefault()
+    //     const formData = new FormData();
+    //     formData.append('file', file);
+    //     formData.append("fileName", fileName);
+    //     // const response = await s3Client.putObject({ Bucket: 'minio', Key: `docopypaste/profile/${file.name}`, Body: `${file}` })
+    //     // if (!response) {
+    //     //    console.log("error uploading file");
+    //     // }
+    //     try {
+    //         await axiosInstance.post(`user/updateProfileImage/${userData.id}`, { file: file, username: username }, { withCredentials: true })
+    //             .then((response) => {
+    //                 console.log(response);
+    //             })
 
-                .catch((error) => { console.log(error); });
-        } catch (error) {
-            console.error(error);
-        }
-        const fetchProfile = async () => {
+    //             .catch((error) => { console.log(error); });
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    //     const fetchProfile = async () => {
 
-            const ne = await s3Client.getSignedUrl('getObject', { Bucket: 'minio', Key: `docopypaste/profile/${userInfo.username}/profile.png`, Expires: 60 * 60 })
-            console.log(ne);
-            setProfileImage(ne)
-        }
+    //         const ne = await s3Client.getSignedUrl('getObject', { Bucket: 'minio', Key: `docopypaste/profile/${userInfo.username}/profile.png`, Expires: 60 * 60 })
+    //         console.log(ne);
+    //         setProfileImage(ne)
+    //     }
 
-        fetchProfile().catch((error) => { console.log(error); })
+    //     fetchProfile().catch((error) => { console.log(error); })
 
-        console.log("Successfully uploaded data to myBucket/myKey");
-    }
+    //     console.log("Successfully uploaded data to myBucket/myKey");
+    // }
     useEffect(() => {
+        var cookie = reactCookie.load("refreshToken");
+        if (cookie === undefined) {
+            logout();
+        }
 
-        console.log("auth from profile", isLoggedIn);
-        console.log("userInfo from profile", JSON.stringify(userInfo));
         setView("profile-overview")
         setEmail(userInfo.email)
         setName(userInfo.name)
@@ -168,10 +183,9 @@ function Profile() {
         try {
             const res = axiosInstance.get(`user/getProfile/${userData.id}`, { withCredentials: true })
                 .then((response) => {
-
+                    console.log(response.data);
                     response.data.signedUrl ? setProfileImage(response.data.signedUrl) : setProfileImage("assets/img/profile-img.jpg")
 
-                    // if (response.data.content !== null) sethasContent(true); else sethasContent(false);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -189,7 +203,7 @@ function Profile() {
 
     return (
         <>
-            <div><Toaster position='bottom-right' reverseOrder={false}/></div>
+            <div><Toaster position='bottom-right' reverseOrder={false} /></div>
             <Box
                 sx={{
                     display: "flex",
@@ -202,70 +216,70 @@ function Profile() {
                     margin: "105px 75px"
                 }}
             >
-                <Typography sx={{paddingX: "15px", fontWeight: "bold"}}>
+                <Typography sx={{ paddingX: "15px", fontWeight: "bold" }}>
                     Profile
                 </Typography>
-                <Divider sx={{borderBottom: "1px solid #e6e8eb"}} />
+                <Divider sx={{ borderBottom: "1px solid #e6e8eb" }} />
                 <form onSubmit={handleSubmit}>
-                <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                        <InputLabel sx={{fontWeight: "bold"}}>
-                            First Name
-                        </InputLabel>
-                        <TextField
-                            variant="outlined"
-                            placeholder="FullName"
-                            name="name"
-                            value={namee}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            fullWidth
-                            sx={{
-                                "& input": { padding: "8px 16px !important" },
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <InputLabel sx={{fontWeight: "bold"}}>
-                            User Name
-                        </InputLabel>
-                        <TextField
-                            variant="outlined"
-                            placeholder="User Name"
-                            name="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                            fullWidth
-                            sx={{
-                                "& input": { padding: "8px 16px !important" },
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <InputLabel sx={{fontWeight: "bold"}}>
-                            Email
-                        </InputLabel>
-                        <TextField
-                            variant="outlined"
-                            placeholder="Email"
-                            name="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            fullWidth
-                            sx={{
-                                "& input": { padding: "8px 16px !important" },
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                            <InputLabel sx={{ fontWeight: "bold" }}>
+                                First Name
+                            </InputLabel>
+                            <TextField
+                                variant="outlined"
+                                placeholder="FullName"
+                                name="name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                                fullWidth
+                                sx={{
+                                    "& input": { padding: "8px 16px !important" },
+                                }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <InputLabel sx={{ fontWeight: "bold" }}>
+                                User Name
+                            </InputLabel>
+                            <TextField
+                                variant="outlined"
+                                placeholder="User Name"
+                                name="username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                                fullWidth
+                                sx={{
+                                    "& input": { padding: "8px 16px !important" },
+                                }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <InputLabel sx={{ fontWeight: "bold" }}>
+                                Email
+                            </InputLabel>
+                            <TextField
+                                variant="outlined"
+                                placeholder="Email"
+                                name="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                fullWidth
+                                sx={{
+                                    "& input": { padding: "8px 16px !important" },
+                                }}
+                            />
+                        </Grid>
+                        {/* <Grid item xs={12} md={6}>
                         <InputLabel sx={{fontWeight: "bold"}}>
                             Avatar
                         </InputLabel>
                         <input name="profileImage" onChange={saveFile} type="file" className="form-control" id="profileImage" />
-                    </Grid>
-                    <Grid item xs={12}>
+                    </Grid> */}
+                        {/* <Grid item xs={12}>
                         <Button 
                             variant='contained'
                             sx={{
@@ -282,8 +296,8 @@ function Profile() {
                         >
                             Update
                         </Button>
+                    </Grid> */}
                     </Grid>
-                </Grid>
                 </form>
             </Box>
             <Box
@@ -298,14 +312,14 @@ function Profile() {
                     margin: "25px 75px"
                 }}
             >
-                <Typography sx={{paddingX: "15px", fontWeight: "bold"}}>
+                <Typography sx={{ paddingX: "15px", fontWeight: "bold" }}>
                     Change Password
                 </Typography>
-                <Divider sx={{borderBottom: "1px solid #e6e8eb"}} />
-                    <form onSubmit={handleChangePassword}>
-                <Grid container spacing={3}>
+                <Divider sx={{ borderBottom: "1px solid #e6e8eb" }} />
+                <form onSubmit={handleChangePassword}>
+                    <Grid container spacing={3}>
                         <Grid item xs={12} md={6}>
-                            <InputLabel sx={{fontWeight: "bold"}}>
+                            <InputLabel sx={{ fontWeight: "bold" }}>
                                 Current Password
                             </InputLabel>
                             <TextField
@@ -321,51 +335,51 @@ function Profile() {
                                 }}
                                 type={showPassword.currentPass ? "text" : "password"}
                                 InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        {" "}
-                                        {showPassword.currentPass ? (
-                                            <IconButton
-                                                size="small"
-                                                onClick={() =>
-                                                    setShowPassword(pre => ({...pre, currentPass: false}))
-                                                }
-                                            >
-                                                <Visibility
-                                                    sx={{
-                                                        color: "#9E9E9E",
-                                                        cursor: "pointer",
-                                                        width: "14px",
-                                                        height: "14px",
-                                                    }}
-                                                    fontSize="small"
-                                                />
-                                            </IconButton>
-                                        ) : (
-                                            <IconButton
-                                                size="small"
-                                                onClick={() =>
-                                                    setShowPassword(pre => ({...pre, currentPass: true}))
-                                                }
-                                            >
-                                                <VisibilityOff
-                                                    sx={{
-                                                        color: "#9E9E9E",
-                                                        cursor: "pointer",
-                                                        width: "14px",
-                                                        height: "14px",
-                                                    }}
-                                                    fontSize="small"
-                                                />
-                                            </IconButton>
-                                        )}
-                                    </InputAdornment>
-                                ),
-                            }}
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            {" "}
+                                            {showPassword.currentPass ? (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                        setShowPassword(pre => ({ ...pre, currentPass: false }))
+                                                    }
+                                                >
+                                                    <Visibility
+                                                        sx={{
+                                                            color: "#9E9E9E",
+                                                            cursor: "pointer",
+                                                            width: "14px",
+                                                            height: "14px",
+                                                        }}
+                                                        fontSize="small"
+                                                    />
+                                                </IconButton>
+                                            ) : (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                        setShowPassword(pre => ({ ...pre, currentPass: true }))
+                                                    }
+                                                >
+                                                    <VisibilityOff
+                                                        sx={{
+                                                            color: "#9E9E9E",
+                                                            cursor: "pointer",
+                                                            width: "14px",
+                                                            height: "14px",
+                                                        }}
+                                                        fontSize="small"
+                                                    />
+                                                </IconButton>
+                                            )}
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel sx={{fontWeight: "bold"}}>
+                            <InputLabel sx={{ fontWeight: "bold" }}>
                                 New Password
                             </InputLabel>
                             <TextField
@@ -381,51 +395,51 @@ function Profile() {
                                 }}
                                 type={showPassword.newPass ? "text" : "password"}
                                 InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        {" "}
-                                        {showPassword.newPass ? (
-                                            <IconButton
-                                                size="small"
-                                                onClick={() =>
-                                                    setShowPassword(pre => ({...pre, newPass: false}))
-                                                }
-                                            >
-                                                <Visibility
-                                                    sx={{
-                                                        color: "#9E9E9E",
-                                                        cursor: "pointer",
-                                                        width: "14px",
-                                                        height: "14px",
-                                                    }}
-                                                    fontSize="small"
-                                                />
-                                            </IconButton>
-                                        ) : (
-                                            <IconButton
-                                                size="small"
-                                                onClick={() =>
-                                                    setShowPassword(pre => ({...pre, newPass: true}))
-                                                }
-                                            >
-                                                <VisibilityOff
-                                                    sx={{
-                                                        color: "#9E9E9E",
-                                                        cursor: "pointer",
-                                                        width: "14px",
-                                                        height: "14px",
-                                                    }}
-                                                    fontSize="small"
-                                                />
-                                            </IconButton>
-                                        )}
-                                    </InputAdornment>
-                                ),
-                            }}
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            {" "}
+                                            {showPassword.newPass ? (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                        setShowPassword(pre => ({ ...pre, newPass: false }))
+                                                    }
+                                                >
+                                                    <Visibility
+                                                        sx={{
+                                                            color: "#9E9E9E",
+                                                            cursor: "pointer",
+                                                            width: "14px",
+                                                            height: "14px",
+                                                        }}
+                                                        fontSize="small"
+                                                    />
+                                                </IconButton>
+                                            ) : (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                        setShowPassword(pre => ({ ...pre, newPass: true }))
+                                                    }
+                                                >
+                                                    <VisibilityOff
+                                                        sx={{
+                                                            color: "#9E9E9E",
+                                                            cursor: "pointer",
+                                                            width: "14px",
+                                                            height: "14px",
+                                                        }}
+                                                        fontSize="small"
+                                                    />
+                                                </IconButton>
+                                            )}
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel sx={{fontWeight: "bold"}}>
+                            <InputLabel sx={{ fontWeight: "bold" }}>
                                 Confirm new Password
                             </InputLabel>
                             <TextField
@@ -441,54 +455,55 @@ function Profile() {
                                 }}
                                 type={showPassword.confirmPass ? "text" : "password"}
                                 InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        {" "}
-                                        {showPassword.confirmPass ? (
-                                            <IconButton
-                                                size="small"
-                                                onClick={() =>
-                                                    setShowPassword(pre => ({...pre, confirmPass: false}))
-                                                }
-                                            >
-                                                <Visibility
-                                                    sx={{
-                                                        color: "#9E9E9E",
-                                                        cursor: "pointer",
-                                                        width: "14px",
-                                                        height: "14px",
-                                                    }}
-                                                    fontSize="small"
-                                                />
-                                            </IconButton>
-                                        ) : (
-                                            <IconButton
-                                                size="small"
-                                                onClick={() =>
-                                                    setShowPassword(pre => ({...pre, confirmPass: true}))
-                                                }
-                                            >
-                                                <VisibilityOff
-                                                    sx={{
-                                                        color: "#9E9E9E",
-                                                        cursor: "pointer",
-                                                        width: "14px",
-                                                        height: "14px",
-                                                    }}
-                                                    fontSize="small"
-                                                />
-                                            </IconButton>
-                                        )}
-                                    </InputAdornment>
-                                ),
-                            }}
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            {" "}
+                                            {showPassword.confirmPass ? (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                        setShowPassword(pre => ({ ...pre, confirmPass: false }))
+                                                    }
+                                                >
+                                                    <Visibility
+                                                        sx={{
+                                                            color: "#9E9E9E",
+                                                            cursor: "pointer",
+                                                            width: "14px",
+                                                            height: "14px",
+                                                        }}
+                                                        fontSize="small"
+                                                    />
+                                                </IconButton>
+                                            ) : (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                        setShowPassword(pre => ({ ...pre, confirmPass: true }))
+                                                    }
+                                                >
+                                                    <VisibilityOff
+                                                        sx={{
+                                                            color: "#9E9E9E",
+                                                            cursor: "pointer",
+                                                            width: "14px",
+                                                            height: "14px",
+                                                        }}
+                                                        fontSize="small"
+                                                    />
+                                                </IconButton>
+                                            )}
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <Button 
-                            variant='contained'
-                            onSubmit={handleChangePassword}
-                            sx={{
+                            <Button
+                                variant='contained'
+                                type='submit'
+                                onSubmit={handleChangePassword}
+                                sx={{
                                     borderRadius: "6px",
                                     background: "#0d6efd",
                                     textTransform: "none",
@@ -501,8 +516,8 @@ function Profile() {
                                 Change Passsword
                             </Button>
                         </Grid>
-                </Grid>
-                    </form>
+                    </Grid>
+                </form>
             </Box>
         </>
     )

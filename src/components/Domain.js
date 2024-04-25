@@ -1,5 +1,8 @@
 import { useState } from "react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import reactCookie from "react-cookies";
+import { removeUser } from "../store/slices/authSlice";
 import axiosInstance from "../api/api";
 import { useSelector, useDispatch } from "react-redux";
 import { initDomain,removeOneDomain, addNewDomain, updateOneDomain } from "../store/slices/domainSlice";
@@ -16,6 +19,7 @@ import useScreenSize from "../hooks/useScreenSize";
 function Domain() {
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [isMobileView] = useScreenSize();
 
     const [domain, setDomain] = useState("");
@@ -39,6 +43,11 @@ function Domain() {
 
     const [QRShow, setQRShow] = useState(false);
     const handleQRClose = () => setQRShow(false);
+
+    const logout = () => {
+        navigate("/login");
+        dispatch(removeUser());
+    }
 
     const showDelete = async (e) => {
         e.preventDefault();
@@ -170,6 +179,10 @@ function Domain() {
     }
 
     useEffect(() => {
+        var cookie = reactCookie.load("refreshToken");
+        if (cookie === undefined) {
+            logout();
+        }
         newEvent("domain", "view domain", "/domain");
         if(is_subdomain.length >=1){ console.log("got domains from state");setHasSubdomain(true)}
         else{ console.log("got data from api call");getinitialData();}
