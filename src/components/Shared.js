@@ -1,28 +1,29 @@
 /* eslint-disable*/
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import reactCookie from "react-cookies";
+import { removeUser } from "../store/slices/authSlice";
 import { useEffect } from "react";
 import axiosInstance from "../api/api";
 import { useSelector, useDispatch } from "react-redux";
 import { initSharedWithMe, removeSharedWithMe } from "../store/slices/sharedWithMeSlice";
-import "react-calendar/dist/Calendar.css";
 import "../assets/content.css";
 import { useState } from "react";
 import newEvent from "../api/postHog";
 import { socket } from "../api/socket";
-import "reactjs-popup/dist/index.css";
-import "../assets/popup.css";
 import toast, { Toaster } from "react-hot-toast";
 import { Button, Form } from "react-bootstrap";
-import { RiEditBoxFill } from "react-icons/ri";
 import { Box, Grid, Typography } from "@mui/material";
 import useScreenSize from "../hooks/useScreenSize";
 import { CardView, CommonDialog } from "../common";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { current } from "@reduxjs/toolkit";
 
 function Shared() {
+
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const userInfo = useSelector((state) => state.auth.userInfo);
   const username = userInfo.username;
   const userEmail = userInfo.email;
@@ -40,6 +41,11 @@ function Shared() {
   const [editable, setEditable] = useState(false);
 
   const [isMobileView] = useScreenSize();
+
+  const logout = () => {
+    navigate("/login");
+    dispatch(removeUser());
+}
 
   const handleUpdateContent = async (e) => {
     e.preventDefault();
@@ -107,6 +113,10 @@ function Shared() {
 
   useEffect(() => {
     getinitialData();
+    var cookie = reactCookie.load("refreshToken");
+        if (cookie === undefined) {
+            logout();
+        }
     if (isSharedContent.length > 0) {
       setHasPermission(true);
     }

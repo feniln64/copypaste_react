@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import axiosInstance from "../api/api";
+import reactCookie from "react-cookies";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 // import toast, { Toaster } from 'react-hot-toast';
 import { useDispatch , useSelector} from "react-redux";
@@ -29,6 +30,7 @@ import { VisibilityOff, Visibility } from "@mui/icons-material";
 import useScreenSize from "../hooks/useScreenSize";
 
 export default function Login() {
+    
     const location = useLocation();
     const message = location.state?.message;
     const dispatch = useDispatch();
@@ -60,6 +62,7 @@ export default function Login() {
                 toast.success("Successfully Login!");
                 axiosInstance.defaults.headers.common["Authorization"] ="Bearer " + res.data.accessToken;
                 localStorage.setItem("refreshToken", res.data.refreshToken);
+                reactCookie.save("refreshToken", res.data.refreshToken, { path: "/",maxAge: 30 });
                 const userInfo = res.data.userInfo;
                 userInfo.isLoggedIn = true;
                 console.log(res.data);
@@ -78,6 +81,8 @@ export default function Login() {
         if (is_loggedin) {
             navigate("/content");
         }
+
+
         if (message) {
             toast.success(message);
         }
@@ -213,6 +218,14 @@ export default function Login() {
                                     }
                                 />
                             }
+                        />
+                        <FormControlLabel
+                            control={
+                                <Link to="/forgot-password" style={{ textDecoration: "none" }}> Forgot Password?</Link>
+                            }
+                            sx={{
+                                "& a": { paddingLeft: "10px " },
+                            }}
                         />
                         <Button
                             variant="contained"

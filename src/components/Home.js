@@ -5,55 +5,33 @@ import psl from 'psl';
 import data from '../assets/data.json';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import newEvent from '../api/postHog';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import toast, { Toaster } from 'react-hot-toast';
 import { socket } from "../api/socket";
-import { Container as MuiContainer, Button, Box, Typography, Grid, Button as MUIButton } from "@mui/material";
-import LunchDiningRoundedIcon from '@mui/icons-material/LunchDiningRounded';
-import { GridViewRounded, LayersRounded, DashboardRounded } from '@mui/icons-material';
+import { Box, Typography, Grid, Button as MUIButton } from "@mui/material";
 import useScreenSize from '../hooks/useScreenSize';
 import { useSelector, useDispatch } from 'react-redux'
-import { addContent, updateOneContent, addNewContent } from '../store/slices/contentSlice';
+import { addContent, updateOneContent } from '../store/slices/contentSlice';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CardView, CommonDialog, FeaturesCard, PricingCard } from '../common';
+import { CardView, CommonDialog } from '../common';
 import { FaPlus } from "react-icons/fa6";
 import '../assets/content.css';
-import Card from 'react-bootstrap/Card';
-import ReactQuill from 'react-quill';
-import { IoRefreshOutline } from "react-icons/io5";
 import { addNewUser } from '../store/slices/authSlice';
+import { Link, useNavigate } from "react-router-dom";
+import { removeUser } from "../store/slices/authSlice";
+import { removeContent } from "../store/slices/contentSlice";
+import {removeDomain} from "../store/slices/domainSlice";
+import {removeSharedWithMe} from '../store/slices/sharedWithMeSlice'
+import {removeSharedBy} from '../store/slices/sharedBySlice'
+import reactCookie from "react-cookies";
+import Logout from '../common/Logout';
 var subdomain = "";
 
-const featureData = [
-  {
-    icon: <LunchDiningRoundedIcon />,
-    title: "Free and Open-Source"
-  },
-  {
-    icon: <DashboardRounded />,
-    title: "Multipurpose Template"
-  },
-  {
-    icon: <LayersRounded />,
-    title: "High-quality Design"
-  },
-  {
-    icon: <GridViewRounded />,
-    title: "All Essential Elements"
-  },
-];
-
-const pricings = [
-  { price: 25 },
-  { price: 59 },
-  { price: 99 },
-];
-
 function Home() {
+  const navigate = useNavigate();
+  
+
 
   var parsed = psl.parse(window.location.hostname);
   const dispatch = useDispatch()
@@ -129,10 +107,6 @@ function Home() {
     setNewTitle(""); setNewIsChecked(false); setNewContent("")
   };
 
-  const viewContent = (id) => {
-    console.log("view content called");
-    console.log("id =", id);
-  };
 
   const handleCreateNewContent = async (e) => {
     e.preventDefault();
@@ -201,7 +175,7 @@ function Home() {
     newEvent("homepage", "homepage", "/homepage");
     subdomain = parsed.subdomain;
     console.log("subdomain =", subdomain);
-
+    
     if (subdomain === null) {
       subdomain = "";
     }
@@ -240,7 +214,8 @@ function Home() {
 
   return (
     <>
-      <div><Toaster /></div>
+      <Toaster position='bottom-right' reverseOrder={false} />
+
       {!hascontent && (
         <>
           <section className="section section-header text-dark " style={{ backgroundColor: 'white' }}>

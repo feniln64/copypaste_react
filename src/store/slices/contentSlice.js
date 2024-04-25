@@ -12,7 +12,7 @@ const contentSlice = createSlice({
       state.content = action.payload
     },
     removeContent: (state) => {             // used while logout to remove all data
-      state.content = {}
+      state.content = [{}]
     },
     removeOneContent: (state, action) => {  // used to remove one data
       state.content = [...state.content.filter((content) => content._id !== action.payload._id)]

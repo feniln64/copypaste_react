@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useSelector, useDispatch } from 'react-redux'
 import { updateUser } from '../store/slices/authSlice'
+import reactCookie from "react-cookies";
 
 let baseURL  = ""
 if (process.env.NODE_ENV === 'development') {
@@ -14,12 +15,7 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-const Logout = () => {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-  window.location.reload();
-  navigator.push("/login");
-};
+
 axiosInstance.interceptors.response.use(
   
   (response) => {
@@ -29,10 +25,10 @@ axiosInstance.interceptors.response.use(
     const originalConfig = error.config;
     if (error.response) {
       if (error.response.data.message === 'Unauthorized! Need access token' && !originalConfig._retry) {
-        axiosInstance.post("/auth/refresh",{refreshToken:localStorage.getItem("refreshToken")})
+        axiosInstance.post("/auth/refresh",{refreshToken:reactCookie.load("refreshToken")})
         .then(response => {
-          // console.log("calling interceptor  ");
-          // console.log(response.data.accessToken);
+          console.log("calling interceptor  ");
+          console.log(response.data.accessToken);
           if (response.status === 200) {
             
               const dispatch = useDispatch()
@@ -50,7 +46,6 @@ axiosInstance.interceptors.response.use(
           })
       }
       else if (error.response.status === 'refreshToken expired' && !originalConfig._retry) {
-        Logout();
         return axios(originalConfig);
       }
 

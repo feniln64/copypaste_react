@@ -1,10 +1,12 @@
 /* eslint-disable*/
-import React,{ useEffect ,useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import axiosInstance from '../api/api'
 import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate } from "react-router-dom";
 import { addContent, addNewContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
 import { initSharedBy, removeSharedBy, removeOneSharedBy, addNewSharedBy } from '../store/slices/sharedBySlice';
 import newEvent from '../api/postHog';
+const reactCookie = require("react-cookies");
 import { socket } from "../api/socket";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -21,33 +23,38 @@ import useScreenSize from '../hooks/useScreenSize';
 import { Select } from 'antd';
 import { Container, Row, Col } from 'react-bootstrap';
 import { AiOutlineClose } from "react-icons/ai";
+import { removeUser } from "../store/slices/authSlice";
+import { removeContent } from "../store/slices/contentSlice";
+import {removeDomain} from "../store/slices/domainSlice";
+import {removeSharedWithMe} from '../store/slices/sharedWithMeSlice'
 var options = []
 
 function ViewContent() {
 
     const dateFormat = 'MM-DD-YYYY';
     const dispatch = useDispatch()
+    const navigate = useNavigate();
     const userInfo = useSelector((state) => state.auth.userInfo)
     const username = userInfo.username
     const userId = userInfo.id
-    
-    const isContent = useSelector((state) => state.content.content)
+
+    const isContent = useSelector((state) => state.content.content) || []  // content
     const permissions = useSelector((state) => state.sharedby.sharedby)
     const [hasContent, sethasContent] = useState(false)
-    
+
     const [newContent, setNewContent] = useState("");
     const [newTitle, setNewTitle] = useState("");
     const [newIsChecked, setNewIsChecked] = useState(false);
-    
+
     const [modelId, setModelId] = useState("")
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
-    
+
     const [deleteModelId, setDeleteModelId] = useState("")
     const [deleteShow, setDeleteShow] = useState(false);
     const [deleteTitle, setDeleteTitle] = useState("")
     const handleDeleteClose = () => setDeleteShow(false);
-    
+
     const [permissionType, setPermissionType] = useState(0)
     const [contentId, setContentId] = useState("")
     const [deletePermissionShow, setDeletePermissionShow] = useState(false);
@@ -56,8 +63,14 @@ function ViewContent() {
     const [permissionShow, setPermissionShow] = useState(false)
     const [users, setUsers] = useState([]);
     const [editable, setEditable] = useState(false);
-    const handlePermissionClose = () => {setPermissionShow(false);options=[]};
+    const handlePermissionClose = () => { setPermissionShow(false); options = [] };
     const handleDeletePermissionClose = () => setDeletePermissionShow(false);
+    
+    const logout = () => {
+        navigate("/login");
+        dispatch(removeUser());
+    }
+
     const handlePermission = async (e) => {
         e.preventDefault();
         const permissionData = {
@@ -108,7 +121,7 @@ function ViewContent() {
         //         }
         //     })
     }
-    
+
     const handleUpdateContent = async (e) => {
         e.preventDefault();
         if (newContent === "" || newTitle === "") {
@@ -209,7 +222,7 @@ function ViewContent() {
             });
     }
 
-    const openModal = (event, editable= true) => {
+    const openModal = (event, editable = true) => {
         setModelId(event)
         if (event === "createContent") {
             setNewTitle("")
@@ -261,7 +274,7 @@ function ViewContent() {
                     dispatch(removeOneContent({ _id: deleteModelId }))
                     setDeleteShow(false);
                     toast.success("data deleted Successfully");
-                    socket.emit("deletecontent", ({ room: username}));
+                    socket.emit("deletecontent", ({ room: username }));
                 }
             })
             .catch((error) => {
@@ -296,7 +309,10 @@ function ViewContent() {
             sethasContent(true)
         }
         newEvent("view content", "view content", "/view-content");
-
+        var cookie = reactCookie.load("refreshToken");
+        if (cookie === undefined) {
+            logout();
+        }
         socket.emit('join_room', userInfo.username);
         socket.on('message', (data) => {
             console.log("data from server", data);
@@ -312,11 +328,13 @@ function ViewContent() {
         });
 
     }, []);
-        
+
     const [isMobileView, isTabletView] = useScreenSize();
     return (
         <>
+        
             <Toaster position='bottom-right' reverseOrder={false} />
+            
             <Box
                 sx={{
                     display: "flex",
@@ -348,7 +366,7 @@ function ViewContent() {
                                     editContent={openModal}
                                     editPermission={permissionModel}
                                     deleteContent={deleteModel}
-                                    content={e.content.slice(0, 20)+"..." }
+                                    content={e.content.slice(0, 20) + "..."}
                                     _id={e._id}
                                 />
                             </Box>
@@ -361,7 +379,7 @@ function ViewContent() {
             </Box>
             <div className="d-flex justify-content-center align-items-center">
                 {/* Update Content Model  */}
-                <CommonDialog 
+                <CommonDialog
                     open={show}
                     onClose={handleClose}
                     onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent}
@@ -462,7 +480,7 @@ function ViewContent() {
                                             <Chip key={contentId} label={e} />
                                         </Col>
                                         <Col className='d-flex align-self-center justify-content-center' xs={4} md={2}>
-                                            <AiOutlineClose id={e} onClick={handleDeletePermissionModel}/>
+                                            <AiOutlineClose id={e} onClick={handleDeletePermissionModel} />
                                         </Col>
                                     </Row>
                                 ))}
