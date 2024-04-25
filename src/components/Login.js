@@ -62,7 +62,7 @@ export default function Login() {
                 toast.success("Successfully Login!");
                 axiosInstance.defaults.headers.common["Authorization"] ="Bearer " + res.data.accessToken;
                 localStorage.setItem("refreshToken", res.data.refreshToken);
-                reactCookie.save("refreshToken", res.data.refreshToken, { path: "/",maxAge: 30 });
+                reactCookie.save("refreshToken", res.data.refreshToken, { path: "/",maxAge: 60*60*24 });
                 const userInfo = res.data.userInfo;
                 userInfo.isLoggedIn = true;
                 console.log(res.data);
