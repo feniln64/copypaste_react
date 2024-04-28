@@ -12,6 +12,7 @@ import Content from './components/EditContent';
 import Shared from './components/Shared';
 import Forgotpassword from './components/Forgotpassword';
 import Resetpassword from './components/Resetpassword';
+import Contact from './components/Contact';
 function App() {
   return (
     <Routes>
@@ -26,6 +27,7 @@ function App() {
         <Route path={"/create-content"} element={<Content/>} />
         <Route path={"/forgot-password"} element={<Forgotpassword/> } />
         <Route path={"/reset-password/:token"} element={<Resetpassword/> } />
+        <Route path={"/contact-us"} element={<Contact/>} />
         <Route path={"*"} element={<Error/>} />
 
         </Route>

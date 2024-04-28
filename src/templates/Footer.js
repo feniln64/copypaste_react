@@ -20,15 +20,15 @@ const Footer = () => {
     }, [])
     return (
         <>
-            <footer id="footer"  className="footer py-4 px-xl-5 bg-primary" style={{marginLeft:"auto",bottom:0,backgroundColor:'#A3D1DE'}}>
-                <div className="text-white mb-3 mb-md-0">
+            <footer id="footer"  className="footer ml-3 py-4 px-xl-5 bg-primary" style={{marginLeft:"auto",bottom:0,backgroundColor:'#A3D1DE'}}>
+                <div className="text-white mb-3 mb-md-0" style={{marginLeft:'20px'}}>
                     Copyright © 2020. All rights reserved.
-                    {version}
+                   
                 </div>
-                <div className="text-white mb-3 mb-md-0">
-                    {description}
+                <div className="text-white mb-3 mb-md-0" style={{marginLeft:'20px'}}>
+                Version: {version}
                 </div>
-                <div className="text-white mb-3 mb-md-0">
+                <div className="text-white mb-3 mb-md-0" style={{marginLeft:'20px'}}>
                     Server Version: {serverVersion}
                 </div>
             </footer>

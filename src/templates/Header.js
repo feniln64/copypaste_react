@@ -310,7 +310,8 @@ const Header = () => {
                                             Log Out
                                         </NavDropdown.Item>
                                         <NavDropdown.Item>
-                                            Contact us
+                                        <Link to="/contact-us">Contact us</Link>
+                                            
                                         </NavDropdown.Item>
                                     </NavDropdown>
                                 </Box>
