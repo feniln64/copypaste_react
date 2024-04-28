@@ -1,14 +1,14 @@
 {
   "features": [
     {
-      "title": "Pay better",
+      "title": "Save Time",
       "icon":"fa-money-bill-wave",
-      "description": "Speed through checkout and offset delivery at the same time."
+      "description": "Speed through create and deviver contant at the same time."
     },
     {
-      "title": "Track better",
+      "title": "Easy Share",
         "icon":"fa-truck",
-      "description": "Get real-time updates on your order status and delivery."
+      "description": "Get real-time updates of your data with live share with others."
     },
     {
       "title": "Save better",
@@ -27,7 +27,7 @@
       },
       {
         "title": "220k+",
-        "description": "Extension installs from the two major mobile app stores."
+        "description": "Data model shared with others via custom domain."
       }
   ]
 }
