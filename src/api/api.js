@@ -1,6 +1,4 @@
 import axios from "axios";
-import { useSelector, useDispatch } from 'react-redux'
-import { updateUser } from '../store/slices/authSlice'
 import reactCookie from "react-cookies";
 
 let baseURL  = ""
@@ -28,16 +26,11 @@ axiosInstance.interceptors.response.use(
         axiosInstance.post("/auth/refresh",{refreshToken:reactCookie.load("refreshToken")})
         .then(response => {
           console.log("calling interceptor  ");
-          console.log(response.data.accessToken);
           if (response.status === 200) {
-            
-              const dispatch = useDispatch()
-              axios.defaults.headers.common["Authorization"] = "Bearer " + response.data.accessToken;
+              console.log(response.data.accessToken);
+              axiosInstance.defaults.headers.common["Authorization"] = "Bearer " + response.data.accessToken;
               console.log("access token refreshed");
               originalConfig._retry = true;
-              const userInfo=response.data.userInfo
-              dispatch(updateUser(userInfo))
-              
               return axios(error.response.config);
             }
           })

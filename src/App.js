@@ -13,6 +13,7 @@ import Shared from './components/Shared';
 import Forgotpassword from './components/Forgotpassword';
 import Resetpassword from './components/Resetpassword';
 import Contact from './components/Contact';
+import Varifyemail from './components/Varifyemail';
 function App() {
   return (
     <Routes>
@@ -28,6 +29,7 @@ function App() {
         <Route path={"/forgot-password"} element={<Forgotpassword/> } />
         <Route path={"/reset-password/:token"} element={<Resetpassword/> } />
         <Route path={"/contact-us"} element={<Contact/>} />
+        <Route path={"/varify-email/:token"} element={<Varifyemail />} />
         <Route path={"*"} element={<Error/>} />
 
         </Route>
