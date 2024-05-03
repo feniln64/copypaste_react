@@ -4,10 +4,11 @@ import axiosInstance from '../api/api'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from "react-router-dom";
 import { addContent, addNewContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
-import { initSharedBy, removeSharedBy, removeOneSharedBy, addNewSharedBy } from '../store/slices/sharedBySlice';
+import { initSharedBy, updateOneSharedBy, removeSharedBy, removeOneSharedBy, addNewSharedBy } from '../store/slices/sharedBySlice';
 import newEvent from '../api/postHog';
 const reactCookie = require("react-cookies");
 import { socket } from "../api/socket";
+import { TiDelete } from "react-icons/ti";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { FaPlus } from "react-icons/fa6";
@@ -25,11 +26,11 @@ import { Container, Row, Col } from 'react-bootstrap';
 import { AiOutlineClose } from "react-icons/ai";
 import { removeUser } from "../store/slices/authSlice";
 import { removeContent } from "../store/slices/contentSlice";
-import {removeDomain} from "../store/slices/domainSlice";
-import {removeSharedWithMe} from '../store/slices/sharedWithMeSlice'
-var options = []
+import { removeDomain } from "../store/slices/domainSlice";
+import { removeSharedWithMe } from '../store/slices/sharedWithMeSlice'
 
 function ViewContent() {
+    var options = []
 
     const dateFormat = 'MM-DD-YYYY';
     const dispatch = useDispatch()
@@ -62,10 +63,11 @@ function ViewContent() {
     const [deleteUser, setDeleteUser] = useState("")
     const [permissionShow, setPermissionShow] = useState(false)
     const [users, setUsers] = useState([]);
+
     const [editable, setEditable] = useState(false);
     const handlePermissionClose = () => { setPermissionShow(false); options = [] };
     const handleDeletePermissionClose = () => setDeletePermissionShow(false);
-    
+
     const logout = () => {
         navigate("/login");
         dispatch(removeUser());
@@ -77,12 +79,13 @@ function ViewContent() {
             userList: users,
             permission_type: permissionType
         }
+        console.log("permissionData", permissionData);
         setUsers([])
         setPermissionType(0)
         await axiosInstance.post(`permission/create/${contentId}`, permissionData, { withCredentials: true })
             .then((response) => {
                 if (response.status === 201) {
-                    dispatch(addNewSharedBy(response.data.sharedbyMe))
+                    dispatch(initSharedBy(response.data.sharedbyMe))
                     toast.success("permission sent Successfully");
                 }
             })
@@ -97,30 +100,57 @@ function ViewContent() {
                 }
             })
         setPermissionShow(false);
+        setUsers([])
     }
 
-    const handleDeletePermission = async (e) => {
+    const deletePermission = async (e) => {
         e.preventDefault();
-        console.log("deleteUser", deleteUser);
-        console.log("contentId", contentId);
-        // await axiosInstance.delete(`permission/delete/${deleteUser}/${contentId}`, { withCredentials: true })
-        //     .then((response) => {
-        //         if (response.status === 201) {
-        //             dispatch(removeOneSharedBy({ contentId: contentId, userEmail: e.target.id }))
-        //             toast.success("permission deleted Successfully");
-        //         }
-        //     })
-        //     .catch((error) => {
-        //         if (error.response) {
-        //             console.log(error.response);
-        //             toast.error(error.response.data.message);
-        //         } else if (error.request) {
-        //             console.log("network error");
-        //         } else {
-        //             console.log(error);
-        //         }
-        //     })
+        console.log("emailId1", deleteUser);
+        await axiosInstance.delete(`permission/delete/${deleteUser}/${contentId}`, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 201) {
+                    dispatch(initSharedBy(response.data.sharedbyMe))
+                    toast.success("permission deleted Successfully");
+                    setDeletePermissionShow(false);
+                    setDeleteUser("")
+                    handlePermissionClose()
+
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                } 
+            })
     }
+
+   /* const handleDeletePermission = async (e) => {
+        e.preventDefault();
+        console.log("contentId", contentId);
+        console.log("email", e.target.id);
+         await axiosInstance.delete(`permission/delete/${e.target.id}/${contentId}`, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 201) {
+                    dispatch(initSharedBy(response.data.sharedbyMe))
+                    toast.success("permission deleted Successfully");
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            }) 
+    }*/
 
     const handleUpdateContent = async (e) => {
         e.preventDefault();
@@ -246,11 +276,13 @@ function ViewContent() {
 
     const permissionModel = (event) => {
         setContentId(event)
+        console.log("event", event);
         setPermissionShow(true);
         // console.log("permissions", permissions);
         setAllowedUsers([])
         permissions.filter((e) => e.contentId === event).map((e) => {
             setAllowedUsers(e.user_emails)
+            setUsers(e.user_emails.map((e) => e))
             for (let i = 0; i < e.user_emails.length; i++) {
                 options.push({ label: e.user_emails[i], value: e.user_emails[i] })
             }
@@ -293,13 +325,16 @@ function ViewContent() {
     };
 
     const addUsers = async (value) => {
-        setUsers(value);
-
+        if (users.includes(value[0])) {
+            toast.error("User already has permission")
+            setPermissionShow(false)
+        }
+        users.push(value[0])
     }
     const handleDeletePermissionModel = (e) => {
-        // console.log("e.target.id", e.target.id);
-        // console.log("deleteUser", contentId);
-        setDeleteUser(e.target.id)
+        const emailId = e.target.id
+        /* deletePermission(emailId) */
+        setDeleteUser(emailId)
         setDeletePermissionShow(true)
     }
 
@@ -332,9 +367,9 @@ function ViewContent() {
     const [isMobileView, isTabletView] = useScreenSize();
     return (
         <>
-        
+
             <Toaster position='bottom-right' reverseOrder={false} />
-            
+
             <Box
                 sx={{
                     display: "flex",
@@ -440,7 +475,7 @@ function ViewContent() {
                         <Button variant="secondary" onClick={handleDeletePermissionClose}>
                             Cancel
                         </Button>
-                        <Button variant="danger" onClick={handleDeletePermission}>
+                        <Button variant="danger" onClick={deletePermission}>
                             Delete User
                         </Button>
                     </Modal.Footer>
@@ -464,7 +499,7 @@ function ViewContent() {
 
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <MUISelect labelId="selct-permission-type" id="selct-permission-type" value={permissionType} label="Permission Type" onChange={e => setPermissionType(e.target.value)}>
+                            <MUISelect labelId="selct-permission-type" id="selct-permission-type" value={permissionType} label="Permission Type" onChange={e => setPermissionType(e.target.value)} onDelete={""}>
                                 <MenuItem value={0}>Permission Type</MenuItem>
                                 <MenuItem value={1}>Read</MenuItem>
                                 <MenuItem value={2}>Read & Write</MenuItem>
@@ -474,14 +509,12 @@ function ViewContent() {
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Shared with</Form.Label>
                             <Container>
-                                {allowedUsers.map((e) => (
-                                    <Row>
-                                        <Col xs={14} md={10} style={{ backgroundColor: "pink" }}>
-                                            <Chip key={contentId} label={e} />
+                                {allowedUsers.map((e, index) => (
+                                    <Row key={index}>
+                                        <Col xs={14} md={10} >
+                                            <Chip style={{ marginTop: '10px' }} id={e} variant="outlined" label={e} deleteIcon={<TiDelete id={e} />}  onDelete={e =>handleDeletePermissionModel(e)} />
                                         </Col>
-                                        <Col className='d-flex align-self-center justify-content-center' xs={4} md={2}>
-                                            <AiOutlineClose id={e} onClick={handleDeletePermissionModel} />
-                                        </Col>
+
                                     </Row>
                                 ))}
                             </Container>

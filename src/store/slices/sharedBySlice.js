@@ -28,6 +28,6 @@ const sharedBySlice = createSlice({
 
 
 // // Action creators are generated for each case reducer function
-export const { initSharedBy, removeSharedBy,removeOneSharedBy, addNewSharedBy } = sharedBySlice.actions
+export const { initSharedBy, removeSharedBy,removeOneSharedBy, addNewSharedBy,updateOneSharedBy } = sharedBySlice.actions
 
 export default sharedBySlice.reducer

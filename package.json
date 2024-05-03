@@ -1,7 +1,7 @@
 {
   "name": "copypaste_react",
-  "version": "2.0.5",
-  "description": "varify email",
+  "version": "2.0.6",
+  "description": "delete permison",
   "private": true,
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^40.0.0",
