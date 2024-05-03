@@ -202,7 +202,7 @@ function Shared() {
               open={show}
               onClose={handleClose}
               onClick={handleUpdateContent}
-              title={"Create New Content"}
+              title={"Shared Content"}
               showFooter={editable}
             >
               <Form>
