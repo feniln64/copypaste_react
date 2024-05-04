@@ -3,9 +3,7 @@ on:
   push:
     branches: ['main', 'testing']
 
-env:
-  REACT_APP_POSTHOG_API_TOKEN: ${{ secrets.REACT_APP_POSTHOG_API_TOKEN }}
-  REACT_APP_POSTHOG_HOST: ${{ secrets.REACT_APP_POSTHOG_HOST }}
+
 jobs:
   docker-build-push:
     runs-on: ubuntu-latest
@@ -28,9 +26,13 @@ jobs:
           registry: registry.gitlab.com
           username: ${{ secrets.GITLAB_REGISTRY_USERNAME }}
           password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
-          
+
       - name: list files
         run: ls -al
+      - name: create .env file
+        run: |
+          echo "REACT_APP_POSTHOG_API_TOKEN=${{secrets.REACT_APP_POSTHOG_API_TOKEN}}" > .env
+          echo "REACT_APP_POSTHOG_URL=${{secrets.REACT_APP_POSTHOG_URL}}" >> .env
 
       - name: Build and push
         uses: docker/build-push-action@v2
