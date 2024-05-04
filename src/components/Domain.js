@@ -1,8 +1,11 @@
-import { useState } from 'react'
-import React from 'react'
-import axiosInstance from '../api/api'
-import { useSelector, useDispatch } from 'react-redux'
-import { updateDomain } from '../store/slices/domainSlice'
+import { useState } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import reactCookie from "react-cookies";
+import { removeUser } from "../store/slices/authSlice";
+import axiosInstance from "../api/api";
+import { useSelector, useDispatch } from "react-redux";
+import { initDomain,removeOneDomain, addNewDomain, updateOneDomain } from "../store/slices/domainSlice";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useEffect } from 'react'
@@ -11,37 +14,111 @@ import toast, { Toaster } from 'react-hot-toast';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-
+import { QRCode } from 'antd';
+import useScreenSize from "../hooks/useScreenSize";
 function Domain() {
 
-    const [domain, setDomain] = useState("")
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const [isMobileView] = useScreenSize();
 
-    const userInfo = useSelector((state) => state.auth.userInfo)
-    const subdomain = useSelector((state) => state.auth.subdomain)
-    const [hasSubdomain, setHasSubdomain] = useState(false)
-    const [subdomainObject, setSubdomainObject] = useState([])
-    const [open, setOpen] = useState(false);
+    const [domain, setDomain] = useState("");
+    const [subDomainId, setSubDomainId] = useState("");
+    const [url , setUrl] = useState("");
+    const userInfo = useSelector((state) => state.auth.userInfo);
+    const is_subdomain = useSelector((state) => state.subdomain.subdomain);
+
+    const [hasSubdomain, setHasSubdomain] = useState(false);
+    const [subdomainObject, setSubdomainObject] = useState([]);
+
+    const userId = userInfo.id;
+    const is_premium = userInfo.is_premium;
     const [newSubdomain, setNewSubdomain] = useState("")
-    const dispatch = useDispatch()
-    const userId = userInfo.id
 
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
 
+    const [deleteShow, setDeleteShow] = useState(false);
+    const handleDeleteClose = () => setDeleteShow(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        const userData = {
-            subdomain: newSubdomain
+    const [QRShow, setQRShow] = useState(false);
+    const handleQRClose = () => setQRShow(false);
+
+    const logout = () => {
+        navigate("/login");
+        dispatch(removeUser());
+    }
+
+    const showDelete = async (e) => {
+        e.preventDefault();
+        console.log("showDelete");
+        setSubDomainId(e.target.id);
+        console.log("subDomainId", subDomainId);
+        // setSubDomainId("");
+        setDeleteShow(true);
+    };
+
+    const handleDeleteDomain = async (e) => {
+        e.preventDefault();
+        const res = await axiosInstance.delete(`/subdomain/delete/${subDomainId}`, { withCredentials: true })
+            .then((response) => {
+                console.log("response", response);
+                toast.success("subdomain deleted successfully");
+                setDeleteShow(false)
+                dispatch(removeOneDomain({ _id: subDomainId }));
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    toast.error("network error");
+                } else {
+                    toast.error(error);
+                }
+            });
+    }
+
+    const handleUpdateDomain = async (e) => {
+        e.preventDefault();
+        const updateData = {
+            subdomain: newSubdomain,
+            is_premium: is_premium
         };
-        setDomain("")
+        const res = await axiosInstance.patch(`/subdomain/update/${subDomainId}`,updateData, { withCredentials: true })
+            .then((response) => {
+                console.log("response", response);
+                toast.success("subdomain updated successfully");
+                setDeleteShow(false)
+                setHasSubdomain(false);
+            }   )
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    toast.error("network error");
+                } else {
+                    toast.error(error);
+                }
+            });
+    }
+
+    const handleCreateSubdomain = async (e) => {
+        e.preventDefault();
+        const userData = {
+            userId: userId,
+            subdomain: newSubdomain,
+            active: true,
+        };
+        setNewSubdomain("");
+
         const res = await axiosInstance.post(`/subdomain/create/${userId}`, userData, { withCredentials: true })
             .then((response) => {
                 console.log("subdomainObject", response.data);
-                dispatch(updateDomain(newSubdomain))
                 toast.success("subdomain created successfully");
-                setOpen(false)
-
+                dispatch(addNewDomain(response.data.subdomainObject));
+                setShow(false)
             })
             .catch((error) => {
                 if (error.response) {
@@ -59,7 +136,7 @@ function Domain() {
         const res = await axiosInstance.get(`/subdomain/availability/${userId}`, { withCredentials: true })
             .then((response) => {
                 console.log("response", response);
-                setOpen(o => !o)
+                setShow(o => !o)
             })
             .catch((error) => {
                 if (error.response) {
@@ -74,48 +151,52 @@ function Domain() {
     }
 
     const handleQR = async (e) => {
-        e.preventDefault()
-        console.log("handleQR")
-    }
+        e.preventDefault();
+        console.log("handleQR");
+        setUrl(e.target.id);
+        setQRShow(true);
+    };
 
-    useEffect(() => {
-        newEvent("domain", "view domain", "/domain");
-
-        axiosInstance.get(`/subdomain/getsubdomain/${userId}`, {}, { withCredentials: true })
+    const getinitialData = async () => {
+        console.log("getinitialData called");
+        await axiosInstance.get(`/subdomain/getsubdomain/${userId}`, { withCredentials: true })
             .then((response) => {
-                // console.log("init.response =", response);
-                if (response.status === 200) {
-                    var subdomain = response
-                    console.log("subdomain", subdomain);
-                    setHasSubdomain(true)
-                    setSubdomainObject(subdomain.data)
-                }
-                if (response.status === 204) {
-                    setHasSubdomain(false)
-                }
+                // setContent(response.data.content);
+                setHasSubdomain(true);
+                setSubdomainObject(response.data)
+                dispatch(initDomain(response.data));
             })
             .catch((error) => {
-                setHasSubdomain(false)
                 if (error.response) {
                     console.log(error.response);
                     toast.error(error.response.data.message);
                 } else if (error.request) {
-                    toast.error("network error");
+                    console.log("network error");
                 } else {
-                    toast.error(error);
+                    console.log(error);
                 }
             });
-    }, []);
+    }
 
+    useEffect(() => {
+        var cookie = reactCookie.load("refreshToken");
+        if (cookie === undefined) {
+            logout();
+        }
+        newEvent("domain", "view domain", "/domain");
+        if(is_subdomain.length >=1){ console.log("got domains from state");setHasSubdomain(true)}
+        else{ console.log("got data from api call");getinitialData();}
+        
+    }, []);
 
     return (
         <>
-            <div><Toaster /></div>
+            <div><Toaster position="bottom-right" reverseOrder={false}/></div>
             {!hasSubdomain &&
                 (
                     <>
-                        <div style={{ backgroundColor: "white" }} className="container">
-                            <form onSubmit={handleSubmit}>
+                        <div style={{ backgroundColor: "white",marginTop:"100px", overflow: isMobileView ? 'scroll' : 'auto'}} >
+                            <form onSubmit={handleCreateSubdomain}>
                                 <h1>Add subdomain</h1>
                                 <div className="form-outline mb-4">
                                     <label className="form-label" htmlFor="subdomaain">subdomain</label>
@@ -131,7 +212,7 @@ function Domain() {
             {hasSubdomain &&
                 (
                     <>
-                        <div className="container card rounded bg-white mt-5 mb-5" >
+                        <div className="container card rounded bg-white  mb-5" style={{marginTop:"100px", overflow: isMobileView ? 'scroll' : 'auto'}}>
                             <h1 className="card-title">
                                 Found subdomain
                             </h1>
@@ -141,19 +222,19 @@ function Domain() {
                                         <th scope="col">Subdoamin</th>
                                         <th scope="col">User Name</th>
                                         <th scope="col">Domain</th>
-                                        <th scope="col">Action</th>
+                                        <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {subdomainObject.map(subdomain => (
+                                    {is_subdomain.map(subdomain => (
                                         <tr key={subdomain._id}>
                                             <th scope="row">1</th>
                                             <td>{subdomain.subdomain}</td>
                                             {/* <td>{subdomain.userId}</td> */}
-                                            <td><a href={"https://" + subdomain.subdomain + ".cpypst.online"}>{subdomain.subdomain}.cpypst.online</a></td>
-                                            <td><button onClick={handleQR} className="btn btn-primary">Generate QR</button></td>
+                                            <td><a href={"https://" + subdomain.subdomain + ".cpypst.online"} target="_blank">{subdomain.subdomain}.cpypst.online</a></td>
+                                            <td><Button onClick={handleQR} variant="primary" id={"https://" + subdomain.subdomain + ".cpypst.online"} >Generate QR</Button></td>
+                                            <td><Button variant="danger" onClick={showDelete} id={subdomain._id} >Delete</Button></td>
                                         </tr>
-
                                     ))}
 
                                 </tbody>
@@ -163,47 +244,63 @@ function Domain() {
                                     <button onClick={checkAvailability} className="btn btn-primary">Add Subdomain</button>
                                 </Col>
                             </Row>
-                            <Modal show={show} onHide={handleClose}>
-                                            <Modal.Header closeButton>
-                                                <Modal.Title>Create New Subdomain</Modal.Title>
-                                            </Modal.Header>
-                                            <Modal.Body>
-                                                <Form>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Form.Label>Title</Form.Label>
-                                                        {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
-                                                        <Form.Control type="text" value={newSubdomain} placeholder="New Subdomain" onChange={e => setNewSubdomain(e.target.value)} autoFocus />
-                                                    </Form.Group>
-                                                </Form>
-                                            </Modal.Body>
-                                            <Modal.Footer>
-                                                <Button variant="secondary" onClick={handleClose}>Close</Button>
-                                                <Button variant="primary" onClick={handleSubmit}>Create New Subdoamin</Button>
-                                            </Modal.Footer>
-                                        </Modal>
-                                    
-                            {/* <Popup className='card rounded bg-white mt-5 mb-5' open={open} closeOnDocumentClick onClose={closeModal}>
-                                <Form onSubmit={handleSubmit}>
-                                    <h3 className='card-title'>Create New Subdoamin</h3>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Control type="text" value={newSubdomain} placeholder="New Subdomain" onChange={e => setNewSubdomain(e.target.value)} />
-                                    </Form.Group>
-                                    <Form.Group className="mb-2">
-                                        <Button type="submit" className="btn btn-primary mb-2">
-                                            Create Contact
-                                        </Button>
-                                    </Form.Group>
-                                </Form>
-                            </Popup> */}
+                            {/* create domain model */}
+                            <Modal show={show} centered onHide={handleClose}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Create New Subdomain</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <Form>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Title</Form.Label>
+                                            {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                                            <Form.Control type="text" value={newSubdomain} placeholder="New Subdomain" onChange={e => setNewSubdomain(e.target.value)} autoFocus />
+                                        </Form.Group>
+                                    </Form>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={handleClose}>Close</Button>
+                                    <Button variant="primary" onClick={handleCreateSubdomain}>Create New Subdoamin</Button>
+                                </Modal.Footer>
+                            </Modal>
+                            {/* Delete Domain model */}
+                            <Modal show={deleteShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handleDeleteClose}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Delete Domain</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>To confirm deletion, Click on Delete Domain.</Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={handleDeleteClose}>
+                                        Cancel
+                                    </Button>
+                                    <Button variant="danger" onClick={handleDeleteDomain}>
+                                        Delete Domain
+                                    </Button>
+                                </Modal.Footer>
+                            </Modal>
+                            {/* QR model */}
+                            <Modal size="sm" show={QRShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handleQRClose}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>QR Coce</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body className="align-items-center d-flex justify-content-center">
+                                    <QRCode
+                                        errorLevel="H"
+                                        value={url}
+                                        icon="https://res.cloudinary.com/dya4asvgq/image/upload/v1710122415/vur4fbp2eocbuckwtdo8.png"
+                                    />
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="primary" onClick={handleQRClose}>
+                                        Close
+                                    </Button>
+                                </Modal.Footer>
+                            </Modal>
                         </div>
                     </>
-                )
-            }
-
+                )}
         </>
     )
 }
-
-
 
 export default Domain

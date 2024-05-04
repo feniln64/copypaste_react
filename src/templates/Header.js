@@ -1,133 +1,327 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from 'react-redux'
-import { removeUser } from '../store/slices/authSlice'
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { removeUser } from "../store/slices/authSlice";
 import { removeContent } from "../store/slices/contentSlice";
-import axiosInstance from '../api/api'
-// import 'bootstrap/dist/css/bootstrap.min.css'
-import React from 'react'
-// import "../assets/button.css"
-// import "../assets/navbar.css"
-// import "../assets/bizland.css"
-import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-
+import {removeDomain} from "../store/slices/domainSlice";
+import {removeSharedWithMe} from '../store/slices/sharedWithMeSlice'
+import {removeSharedBy} from '../store/slices/sharedBySlice'
+import axiosInstance from "../api/api";
+import React from "react";
+import { Menu as MenuIcon } from "@mui/icons-material";
+import { AppBar, Box, Button, IconButton, Menu, Toolbar } from "@mui/material";
+import useScreenSize from "../hooks/useScreenSize";
+import { NavDropdown } from "react-bootstrap";
 
 const Header = () => {
-    const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
-    const userInfo = useSelector((state) => state.auth.userInfo)
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
+    const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+    const userInfo = useSelector((state) => state.auth.userInfo);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [isMobileView] = useScreenSize();
 
-    function logout() {
-        axiosInstance.post("/auth/logout", {}, { withCredentials: true })
+    const handleMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const logout = () => {
+        axiosInstance
+            .post("/auth/logout", {}, { withCredentials: true })
             .then((response) => {
                 console.log("profile.response =", response);
             })
             .catch((error) => {
                 console.log(error);
             });
-        localStorage.removeItem("jwt");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("userInfo");
-        dispatch(removeUser())
-        dispatch(removeContent())
+        dispatch(removeUser());
+        dispatch(removeContent());
+        dispatch(removeDomain());
+        dispatch(removeSharedWithMe());
+        dispatch(removeSharedBy());
         navigate("/login");
     }
 
     return (
         <>
-            <Navbar expand="lg" className="bg-body-tertiary" >
-                <Container fluid>
-                    <Navbar.Brand ><Link to="/" className="logo"><img src="assets/img/old.png" alt="" /></Link></Navbar.Brand>
-                    <Navbar.Toggle aria-controls="navbarScroll" />
-                    <Navbar.Collapse id="navbarScroll">
-                        <Nav
-                            className="me-auto my-2 my-lg-0"
-                            style={{ maxHeight: '150px' }}
-                            navbarScroll
-                        >
-                        </Nav>
+            <Box sx={{ flexGrow: 1, marginBottom: "60px" }}>
+                <AppBar
+                    position="fixed"
+                    sx={{
+                        background: "#fff",
+                        boxShadow: "inset 0 -1px 0 0 rgba(0, 0, 0, 0.1)",
+                    }}
+                >
+                    <Toolbar>
+                        <Link to="/" className="logo">
+                            <img src="assets/img/old.png" alt="" />
+                        </Link>
                         {!isLoggedIn && (
-                            <>
-                                <Nav className="d-flex">
-                                        <Link className="nav-link active" to="/login">Login</Link>
-                                        <Link className="nav-link " to="/register">Sign Up</Link>
-                                </Nav>
-                            </>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                    flex: 1,
+                                    gap: "12px",
+                                }}
+                            >
+                                {!isMobileView ? (
+                                    <>
+                                        <Button
+                                            component={Link}
+                                            to="/login"
+                                            variant="contained"
+                                            sx={{
+                                                backgroundColor: "#0d6efd",
+                                                "&:hover": {
+                                                    backgroundColor: "#0d6efd",
+                                                    color: "#fff",
+                                                },
+                                            }}
+                                        >
+                                            Login
+                                        </Button>
+                                        <Button
+                                            component={Link}
+                                            to="/register"
+                                            variant="contained"
+                                            sx={{
+                                                backgroundColor: "#0d6efd",
+                                                "&:hover": {
+                                                    backgroundColor: "#0d6efd",
+                                                    color: "#fff",
+                                                },
+                                            }}
+                                        >
+                                            Sign Up
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <IconButton
+                                            size="large"
+                                            edge="start"
+                                            color="inherit"
+                                            aria-label="menu"
+                                            onClick={handleMenu}
+                                        >
+                                            <MenuIcon
+                                                sx={{ fill: "#0d6efd" }}
+                                            />
+                                        </IconButton>
+                                        <Menu
+                                            id="menu-appbar"
+                                            anchorEl={anchorEl}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left",
+                                            }}
+                                            keepMounted
+                                            transformOrigin={{
+                                                vertical: "top",
+                                                horizontal: "center",
+                                            }}
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleClose}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    padding: "12px",
+                                                    gap: "12px",
+                                                }}
+                                            >
+                                                <Button
+                                                    variant="contained"
+                                                    color="inherit"
+                                                >
+                                                    <Link to="/login">
+                                                        Login
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="inherit"
+                                                >
+                                                    <Link to="/register">
+                                                        Sign Up
+                                                    </Link>
+                                                </Button>
+                                            </Box>
+                                        </Menu>
+                                    </>
+                                )}
+                            </Box>
                         )}
                         {isLoggedIn && (
-                            <>
-                                <Nav className="d-flex">
-                                    
-                                        <Link className="nav-link mx-2  " to="/content">Content</Link>
-                                    
-                                  
-                                        <Link className="nav-link mx-2  " to="/add-domain">Add Domain</Link>
-                                 
-                                    <NavDropdown title={<span>
-                                        <img
-                                            style={{ width: 30, height: 30 }}
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flex: 1,
+                                }}
+                            >
+                                {!isMobileView ? (
+                                    <Box sx={{ flex: 0.7 }}>
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                color: "black",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            <Button>
+                                                <Link
+                                                    className="nav-link mx-2  "
+                                                    to="/shared"
+                                                >
+                                                    Shared
+                                                </Link>
+                                            </Button>
+                                            <Button>
+                                                <Link
+                                                    className="nav-link mx-2  "
+                                                    to="/content"
+                                                >
+                                                    Content
+                                                </Link>
+                                            </Button>
+                                            <Button>
+                                                <Link
+                                                    className="nav-link mx-2  "
+                                                    to="/add-domain"
+                                                >
+                                                    Add Domain
+                                                </Link>
+                                            </Button>
+                                        </Box>
+                                        {/* <Avatar 
                                             src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
-                                            className="rounded-circle"
-                                            alt="Black and White Portrait of a Man"
-                                        />
-                                        </span>} drop="start">
-                                        <NavDropdown.Item><Link to="/profile">Profile</Link></NavDropdown.Item>
-                                        <NavDropdown.Item onClick={logout}>Log Out</NavDropdown.Item>
-                                        <NavDropdown.Item>Contact us</NavDropdown.Item>
+                                            sx={{width: "30px", height: "30px"}}
+                                        /> */}
+                                    </Box>
+                                ) : (
+                                    <Box
+                                        sx={{
+                                            flex: 0.9,
+                                            justifyContent: "flex-end",
+                                            display: "flex",
+                                        }}
+                                    >
+                                        <IconButton
+                                            size="large"
+                                            edge="start"
+                                            color="inherit"
+                                            aria-label="menu"
+                                            onClick={handleMenu}
+                                        >
+                                            <MenuIcon
+                                                sx={{ fill: "#0d6efd" }}
+                                            />
+                                        </IconButton>
+                                        <Menu
+                                            id="menu-appbar"
+                                            anchorEl={anchorEl}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left",
+                                            }}
+                                            keepMounted
+                                            transformOrigin={{
+                                                vertical: "top",
+                                                horizontal: "center",
+                                            }}
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleClose}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    padding: "12px",
+                                                    gap: "12px",
+                                                }}
+                                            >
+                                                <Button
+                                                    variant="contained"
+                                                    color="inherit"
+                                                >
+                                                    <Link to="/shared">
+                                                        Shared
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="inherit"
+                                                >
+                                                    <Link to="/content">
+                                                        Content
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="inherit"
+                                                >
+                                                    <Link to="/add-domain">
+                                                        Add Domain
+                                                    </Link>
+                                                </Button>
+                                            </Box>
+                                        </Menu>
+                                    </Box>
+                                )}
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: !isMobileView
+                                            ? "flex-end"
+                                            : "center",
+                                        alignItems: "center",
+                                        flex: !isMobileView ? 0.3 : 0.1,
+                                    }}
+                                >
+                                    <NavDropdown
+                                        title={
+                                            <span>
+                                                <img
+                                                    style={{
+                                                        width: 30,
+                                                        height: 30,
+                                                    }}
+                                                    src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
+                                                    className="rounded-circle"
+                                                    alt="Black and White Portrait of a Man"
+                                                />
+                                            </span>
+                                        }
+                                        drop="start"
+                                    >
+                                        <NavDropdown.Item>
+                                            <Link to="/profile">Profile</Link>
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Item onClick={logout}>
+                                            Log Out
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Item>
+                                        <Link to="/contact-us">Contact us</Link>
+                                            
+                                        </NavDropdown.Item>
                                     </NavDropdown>
-
-                                </Nav>
-                            </>
+                                </Box>
+                            </Box>
                         )}
-                    </Navbar.Collapse>
-                </Container>
-            </Navbar>
-            {/* <header id="header" className="d-flex align-items-center">
-
-                <div className="container d-flex align-items-center justify-content-between">
-                    <Link to="/" className="logo"><img src="assets/img/old.png" alt="" /></Link>
-                    <nav id="navbar" className="navbar">
-                        <ul>
-                            {!isLoggedIn && (
-                                <>
-                                    <li className="nav-item">
-                                        <Link className="nav-link active" to="/login">Login</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link " to="/register">Sign Up</Link>
-                                    </li>
-                                </>)}
-
-                            {isLoggedIn && (<>
-                                <li><Link className="nav-link mx-2  " to="/content">Content</Link></li>
-                                <li><Link className="nav-link mx-2  " to="/add-domain">Add Domain</Link></li>
-                                <li className="dropdown"> <span><img
-                                    style={{ width: 30, height: 30 }}
-                                    src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
-                                    className="rounded-circle"
-                                    alt="Black and White Portrait of a Man"
-                                /></span> <i className="bi bi-chevron-down"></i>
-                                    <ul style={{ width: "150px" }}>
-                                        <li><Link to="/profile">Profile</Link></li>
-                                        <li><a className="" onClick={logout}>Log Out</a></li>
-                                        <li><a href="#">Contact us</a></li>
-                                    </ul>
-                                </li>
-                            </>
-                            )}
-                        </ul>
-                        <i className="bi bi-list mobile-nav-toggle"></i>
-                    </nav>
-
-                </div>
-            </header> */}
-
+                    </Toolbar>
+                </AppBar>
+            </Box>
         </>
-    )
-}
+    );
+};
 
-export default Header
+export default Header;

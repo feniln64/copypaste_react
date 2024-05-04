@@ -1,8 +1,8 @@
 import { PostHog } from 'posthog-node'
 
 const client = new PostHog(
-    'phc_lZpmcwWp5TdXxmBAGiCfIyQLBVii6cnYN3msosyyyCC',
-    { host: 'https://app.posthog.com' }
+    process.env.REACT_APP_POSTHOG_API_TOKEN,
+    { host: process.env.REACT_APP_POSTHOG_URL }
 )
 
 const newEvent= (event, distinctId,url) => {
