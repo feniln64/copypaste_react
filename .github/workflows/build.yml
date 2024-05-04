@@ -1,7 +1,7 @@
 name: build-and-deploy
 on:
   push:
-    branches: ['main', 'testing']
+    branches: ['main']
 
 
 jobs:
@@ -76,3 +76,5 @@ jobs:
           cd copypaste_react
           ls
           git pull
+          docker compose up -d --build
+          docker image prune -f

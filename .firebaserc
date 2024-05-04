@@ -1,0 +1,19 @@
+{
+    "projects": {
+      "default": "dcp-dev"
+    },
+    "targets": {
+      "dcp-dev": {
+        "hosting": {
+          "main": [
+            "dcp-dev"
+          ],
+          "dev": [
+            "docopypaste-dfb15"
+          ]
+        }
+      }
+    }
+  }
+  
+
