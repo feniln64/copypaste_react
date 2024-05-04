@@ -1,45 +1,47 @@
 /* eslint-disable*/
-import React from 'react'
-import { Link } from "react-router-dom";
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react'
 import axiosInstance from '../api/api'
-import Calendar from 'react-calendar';
 import { useSelector, useDispatch } from 'react-redux'
-import { addContent, updateContent, updateOneContent,removeOneContent } from '../store/slices/contentSlice';
-import 'react-calendar/dist/Calendar.css';
-import { useState } from 'react';
-import ReactQuill from 'react-quill';
+import { useNavigate } from "react-router-dom";
+import { addContent, addNewContent, updateOneContent, removeOneContent } from '../store/slices/contentSlice';
+import { initSharedBy, updateOneSharedBy, removeSharedBy, removeOneSharedBy, addNewSharedBy } from '../store/slices/sharedBySlice';
 import newEvent from '../api/postHog';
+const reactCookie = require("react-cookies");
 import { socket } from "../api/socket";
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Card from 'react-bootstrap/Card';
+import { TiDelete } from "react-icons/ti";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { FaPlus } from "react-icons/fa6";
 import '../assets/popup.css';
+import '../assets/content.css';
 import toast, { Toaster } from 'react-hot-toast';
-import InputGroup from 'react-bootstrap/InputGroup';
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
-import CardView from '../views/CardView';
 import Modal from 'react-bootstrap/Modal';
-import ToggleButton from 'react-bootstrap/ToggleButton';
+import { CommonDialog, CardView } from '../common';
+import { Box, Grid, Typography, Button as MUIButton, MenuItem, Select as MUISelect, InputLabel, OutlinedInput, Chip } from '@mui/material';
+import useScreenSize from '../hooks/useScreenSize';
+import { Select } from 'antd';
+import { Container, Row, Col } from 'react-bootstrap';
+import { AiOutlineClose } from "react-icons/ai";
+import { removeUser } from "../store/slices/authSlice";
+import { removeContent } from "../store/slices/contentSlice";
+import { removeDomain } from "../store/slices/domainSlice";
+import { removeSharedWithMe } from '../store/slices/sharedWithMeSlice'
 
 function ViewContent() {
+    var options = []
 
+    const dateFormat = 'MM-DD-YYYY';
     const dispatch = useDispatch()
+    const navigate = useNavigate();
     const userInfo = useSelector((state) => state.auth.userInfo)
     const username = userInfo.username
     const userId = userInfo.id
 
-    const isContent = useSelector((state) => state.content.content)
+    const isContent = useSelector((state) => state.content.content) || []  // content
+    const permissions = useSelector((state) => state.sharedby.sharedby)
     const [hasContent, sethasContent] = useState(false)
-    const [content, setContent] = useState([])
-
-    const [permission, setPermission] = useState(0)
-    const [date, setDate] = useState(new Date());
 
     const [newContent, setNewContent] = useState("");
     const [newTitle, setNewTitle] = useState("");
@@ -51,11 +53,104 @@ function ViewContent() {
 
     const [deleteModelId, setDeleteModelId] = useState("")
     const [deleteShow, setDeleteShow] = useState(false);
+    const [deleteTitle, setDeleteTitle] = useState("")
     const handleDeleteClose = () => setDeleteShow(false);
 
-    const handlePermission = (e) => {
-        setPermission(e.target.value);
+    const [permissionType, setPermissionType] = useState(0)
+    const [contentId, setContentId] = useState("")
+    const [deletePermissionShow, setDeletePermissionShow] = useState(false);
+    const [allowedUsers, setAllowedUsers] = useState([])
+    const [deleteUser, setDeleteUser] = useState("")
+    const [permissionShow, setPermissionShow] = useState(false)
+    const [users, setUsers] = useState([]);
+
+    const [editable, setEditable] = useState(false);
+    const handlePermissionClose = () => { setPermissionShow(false); options = [] };
+    const handleDeletePermissionClose = () => setDeletePermissionShow(false);
+
+    const logout = () => {
+        navigate("/login");
+        dispatch(removeUser());
     }
+
+    const handlePermission = async (e) => {
+        e.preventDefault();
+        const permissionData = {
+            userList: users,
+            permission_type: permissionType
+        }
+        console.log("permissionData", permissionData);
+        setUsers([])
+        setPermissionType(0)
+        await axiosInstance.post(`permission/create/${contentId}`, permissionData, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 201) {
+                    dispatch(initSharedBy(response.data.sharedbyMe))
+                    toast.success("permission sent Successfully");
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            })
+        setPermissionShow(false);
+        setUsers([])
+    }
+
+    const deletePermission = async (e) => {
+        e.preventDefault();
+        console.log("emailId1", deleteUser);
+        await axiosInstance.delete(`permission/delete/${deleteUser}/${contentId}`, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 201) {
+                    dispatch(initSharedBy(response.data.sharedbyMe))
+                    toast.success("permission deleted Successfully");
+                    setDeletePermissionShow(false);
+                    setDeleteUser("")
+                    handlePermissionClose()
+
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                } 
+            })
+    }
+
+   /* const handleDeletePermission = async (e) => {
+        e.preventDefault();
+        console.log("contentId", contentId);
+        console.log("email", e.target.id);
+         await axiosInstance.delete(`permission/delete/${e.target.id}/${contentId}`, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 201) {
+                    dispatch(initSharedBy(response.data.sharedbyMe))
+                    toast.success("permission deleted Successfully");
+                }
+            })
+            .catch((error) => {
+                if (error.response) {
+                    console.log(error.response);
+                    toast.error(error.response.data.message);
+                } else if (error.request) {
+                    console.log("network error");
+                } else {
+                    console.log(error);
+                }
+            }) 
+    }*/
 
     const handleUpdateContent = async (e) => {
         e.preventDefault();
@@ -67,17 +162,20 @@ function ViewContent() {
             _id: modelId,
             content: newContent,
             is_protected: newIsChecked,
-            title: newTitle
+            title: newTitle,
+            is_shared: false
         };
         console.log("contentData =", contentData);
 
-        socket.emit("message", ({ room: username, message: contentData }));
+        socket.emit("updatecontent", ({ room: username, message: contentData }));
 
         await axiosInstance.patch(`/content/update/${modelId}`, contentData, { withCredentials: true })
             .then((response) => {
                 if (response.status === 200) {
-                    dispatch(updateOneContent(contentData))
-                    setContent(isContent)
+                    console.log("response.data.updatedContent", response.data.updatedContent);
+                    dispatch(updateOneContent(response.data.updatedContent))
+                    // getinitialData()
+                    // setContent(isContent)
                     handleClose()
                     toast.success("data updated Successfully");
                 }
@@ -105,23 +203,21 @@ function ViewContent() {
         const contentData = {
             content: newContent,
             is_protected: newIsChecked,
-            title: newTitle
+            title: newTitle,
+            is_shared: false
         };
-        console.log("contentData =", contentData);
         setNewTitle("")
         setNewIsChecked(false)
         setNewContent("")
 
-        socket.emit("message", ({ room: username, message: contentData }));
-
         await axiosInstance.post(`/content/create/${userId}`, contentData, { withCredentials: true })
             .then((response) => {
                 if (response.status === 201) {
-                    setContent(response.data.content);
                     sethasContent(true)
-                    dispatch(addContent(response.data.content))
+                    dispatch(addNewContent(response.data.createdContent))
                     handleClose();
                     toast.success("data added Successfully");
+                    socket.emit("newcontent", ({ room: username, message: response.data.createdContent }));
                 }
             })
             .catch((error) => {
@@ -139,9 +235,10 @@ function ViewContent() {
     const getinitialData = async () => {
         await axiosInstance.get(`/content/getcontent/${userId}`, { withCredentials: true })
             .then((response) => {
-                setContent(response.data.content);
+                // setContent(response.data.content);
                 sethasContent(true)
                 dispatch(addContent(response.data.content))
+                dispatch(initSharedBy(response.data.sharedByMe))
             })
             .catch((error) => {
                 if (error.response) {
@@ -155,37 +252,52 @@ function ViewContent() {
             });
     }
 
-    useEffect(() => {
-        getinitialData()
-        newEvent("view content", "view content", "/view-content");
-
-        socket.emit('join_room', userInfo.username);
-        socket.on('message', (data) => {
-            console.log("data from server", data);
-            setContent(data.content);
-        });
-    }, []);
-
-    const openModal = (event) => {
+    const openModal = (event, editable = true) => {
         setModelId(event)
         if (event === "createContent") {
             setNewTitle("")
             setNewIsChecked(false)
             setNewContent("")
         } else {
-            setNewContent(isContent.filter((e) => e._id === event)[0].content ||  "")
+            setNewContent(isContent.filter((e) => e._id === event)[0].content || "")
             setNewTitle(isContent.filter((e) => e._id === event)[0].title || "")
             setNewIsChecked(isContent.filter((e) => e._id === event)[0].is_protected || false)
             // handleUpdateShow()
         }
         setShow(true);
+        setEditable(editable);
     };
 
     const deleteModel = (event) => {
-        console.log("deleteModelId", event);
+        setDeleteTitle(isContent.filter((e) => e._id === event)[0].title || "")
         setDeleteModelId(event)
         setDeleteShow(true);
     };
+
+    const permissionModel = (event) => {
+        setContentId(event)
+        console.log("event", event);
+        setPermissionShow(true);
+        // console.log("permissions", permissions);
+        setAllowedUsers([])
+        permissions.filter((e) => e.contentId === event).map((e) => {
+            setAllowedUsers(e.user_emails)
+            setUsers(e.user_emails.map((e) => e))
+            for (let i = 0; i < e.user_emails.length; i++) {
+                options.push({ label: e.user_emails[i], value: e.user_emails[i] })
+            }
+        })
+        // console.log("allowedUsers", allowedUsers);
+        console.log("options", options);
+        // for (let i = 0; i < permissions.length; i++) {
+        //     if (permissions[i].contentId === event) {
+        //         console.log("permissions[i].allowedUsers", permissions[i].user_emails);
+        //         setAllowedUsers(permissions[i].user_emails)
+        //     }
+        // }
+        // console.log("allowedUsers", allowedUsers);
+    };
+
     const handleDeleteContent = async (e) => {
         e.preventDefault();
         await axiosInstance.delete(`/content/delete/${deleteModelId}`, { withCredentials: true })
@@ -193,8 +305,8 @@ function ViewContent() {
                 if (response.status === 201) {
                     dispatch(removeOneContent({ _id: deleteModelId }))
                     setDeleteShow(false);
-                    setContent(isContent)
                     toast.success("data deleted Successfully");
+                    socket.emit("deletecontent", ({ room: username }));
                 }
             })
             .catch((error) => {
@@ -207,115 +319,219 @@ function ViewContent() {
                     console.log(error);
                 }
             });
+        setDeleteTitle("");
         setDeleteModelId("");
         setDeleteShow(false);
     };
+
+    const addUsers = async (value) => {
+        if (users.includes(value[0])) {
+            toast.error("User already has permission")
+            setPermissionShow(false)
+        }
+        users.push(value[0])
+    }
+    const handleDeletePermissionModel = (e) => {
+        const emailId = e.target.id
+        /* deletePermission(emailId) */
+        setDeleteUser(emailId)
+        setDeletePermissionShow(true)
+    }
+
+    useEffect(() => {
+        getinitialData()
+        if (isContent.length > 0) {
+            sethasContent(true)
+        }
+        newEvent("view content", "view content", "/view-content");
+        var cookie = reactCookie.load("refreshToken");
+        if (cookie === undefined) {
+            logout();
+        }
+        socket.emit('join_room', userInfo.username);
+        socket.on('message', (data) => {
+            console.log("data from server", data);
+            console.log("data from server", data);
+            // setContent(data.content);
+        });
+        socket.on('newcontent', (data) => {
+            getinitialData()
+        });
+
+        socket.on('updatecontent', (data) => {
+            getinitialData()
+        });
+
+    }, []);
+
+    const [isMobileView, isTabletView] = useScreenSize();
     return (
         <>
-            <Toaster />
-            <Container className="mt-4">
-                {hasContent ? (
-                    <>
-                        <div className="container  card rounded bg-white" style={{ marginBottom: "100px" }}>
-                            <div className="row">
-                                <div className="d-flex justify-content-center align-items-center mt-3">
-                                    <h4 className="text-right">User Content</h4>
-                                </div>
-                                <div className="row">
-                                    <div className="col-md-24  card-body">
-                                        <Container style={{ minHeight: "715px", marginTop: "50px" }}>
-                                            <Row >
-                                                {content.map((e) => (
-                                                    <Col key={e._id} id={e._id} >
-                                                        <CardView title={e.title} editContent={openModal} deleteContent={deleteModel} content={e.content} _id={e._id} />
-                                                    </Col>
-                                                ))}
-                                            </Row>
-                                        </Container>
-                                    </div>
-                                    <div className="d-flex justify-content-center align-items-center">
-                                        {/* Update Content Model  */}
-                                        <Modal show={show} onHide={handleClose}>
-                                            <Modal.Header closeButton>
-                                                <Modal.Title>Create New Content</Modal.Title>
-                                            </Modal.Header>
-                                            <Modal.Body>
-                                                <Form>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Form.Label>Title</Form.Label>
-                                                        {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
-                                                        <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
-                                                    </Form.Group>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Form.Label>Protected Content</Form.Label>
-                                                        <Form.Check // prettier-ignore
-                                                            type={"checkbox"}
-                                                            id={"protected_content"}
-                                                            label="Protected Content"
-                                                            checked={newIsChecked}
-                                                            onChange={e => setNewIsChecked(e.target.checked)}
-                                                        />
-                                                    </Form.Group>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                                                        <CKEditor
-                                                            editor={ClassicEditor}
-                                                            data={newContent}
-                                                            config={{ placeholder: "Placeholder text..." }}
-                                                            onReady={editor => { }}
-                                                            onChange={(event, editor) => {
-                                                                setNewContent(editor.getData())
-                                                            }}
-                                                        />
-                                                    </Form.Group>
-                                                </Form>
-                                            </Modal.Body>
-                                            <Modal.Footer>
-                                                <Button variant="secondary" onClick={handleClose}>Close</Button>
-                                                <Button variant="primary" onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent}>Save Changes</Button>
-                                            </Modal.Footer>
-                                        </Modal>
-                                        {/* delete content model */}
-                                        <Modal show={deleteShow} onHide={handleDeleteClose}>
-                                            <Modal.Header closeButton>
-                                                <Modal.Title>Modal heading</Modal.Title>
-                                            </Modal.Header>
-                                            <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
-                                            <Modal.Footer>
-                                                <Button variant="secondary" onClick={handleDeleteClose}>
-                                                    Close
-                                                </Button>
-                                                <Button variant="danger" onClick={handleDeleteContent}>
-                                                    Delete Content
-                                                </Button>
-                                            </Modal.Footer>
-                                        </Modal>
-                                        <button className="btn btn-primary mb-3" onClick={e => openModal(e.target.id)} id='createContent'> <FaPlus /> Create New Content </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <Container style={{ minHeight: "715px", marginTop: "50px" }}>
-                            <Row >
-                                <Col>
-                                    <Card style={{ width: '18rem' }}>
-                                        <Card.Body>
-                                            <Card.Title>No Content</Card.Title>
-                                            <Card.Text>
-                                                Add new content clieck on the button below
-                                            </Card.Text>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            </Row>
-                            <Link className="btn btn-primary btn-block mb-4" to="/create-content"> Add new Content</Link>
-                        </Container>
-                    </>
-                )
-                }
-            </Container >
+
+            <Toaster position='bottom-right' reverseOrder={false} />
+
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: isMobileView ? "20px !important" : "40px !important",
+                    background: "#fff",
+                    gap: "30px",
+                    borderRadius: "8px",
+                    flex: 1,
+                    margin: isMobileView ? "25px 10px" : "100px 105px",
+                    boxShadow: "rgba(0, 0, 0, 0.15) 0px 2px 8px",
+                }}
+            >
+                <Typography variant='h5' fontWeight={"bold"} textAlign={"center"}>User Content</Typography>
+                <Grid container>
+                    {isContent.map((e) => (
+                        <Grid key={e._id} item xs={12} md={6} lg={4}
+                            sx={{
+                                padding: "20px",
+                                display: isTabletView ? 'flex' : 'block',
+                                justifyContent: isTabletView ? 'center' : 'flex-start',
+                                // border: '1px solid red'
+                            }}
+                        >
+                            <Box sx={{ width: isMobileView ? "auto" : "18rem", borderRadius: "8px" }}>
+                                {/* {if (e.content.length > 10) e.content = e.content.slice(0, 10) + "..."} */}
+                                <CardView
+                                    title={e.title}
+                                    editContent={openModal}
+                                    editPermission={permissionModel}
+                                    deleteContent={deleteModel}
+                                    content={e.content.slice(0, 20) + "..."}
+                                    _id={e._id}
+                                />
+                            </Box>
+                        </Grid>
+                    ))}
+                </Grid>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <MUIButton variant="contained" sx={{ width: "fit-content", textTransform: "capitalize" }} onClick={e => openModal(e.target.id)} id='createContent'> <FaPlus />Create New Content </MUIButton>
+                </Box>
+            </Box>
+            <div className="d-flex justify-content-center align-items-center">
+                {/* Update Content Model  */}
+                <CommonDialog
+                    open={show}
+                    onClose={handleClose}
+                    onClick={modelId === "createContent" ? handleCreateNewContent : handleUpdateContent}
+                    title={"Create New Content"}
+                    showFooter={editable}
+                >
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Title</Form.Label>
+                            {/* <input type="text" placeholder="Title" value={newTitle} autoFocus /> */}
+                            <Form.Control type="text" placeholder="Title" onChange={e => setNewTitle(e.target.value)} value={newTitle} autoFocus />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Protected Content</Form.Label>
+                            <Form.Check // prettier-ignore
+                                type={"checkbox"}
+                                id={"protected_content"}
+                                label="Protected Content"
+                                checked={newIsChecked}
+                                onChange={e => setNewIsChecked(e.target.checked)}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                            <CKEditor
+                                editor={ClassicEditor}
+                                data={newContent}
+                                config={{ placeholder: "Placeholder text..." }}
+                                onReady={editor => { }}
+                                onChange={(event, editor) => {
+                                    setNewContent(editor.getData())
+                                }}
+                            />
+                        </Form.Group>
+                    </Form>
+                </CommonDialog>
+                {/* Delete Content Model  */}
+                <Modal show={deleteShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handleDeleteClose}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Delete Content "{deleteTitle}" ?</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>To confirm deletion, Click on Delete Content.</Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleDeleteClose}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={handleDeleteContent}>
+                            Delete Content
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+                {/* delete permission models */}
+                <Modal show={deletePermissionShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handlePermissionClose}>
+                    <Modal.Header closeButton>
+                        <Modal.Title> <h6>Delete Permission for  "{deleteUser}" ? </h6></Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>To confirm deletion, Click on Delete User.</Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleDeletePermissionClose}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={deletePermission}>
+                            Delete User
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+                {/* permission Model */}
+                <Modal show={permissionShow} backdrop="static" aria-labelledby="contained-modal-title-vcenter" centered onHide={handlePermissionClose}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Permission</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Users List</Form.Label>
+                            <Select
+                                mode="tags"
+                                style={{ width: '100%' }}
+                                // open={false}
+                                onChange={addUsers}
+                                placeholder="enter user email and press enter"
+                                options={options}
+                            />
+
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <MUISelect labelId="selct-permission-type" id="selct-permission-type" value={permissionType} label="Permission Type" onChange={e => setPermissionType(e.target.value)} onDelete={""}>
+                                <MenuItem value={0}>Permission Type</MenuItem>
+                                <MenuItem value={1}>Read</MenuItem>
+                                <MenuItem value={2}>Read & Write</MenuItem>
+                            </MUISelect>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Shared with</Form.Label>
+                            <Container>
+                                {allowedUsers.map((e, index) => (
+                                    <Row key={index}>
+                                        <Col xs={14} md={10} >
+                                            <Chip style={{ marginTop: '10px' }} id={e} variant="outlined" label={e} deleteIcon={<TiDelete id={e} />}  onDelete={e =>handleDeletePermissionModel(e)} />
+                                        </Col>
+
+                                    </Row>
+                                ))}
+                            </Container>
+                        </Form.Group>
+
+                    </Modal.Body>
+
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handlePermissionClose}>
+                            Cancel
+                        </Button>
+                        <Button variant="primary" onClick={handlePermission} >
+                            Give Permission
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            </div>
         </>
     )
 }

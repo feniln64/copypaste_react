@@ -9,19 +9,27 @@ import Error from './templates/Error';
 import Domain from './components/Domain';
 import ViewContent from './components/ViewContent';
 import Content from './components/EditContent';
-
+import Shared from './components/Shared';
+import Forgotpassword from './components/Forgotpassword';
+import Resetpassword from './components/Resetpassword';
+import Contact from './components/Contact';
+import Varifyemail from './components/Varifyemail';
 function App() {
   return (
     <Routes>
         <Route path="/" element={<Layout />} >
-
         <Route index element={<Home/>} />
         <Route path={"/login"} element={<Login/>} />
         <Route path={"/register"} element={<Register/>} />
         <Route path={"/profile"} element={<Profile/>} />
         <Route path={"/add-domain"} element={<Domain/>} />
+        <Route path={"/shared"} element={<Shared/>} />
         <Route path={"/content"} element={<ViewContent/>} />
         <Route path={"/create-content"} element={<Content/>} />
+        <Route path={"/forgot-password"} element={<Forgotpassword/> } />
+        <Route path={"/reset-password/:token"} element={<Resetpassword/> } />
+        <Route path={"/contact-us"} element={<Contact/>} />
+        <Route path={"/varify-email/:token"} element={<Varifyemail />} />
         <Route path={"*"} element={<Error/>} />
 
         </Route>
