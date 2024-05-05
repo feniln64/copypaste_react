@@ -28,6 +28,7 @@ import { removeUser } from "../store/slices/authSlice";
 import { removeContent } from "../store/slices/contentSlice";
 import { removeDomain } from "../store/slices/domainSlice";
 import { removeSharedWithMe } from '../store/slices/sharedWithMeSlice'
+import Table from 'react-bootstrap/Table';
 
 function ViewContent() {
     var options = []
@@ -125,32 +126,32 @@ function ViewContent() {
                     console.log("network error");
                 } else {
                     console.log(error);
-                } 
+                }
             })
     }
 
-   /* const handleDeletePermission = async (e) => {
-        e.preventDefault();
-        console.log("contentId", contentId);
-        console.log("email", e.target.id);
-         await axiosInstance.delete(`permission/delete/${e.target.id}/${contentId}`, { withCredentials: true })
-            .then((response) => {
-                if (response.status === 201) {
-                    dispatch(initSharedBy(response.data.sharedbyMe))
-                    toast.success("permission deleted Successfully");
-                }
-            })
-            .catch((error) => {
-                if (error.response) {
-                    console.log(error.response);
-                    toast.error(error.response.data.message);
-                } else if (error.request) {
-                    console.log("network error");
-                } else {
-                    console.log(error);
-                }
-            }) 
-    }*/
+    /* const handleDeletePermission = async (e) => {
+         e.preventDefault();
+         console.log("contentId", contentId);
+         console.log("email", e.target.id);
+          await axiosInstance.delete(`permission/delete/${e.target.id}/${contentId}`, { withCredentials: true })
+             .then((response) => {
+                 if (response.status === 201) {
+                     dispatch(initSharedBy(response.data.sharedbyMe))
+                     toast.success("permission deleted Successfully");
+                 }
+             })
+             .catch((error) => {
+                 if (error.response) {
+                     console.log(error.response);
+                     toast.error(error.response.data.message);
+                 } else if (error.request) {
+                     console.log("network error");
+                 } else {
+                     console.log(error);
+                 }
+             }) 
+     }*/
 
     const handleUpdateContent = async (e) => {
         e.preventDefault();
@@ -325,15 +326,12 @@ function ViewContent() {
     };
 
     const addUsers = async (value) => {
-        if (users.includes(value[0])) {
-            toast.error("User already has permission")
-            setPermissionShow(false)
-        }
+        
         users.push(value[0])
     }
     const handleDeletePermissionModel = (e) => {
         const emailId = e.target.id
-        /* deletePermission(emailId) */
+        console.log("emailId", e.target.id);
         setDeleteUser(emailId)
         setDeletePermissionShow(true)
     }
@@ -499,7 +497,7 @@ function ViewContent() {
 
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <MUISelect labelId="selct-permission-type" id="selct-permission-type" value={permissionType} label="Permission Type" onChange={e => setPermissionType(e.target.value)} onDelete={""}>
+                            <MUISelect labelId="selct-permission-type" id="selct-permission-type" value={permissionType} label="Permission Type" onChange={e => setPermissionType(e.target.value)}>
                                 <MenuItem value={0}>Permission Type</MenuItem>
                                 <MenuItem value={1}>Read</MenuItem>
                                 <MenuItem value={2}>Read & Write</MenuItem>
@@ -509,14 +507,27 @@ function ViewContent() {
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Shared with</Form.Label>
                             <Container>
-                                {allowedUsers.map((e, index) => (
-                                    <Row key={index}>
-                                        <Col xs={14} md={10} >
-                                            <Chip style={{ marginTop: '10px' }} id={e} variant="outlined" label={e} deleteIcon={<TiDelete id={e} />}  onDelete={e =>handleDeletePermissionModel(e)} />
-                                        </Col>
+                                <Row >
+                                    <Table striped bordered hover>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Name</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {allowedUsers.map((e, index) => (
+                                                <tr>
+                                                    <td>{index}</td>
+                                                    <td>{e}</td>
+                                                    <td><Button variant="danger" style={{height:'25px',padding:'0px 5px'}} onClick={e => handleDeletePermissionModel(e)} id={e} ><i id={e} className="fa-solid fa-circle-minus"></i></Button></td>
+                                                </tr>
 
-                                    </Row>
-                                ))}
+                                            ))}
+                                        </tbody>
+                                    </Table>
+                                </Row>
                             </Container>
                         </Form.Group>
 
